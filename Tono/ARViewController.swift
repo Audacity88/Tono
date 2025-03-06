@@ -9,6 +9,7 @@ import ARKit
 import AVFoundation
 import Speech
 import Vision
+import CoreData
 
 class ARViewController: UIViewController, ARSCNViewDelegate {
     
@@ -30,11 +31,20 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
     let dispatchQueueML = DispatchQueue(label: "com.tono.dispatchqueueml") // A Serial Queue
     var debugTextView: UITextView!
     
+    // Flag to control ML processing
+    var isMLProcessingActive = true
+    
     // Translation manager for object translations
     let translationManager = TranslationManager.shared
     
+    // Core Data managed object context
+    var managedObjectContext: NSManagedObjectContext?
+    
     // Callback for when a new object is detected
     var onObjectDetected: ((String, String, String) -> Void)?
+    
+    // Last captured image for object detection
+    var lastCapturedImage: UIImage?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -72,8 +82,60 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
         // Set up audio session for playback
         setupAudioSession()
         
+        // Register for app lifecycle notifications
+        registerForAppLifecycleNotifications()
+        
         // Begin Loop to Update CoreML
         loopCoreMLUpdate()
+    }
+    
+    // MARK: - App Lifecycle
+    
+    func registerForAppLifecycleNotifications() {
+        // Register for notifications when app enters background or foreground
+        NotificationCenter.default.addObserver(self, 
+                                              selector: #selector(appWillResignActive), 
+                                              name: UIApplication.willResignActiveNotification, 
+                                              object: nil)
+        
+        NotificationCenter.default.addObserver(self, 
+                                              selector: #selector(appDidBecomeActive), 
+                                              name: UIApplication.didBecomeActiveNotification, 
+                                              object: nil)
+    }
+    
+    @objc func appWillResignActive() {
+        // Pause ML processing when app goes to background or screen turns off
+        isMLProcessingActive = false
+        // Pause the AR session
+        sceneView.session.pause()
+        // Deactivate audio session
+        deactivateAudioSession()
+        print("App resigned active: Paused ML processing and AR session, deactivated audio session")
+    }
+    
+    @objc func appDidBecomeActive() {
+        // Resume ML processing when app comes to foreground
+        if !isMLProcessingActive {
+            isMLProcessingActive = true
+            
+            // Resume the AR session with the current configuration
+            let configuration = ARWorldTrackingConfiguration()
+            configuration.planeDetection = [.horizontal, .vertical]
+            sceneView.session.run(configuration)
+            
+            // Reactivate audio session
+            setupAudioSession()
+            
+            print("App became active: Resumed ML processing and AR session, reactivated audio session")
+            // Restart the ML loop if it was paused
+            loopCoreMLUpdate()
+        }
+    }
+    
+    deinit {
+        // Remove observers when view controller is deallocated
+        NotificationCenter.default.removeObserver(self)
     }
     
     func setupDebugTextView() {
@@ -113,10 +175,18 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
     
     func setupAudioSession() {
         do {
-            try AVAudioSession.sharedInstance().setCategory(.playback)
-            try AVAudioSession.sharedInstance().setActive(true)
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
+            try AVAudioSession.sharedInstance().setActive(true, options: .notifyOthersOnDeactivation)
         } catch {
             print("Failed to set up audio session: \(error)")
+        }
+    }
+    
+    func deactivateAudioSession() {
+        do {
+            try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        } catch {
+            print("Failed to deactivate audio session: \(error)")
         }
     }
     
@@ -221,6 +291,9 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
             
             // Play pronunciation audio
             playPronunciation(for: latestChineseTranslation, pinyin: latestPinyin)
+            
+            // Save the tagged object to Core Data
+            saveTaggedObject(at: worldCoord)
             
             // Notify about the detected object
             onObjectDetected?(latestPrediction, latestChineseTranslation, latestPinyin)
@@ -406,14 +479,21 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
     // MARK: - CoreML Vision Handling
     
     func loopCoreMLUpdate() {
-        // Continuously run CoreML whenever it's ready. (Preventing 'hiccups' in Frame Rate)
+        // Only continue the loop if ML processing is active
+        guard isMLProcessingActive else {
+            print("ML processing is paused")
+            return
+        }
         
+        // Continuously run CoreML whenever it's ready. (Preventing 'hiccups' in Frame Rate)
         dispatchQueueML.async {
             // 1. Run Update.
             self.updateCoreML()
             
-            // 2. Loop this function.
-            self.loopCoreMLUpdate()
+            // 2. Loop this function only if ML processing is still active
+            if self.isMLProcessingActive {
+                self.loopCoreMLUpdate()
+            }
         }
     }
     
@@ -477,6 +557,9 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
     }
     
     func updateCoreML() {
+        // Skip processing if ML is not active
+        guard isMLProcessingActive else { return }
+        
         ///////////////////////////
         // Get Camera Image as RGB
         let pixbuff : CVPixelBuffer? = (sceneView.session.currentFrame?.capturedImage)
@@ -493,6 +576,130 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
             try imageRequestHandler.perform(self.visionRequests)
         } catch {
             print(error)
+        }
+    }
+    
+    // MARK: - Object Capture and Storage
+    
+    // Save the tagged object to Core Data
+    func saveTaggedObject(at position: SCNVector3) {
+        guard let managedObjectContext = managedObjectContext else {
+            print("Error: Managed object context not available")
+            return
+        }
+        
+        // Use a background thread for Core Data operations
+        let backgroundContext = managedObjectContext.perform {
+            // Capture the current frame as an image
+            self.captureCurrentFrame { [weak self] image in
+                guard let self = self, let image = image else { return }
+                
+                // Get the object's image by cropping around the detected object
+                if let objectImage = self.cropObjectImage(from: image) {
+                    // Save to Core Data on a background thread
+                    DispatchQueue.global(qos: .userInitiated).async {
+                        PersistenceController.shared.saveTaggedObject(
+                            english: self.latestPrediction,
+                            chinese: self.latestChineseTranslation,
+                            pinyin: self.latestPinyin,
+                            image: objectImage,
+                            position: position,
+                            context: managedObjectContext
+                        )
+                        
+                        // Show a success message on the main thread
+                        DispatchQueue.main.async {
+                            self.showSavedConfirmation()
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // Capture the current AR frame as a UIImage
+    func captureCurrentFrame(completion: @escaping (UIImage?) -> Void) {
+        // Make sure we're on the main thread when accessing the AR session
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self, let pixelBuffer = self.sceneView.session.currentFrame?.capturedImage else {
+                completion(nil)
+                return
+            }
+            
+            // Process the image on a background thread to avoid blocking the main thread
+            DispatchQueue.global(qos: .userInitiated).async {
+                let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+                let context = CIContext()
+                
+                // Convert CIImage to CGImage
+                if let cgImage = context.createCGImage(ciImage, from: ciImage.extent) {
+                    // Create UIImage from CGImage
+                    let uiImage = UIImage(cgImage: cgImage)
+                    
+                    // Store the image for later use
+                    DispatchQueue.main.async {
+                        self.lastCapturedImage = uiImage
+                        completion(uiImage)
+                    }
+                } else {
+                    completion(nil)
+                }
+            }
+        }
+    }
+    
+    // Crop the image to focus on the detected object
+    func cropObjectImage(from image: UIImage) -> UIImage? {
+        // For now, we'll just use a simple center crop as a placeholder
+        // In a real implementation, you would use object detection bounding boxes
+        
+        let size = image.size
+        let cropSize = min(size.width, size.height) * 0.5 // 50% of the smaller dimension
+        
+        let originX = (size.width - cropSize) / 2
+        let originY = (size.height - cropSize) / 2
+        
+        let cropRect = CGRect(x: originX, y: originY, width: cropSize, height: cropSize)
+        
+        // Crop the image
+        if let cgImage = image.cgImage?.cropping(to: cropRect) {
+            return UIImage(cgImage: cgImage)
+        }
+        
+        return nil
+    }
+    
+    // Show a confirmation that the object was saved
+    func showSavedConfirmation() {
+        // Make sure we're on the main thread
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            
+            let confirmationView = UIView(frame: CGRect(x: 0, y: 0, width: 200, height: 50))
+            confirmationView.backgroundColor = UIColor.green.withAlphaComponent(0.7)
+            confirmationView.layer.cornerRadius = 10
+            confirmationView.center = CGPoint(x: self.view.bounds.midX, y: self.view.bounds.height - 100)
+            
+            let label = UILabel(frame: confirmationView.bounds)
+            label.text = "Object Saved!"
+            label.textColor = .white
+            label.textAlignment = .center
+            label.font = UIFont.boldSystemFont(ofSize: 16)
+            
+            confirmationView.addSubview(label)
+            self.view.addSubview(confirmationView)
+            
+            // Animate the confirmation
+            confirmationView.alpha = 0
+            UIView.animate(withDuration: 0.3, animations: {
+                confirmationView.alpha = 1
+            }) { _ in
+                UIView.animate(withDuration: 0.3, delay: 1.0, options: [], animations: {
+                    confirmationView.alpha = 0
+                }) { _ in
+                    confirmationView.removeFromSuperview()
+                }
+            }
         }
     }
 }

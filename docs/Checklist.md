@@ -31,7 +31,7 @@
 - [x] Import **AVFoundation**, **AudioKit**, and **Speech** frameworks.  
 - [ ] Install and configure **SpeechSuper API** for pronunciation assessment.  
 - [x] Develop a prototype for **audio playback** using AVFoundation.  
-- [x] Create a basic **speech recording and transcription** function using the Speech framework.  
+- [ ] Create a basic **speech recording and transcription** function using the Speech framework.  
 
 ---
 
@@ -39,9 +39,9 @@
 
 - [x] Add **Core Data** to the project for local storage.  
 - [ ] Define data models in Core Data for:
-  - Objects (name, image, pronunciation, SRS data).  
-  - SRS schedule (last review date, interval, performance).  
-  - User achievements and progress.  
+  - [ ] Objects (name, image, pronunciation, SRS data).  
+  - [ ] SRS schedule (last review date, interval, performance).  
+  - [ ] User achievements and progress.  
 - [ ] Implement a simple **CRUD** (Create, Read, Update, Delete) interface for testing.  
 
 ---
@@ -55,8 +55,8 @@
 - [x] Create a **SwiftUI view** for the camera interface using ARKit.  
 - [x] Integrate **Core ML** for real-time object recognition.  
 - [x] Display **popups with Chinese names, pinyin, and pronunciation**.  
-- [x] Implement **speech recording** and send audio to SpeechSuper API for assessment.  
-- [x] Provide **feedback on pronunciation** (correct or retry).  
+- [ ] Implement **speech recording** and send audio to SpeechSuper API for assessment.  
+- [ ] Provide **feedback on pronunciation** (correct or retry).  
 - [ ] Save correctly pronounced objects to Core Data.  
 - [ ] Test for **accuracy and performance** on multiple devices.  
 

@@ -23,8 +23,7 @@ struct ContentView: View {
                 .tag(0)
             
             // Practice Mode (placeholder)
-            Text("Practice Mode")
-                .font(.largeTitle)
+            PracticeView()
                 .tabItem {
                     Image(systemName: "book.fill")
                     Text("Practice")
@@ -32,15 +31,14 @@ struct ContentView: View {
                 .tag(1)
             
             // Collection (Items saved by the user)
-            CollectionView(viewContext: viewContext)
+            CollectionView()
                 .tabItem {
                     Label("Collection", systemImage: "square.grid.2x2.fill")
                 }
                 .tag(2)
             
             // Settings (placeholder)
-            Text("Settings")
-                .font(.largeTitle)
+            SettingsView()
                 .tabItem {
                     Image(systemName: "gear")
                     Text("Settings")
@@ -63,50 +61,6 @@ struct PracticeView: View {
                 .foregroundColor(.secondary)
             
             Spacer()
-        }
-    }
-}
-
-// Placeholder for Collection View
-struct CollectionView: View {
-    var viewContext: NSManagedObjectContext
-    
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
-        animation: .default)
-    private var items: FetchedResults<Item>
-    
-    var body: some View {
-        NavigationView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp!, formatter: itemFormatter)")
-                    } label: {
-                        Text(item.timestamp!, formatter: itemFormatter)
-                    }
-                }
-                .onDelete(perform: deleteItems)
-            }
-            .navigationTitle("My Collection")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-            }
-        }
-    }
-    
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
-
-            do {
-                try viewContext.save()
-            } catch {
-                let nsError = error as NSError
-                print("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
         }
     }
 }
