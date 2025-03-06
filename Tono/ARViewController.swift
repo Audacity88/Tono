@@ -30,78 +30,8 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
     let dispatchQueueML = DispatchQueue(label: "com.tono.dispatchqueueml") // A Serial Queue
     var debugTextView: UITextView!
     
-    // Dictionary for English to Chinese translations
-    let translationDictionary: [String: (chinese: String, pinyin: String)] = [
-        "cup": (chinese: "杯子", pinyin: "bēizi"),
-        "bottle": (chinese: "瓶子", pinyin: "píngzi"),
-        "chair": (chinese: "椅子", pinyin: "yǐzi"),
-        "table": (chinese: "桌子", pinyin: "zhuōzi"),
-        "book": (chinese: "书", pinyin: "shū"),
-        "pen": (chinese: "笔", pinyin: "bǐ"),
-        "phone": (chinese: "手机", pinyin: "shǒujī"),
-        "computer": (chinese: "电脑", pinyin: "diànnǎo"),
-        "keyboard": (chinese: "键盘", pinyin: "jiànpán"),
-        "mouse": (chinese: "鼠标", pinyin: "shǔbiāo"),
-        "monitor": (chinese: "显示器", pinyin: "xiǎnshìqì"),
-        "desk": (chinese: "桌子", pinyin: "zhuōzi"),
-        "lamp": (chinese: "灯", pinyin: "dēng"),
-        "window": (chinese: "窗户", pinyin: "chuānghu"),
-        "door": (chinese: "门", pinyin: "mén"),
-        "wall": (chinese: "墙", pinyin: "qiáng"),
-        "floor": (chinese: "地板", pinyin: "dìbǎn"),
-        "ceiling": (chinese: "天花板", pinyin: "tiānhuābǎn"),
-        "sofa": (chinese: "沙发", pinyin: "shāfā"),
-        "television": (chinese: "电视", pinyin: "diànshì"),
-        "remote": (chinese: "遥控器", pinyin: "yáokòngqì"),
-        "clock": (chinese: "钟", pinyin: "zhōng"),
-        "watch": (chinese: "手表", pinyin: "shǒubiǎo"),
-        "glasses": (chinese: "眼镜", pinyin: "yǎnjìng"),
-        "shoe": (chinese: "鞋", pinyin: "xié"),
-        "hat": (chinese: "帽子", pinyin: "màozi"),
-        "shirt": (chinese: "衬衫", pinyin: "chènshān"),
-        "pants": (chinese: "裤子", pinyin: "kùzi"),
-        "jacket": (chinese: "夹克", pinyin: "jiákè"),
-        "coat": (chinese: "外套", pinyin: "wàitào"),
-        "train": (chinese: "火车", pinyin: "huǒchē"),
-        "person": (chinese: "人", pinyin: "rén"),
-        "dog": (chinese: "狗", pinyin: "gǒu"),
-        "cat": (chinese: "猫", pinyin: "māo"),
-        "car": (chinese: "汽车", pinyin: "qìchē"),
-        "bicycle": (chinese: "自行车", pinyin: "zìxíngchē"),
-        "cell phone": (chinese: "手机", pinyin: "shǒujī"),
-        "tv": (chinese: "电视", pinyin: "diànshì"),
-        "couch": (chinese: "沙发", pinyin: "shāfā"),
-        "potted plant": (chinese: "盆栽", pinyin: "pénzāi"),
-        "dining table": (chinese: "餐桌", pinyin: "cānzhuō"),
-        "toilet": (chinese: "厕所", pinyin: "cèsuǒ"),
-        "bed": (chinese: "床", pinyin: "chuáng"),
-        "refrigerator": (chinese: "冰箱", pinyin: "bīngxiāng"),
-        "oven": (chinese: "烤箱", pinyin: "kǎoxiāng"),
-        "microwave": (chinese: "微波炉", pinyin: "wēibōlú"),
-        "toaster": (chinese: "烤面包机", pinyin: "kǎomiànbāojī"),
-        "sink": (chinese: "水槽", pinyin: "shuǐcáo"),
-        "vase": (chinese: "花瓶", pinyin: "huāpíng"),
-        "scissors": (chinese: "剪刀", pinyin: "jiǎndāo"),
-        "teddy bear": (chinese: "泰迪熊", pinyin: "tàidíxióng"),
-        "hair drier": (chinese: "吹风机", pinyin: "chuīfēngjī"),
-        "toothbrush": (chinese: "牙刷", pinyin: "yáshuā"),
-        "bus": (chinese: "公共汽车", pinyin: "gōnggòngqìchē"),
-        "airplane": (chinese: "飞机", pinyin: "fēijī"),
-        "boat": (chinese: "船", pinyin: "chuán"),
-        "fork": (chinese: "叉子", pinyin: "chāzi"),
-        "knife": (chinese: "刀", pinyin: "dāo"),
-        "spoon": (chinese: "勺子", pinyin: "sháozi"),
-        "bowl": (chinese: "碗", pinyin: "wǎn"),
-        "banana": (chinese: "香蕉", pinyin: "xiāngjiāo"),
-        "sandwich": (chinese: "三明治", pinyin: "sānmíngzhì"),
-        "orange": (chinese: "橙子", pinyin: "chéngzi"),
-        "broccoli": (chinese: "西兰花", pinyin: "xīlánhuā"),
-        "carrot": (chinese: "胡萝卜", pinyin: "húluóbo"),
-        "hot dog": (chinese: "热狗", pinyin: "règǒu"),
-        "pizza": (chinese: "披萨", pinyin: "pīsà"),
-        "donut": (chinese: "甜甜圈", pinyin: "tiántiánquān"),
-        "cake": (chinese: "蛋糕", pinyin: "dàngāo")
-    ]
+    // Translation manager for object translations
+    let translationManager = TranslationManager.shared
     
     // Callback for when a new object is detected
     var onObjectDetected: ((String, String, String) -> Void)?
@@ -531,7 +461,7 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
         let mainWord = englishWord.components(separatedBy: " ")[0].lowercased()
         
         // Look up in dictionary
-        if let translation = translationDictionary[mainWord] {
+        if let translation = translationManager.getTranslation(for: mainWord) {
             latestChineseTranslation = translation.chinese
             latestPinyin = translation.pinyin
         } else {

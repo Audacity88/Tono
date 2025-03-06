@@ -1,0 +1,448 @@
+{
+  "objects": [
+    {
+      "english": "apple",
+      "chinese": "苹果",
+      "pinyin": "píng guǒ",
+      "category": "food"
+    },
+    {
+      "english": "chair",
+      "chinese": "椅子",
+      "pinyin": "yǐ zi",
+      "category": "furniture"
+    },
+    {
+      "english": "table",
+      "chinese": "桌子",
+      "pinyin": "zhuō zi",
+      "category": "furniture"
+    },
+    {
+      "english": "book",
+      "chinese": "书",
+      "pinyin": "shū",
+      "category": "stationery"
+    },
+    {
+      "english": "cup",
+      "chinese": "杯子",
+      "pinyin": "bēi zi",
+      "category": "kitchenware"
+    },
+    {
+      "english": "bottle",
+      "chinese": "瓶子",
+      "pinyin": "píng zi",
+      "category": "kitchenware"
+    },
+    {
+      "english": "laptop",
+      "chinese": "笔记本电脑",
+      "pinyin": "bǐ jì běn diàn nǎo",
+      "category": "electronics"
+    },
+    {
+      "english": "phone",
+      "chinese": "手机",
+      "pinyin": "shǒu jī",
+      "category": "electronics"
+    },
+    {
+      "english": "cell phone",
+      "chinese": "手机",
+      "pinyin": "shǒu jī",
+      "category": "electronics"
+    },
+    {
+      "english": "pen",
+      "chinese": "钢笔",
+      "pinyin": "gāng bǐ",
+      "category": "stationery"
+    },
+    {
+      "english": "glasses",
+      "chinese": "眼镜",
+      "pinyin": "yǎn jìng",
+      "category": "accessories"
+    },
+    {
+      "english": "keyboard",
+      "chinese": "键盘",
+      "pinyin": "jiàn pán",
+      "category": "electronics"
+    },
+    {
+      "english": "mouse",
+      "chinese": "鼠标",
+      "pinyin": "shǔ biāo",
+      "category": "electronics"
+    },
+    {
+      "english": "headphones",
+      "chinese": "耳机",
+      "pinyin": "ěr jī",
+      "category": "electronics"
+    },
+    {
+      "english": "watch",
+      "chinese": "手表",
+      "pinyin": "shǒu biǎo",
+      "category": "accessories"
+    },
+    {
+      "english": "backpack",
+      "chinese": "背包",
+      "pinyin": "bēi bāo",
+      "category": "accessories"
+    },
+    {
+      "english": "door",
+      "chinese": "门",
+      "pinyin": "mén",
+      "category": "home"
+    },
+    {
+      "english": "window",
+      "chinese": "窗户",
+      "pinyin": "chuāng hu",
+      "category": "home"
+    },
+    {
+      "english": "light",
+      "chinese": "灯",
+      "pinyin": "dēng",
+      "category": "home"
+    },
+    {
+      "english": "television",
+      "chinese": "电视",
+      "pinyin": "diàn shì",
+      "category": "electronics"
+    },
+    {
+      "english": "tv",
+      "chinese": "电视",
+      "pinyin": "diàn shì",
+      "category": "electronics"
+    },
+    {
+      "english": "remote",
+      "chinese": "遥控器",
+      "pinyin": "yáo kòng qì",
+      "category": "electronics"
+    },
+    {
+      "english": "person",
+      "chinese": "人",
+      "pinyin": "rén",
+      "category": "people"
+    },
+    {
+      "english": "dog",
+      "chinese": "狗",
+      "pinyin": "gǒu",
+      "category": "animals"
+    },
+    {
+      "english": "cat",
+      "chinese": "猫",
+      "pinyin": "māo",
+      "category": "animals"
+    },
+    {
+      "english": "car",
+      "chinese": "汽车",
+      "pinyin": "qì chē",
+      "category": "transportation"
+    },
+    {
+      "english": "bicycle",
+      "chinese": "自行车",
+      "pinyin": "zì xíng chē",
+      "category": "transportation"
+    },
+    {
+      "english": "couch",
+      "chinese": "沙发",
+      "pinyin": "shā fā",
+      "category": "furniture"
+    },
+    {
+      "english": "sofa",
+      "chinese": "沙发",
+      "pinyin": "shā fā",
+      "category": "furniture"
+    },
+    {
+      "english": "potted plant",
+      "chinese": "盆栽",
+      "pinyin": "pén zāi",
+      "category": "home"
+    },
+    {
+      "english": "dining table",
+      "chinese": "餐桌",
+      "pinyin": "cān zhuō",
+      "category": "furniture"
+    },
+    {
+      "english": "toilet",
+      "chinese": "厕所",
+      "pinyin": "cè suǒ",
+      "category": "home"
+    },
+    {
+      "english": "bed",
+      "chinese": "床",
+      "pinyin": "chuáng",
+      "category": "furniture"
+    },
+    {
+      "english": "refrigerator",
+      "chinese": "冰箱",
+      "pinyin": "bīng xiāng",
+      "category": "appliances"
+    },
+    {
+      "english": "oven",
+      "chinese": "烤箱",
+      "pinyin": "kǎo xiāng",
+      "category": "appliances"
+    },
+    {
+      "english": "microwave",
+      "chinese": "微波炉",
+      "pinyin": "wēi bō lú",
+      "category": "appliances"
+    },
+    {
+      "english": "toaster",
+      "chinese": "烤面包机",
+      "pinyin": "kǎo miàn bāo jī",
+      "category": "appliances"
+    },
+    {
+      "english": "sink",
+      "chinese": "水槽",
+      "pinyin": "shuǐ cáo",
+      "category": "home"
+    },
+    {
+      "english": "clock",
+      "chinese": "时钟",
+      "pinyin": "shí zhōng",
+      "category": "home"
+    },
+    {
+      "english": "vase",
+      "chinese": "花瓶",
+      "pinyin": "huā píng",
+      "category": "home"
+    },
+    {
+      "english": "scissors",
+      "chinese": "剪刀",
+      "pinyin": "jiǎn dāo",
+      "category": "tools"
+    },
+    {
+      "english": "teddy bear",
+      "chinese": "泰迪熊",
+      "pinyin": "tài dí xióng",
+      "category": "toys"
+    },
+    {
+      "english": "hair drier",
+      "chinese": "吹风机",
+      "pinyin": "chuī fēng jī",
+      "category": "appliances"
+    },
+    {
+      "english": "toothbrush",
+      "chinese": "牙刷",
+      "pinyin": "yá shuā",
+      "category": "bathroom"
+    },
+    {
+      "english": "train",
+      "chinese": "火车",
+      "pinyin": "huǒ chē",
+      "category": "transportation"
+    },
+    {
+      "english": "bus",
+      "chinese": "公共汽车",
+      "pinyin": "gōng gòng qì chē",
+      "category": "transportation"
+    },
+    {
+      "english": "airplane",
+      "chinese": "飞机",
+      "pinyin": "fēi jī",
+      "category": "transportation"
+    },
+    {
+      "english": "boat",
+      "chinese": "船",
+      "pinyin": "chuán",
+      "category": "transportation"
+    },
+    {
+      "english": "fork",
+      "chinese": "叉子",
+      "pinyin": "chā zi",
+      "category": "kitchenware"
+    },
+    {
+      "english": "knife",
+      "chinese": "刀",
+      "pinyin": "dāo",
+      "category": "kitchenware"
+    },
+    {
+      "english": "spoon",
+      "chinese": "勺子",
+      "pinyin": "sháo zi",
+      "category": "kitchenware"
+    },
+    {
+      "english": "bowl",
+      "chinese": "碗",
+      "pinyin": "wǎn",
+      "category": "kitchenware"
+    },
+    {
+      "english": "banana",
+      "chinese": "香蕉",
+      "pinyin": "xiāng jiāo",
+      "category": "food"
+    },
+    {
+      "english": "sandwich",
+      "chinese": "三明治",
+      "pinyin": "sān míng zhì",
+      "category": "food"
+    },
+    {
+      "english": "orange",
+      "chinese": "橙子",
+      "pinyin": "chéng zi",
+      "category": "food"
+    },
+    {
+      "english": "broccoli",
+      "chinese": "西兰花",
+      "pinyin": "xī lán huā",
+      "category": "food"
+    },
+    {
+      "english": "carrot",
+      "chinese": "胡萝卜",
+      "pinyin": "hú luó bo",
+      "category": "food"
+    },
+    {
+      "english": "hot dog",
+      "chinese": "热狗",
+      "pinyin": "rè gǒu",
+      "category": "food"
+    },
+    {
+      "english": "pizza",
+      "chinese": "披萨",
+      "pinyin": "pī sà",
+      "category": "food"
+    },
+    {
+      "english": "donut",
+      "chinese": "甜甜圈",
+      "pinyin": "tián tián quān",
+      "category": "food"
+    },
+    {
+      "english": "cake",
+      "chinese": "蛋糕",
+      "pinyin": "dàn gāo",
+      "category": "food"
+    },
+    {
+      "english": "computer",
+      "chinese": "电脑",
+      "pinyin": "diàn nǎo",
+      "category": "electronics"
+    },
+    {
+      "english": "monitor",
+      "chinese": "显示器",
+      "pinyin": "xiǎn shì qì",
+      "category": "electronics"
+    },
+    {
+      "english": "desk",
+      "chinese": "桌子",
+      "pinyin": "zhuō zi",
+      "category": "furniture"
+    },
+    {
+      "english": "lamp",
+      "chinese": "灯",
+      "pinyin": "dēng",
+      "category": "home"
+    },
+    {
+      "english": "wall",
+      "chinese": "墙",
+      "pinyin": "qiáng",
+      "category": "home"
+    },
+    {
+      "english": "floor",
+      "chinese": "地板",
+      "pinyin": "dì bǎn",
+      "category": "home"
+    },
+    {
+      "english": "ceiling",
+      "chinese": "天花板",
+      "pinyin": "tiān huā bǎn",
+      "category": "home"
+    },
+    {
+      "english": "shoe",
+      "chinese": "鞋",
+      "pinyin": "xié",
+      "category": "clothing"
+    },
+    {
+      "english": "hat",
+      "chinese": "帽子",
+      "pinyin": "mào zi",
+      "category": "clothing"
+    },
+    {
+      "english": "shirt",
+      "chinese": "衬衫",
+      "pinyin": "chèn shān",
+      "category": "clothing"
+    },
+    {
+      "english": "pants",
+      "chinese": "裤子",
+      "pinyin": "kù zi",
+      "category": "clothing"
+    },
+    {
+      "english": "jacket",
+      "chinese": "夹克",
+      "pinyin": "jiá kè",
+      "category": "clothing"
+    },
+    {
+      "english": "coat",
+      "chinese": "外套",
+      "pinyin": "wài tào",
+      "category": "clothing"
+    }
+  ]
+} 
