@@ -1,0 +1,8 @@
+---
+description: Swift development
+globs: 
+---
+
+# Your rule content
+
+- Do not edit plist or pbxproj files directly, give me instructions for how to do so in xcode

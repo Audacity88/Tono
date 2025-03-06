@@ -4,11 +4,11 @@
 
 ## **1. Project Setup**
 
-- [ ] Install and configure **Xcode** (latest version).  
-- [ ] Create a new **iOS project** in Xcode using **Swift** and **SwiftUI**.  
-- [ ] Set up a **Git repository** for version control (GitHub or GitLab).  
-- [ ] Define **app bundle ID** and configure **App Store Connect** account.  
-- [ ] Integrate **Swift Package Manager** for dependency management.  
+- [x] Install and configure **Xcode** (latest version).  
+- [x] Create a new **iOS project** in Xcode using **Swift** and **SwiftUI**.  
+- [x] Set up a **Git repository** for version control (GitHub or GitLab).  
+- [x] Define **app bundle ID** and configure **App Store Connect** account.  
+- [x] Integrate **Swift Package Manager** for dependency management.  
 
 ---
 
@@ -16,29 +16,28 @@
 
 ### **2.1 ARKit and Core ML Integration**
 
-- [ ] Enable **ARKit** in the Xcode project settings.  
-- [ ] Import **ARKit** and **Core ML** frameworks.  
-- [ ] Download or create a pre-trained **Core ML model** for object recognition.  
-- [ ] Convert the model to **Core ML format** if necessary using Core ML Tools.  
-- [ ] Implement a **UIViewRepresentable** wrapper for ARKit in SwiftUI.  
-- [ ] Build a simple AR scene to test object recognition capabilities.  
+- [x] Enable **ARKit** in the Xcode project settings.  
+- [x] Import **ARKit** and **Core ML** frameworks.  
+- [x] Download or create a pre-trained **Core ML model** for object recognition.  
+- [x] Convert the model to **Core ML format** if necessary using Core ML Tools.  
+- [x] Implement a **UIViewRepresentable** wrapper for ARKit in SwiftUI.  
+- [x] Build a simple AR scene to test object recognition capabilities.  
 
 ---
 
 ### **2.2 Audio and Pronunciation Setup**
 
-- [ ] Enable **Microphone and Speech Recognition** capabilities in Xcode.  
-- [ ] Import **AVFoundation**, **AudioKit**, and **Speech** frameworks.  
+- [x] Enable **Microphone and Speech Recognition** capabilities in Xcode.  
+- [x] Import **AVFoundation**, **AudioKit**, and **Speech** frameworks.  
 - [ ] Install and configure **SpeechSuper API** for pronunciation assessment.  
-- [ ] Develop a prototype for **audio playback** using AVFoundation.  
-- [ ] Create a basic **speech recording and transcription** function using the Speech framework.  
-- [ ] Implement **pitch detection** with AudioKit for tone assessment.  
+- [x] Develop a prototype for **audio playback** using AVFoundation.  
+- [x] Create a basic **speech recording and transcription** function using the Speech framework.  
 
 ---
 
 ### **2.3 Data Storage Configuration**
 
-- [ ] Add **Core Data** to the project for local storage.  
+- [x] Add **Core Data** to the project for local storage.  
 - [ ] Define data models in Core Data for:
   - Objects (name, image, pronunciation, SRS data).  
   - SRS schedule (last review date, interval, performance).  
@@ -53,11 +52,11 @@
 
 ### **3.1 Explore Mode**
 
-- [ ] Create a **SwiftUI view** for the camera interface using ARKit.  
-- [ ] Integrate **Core ML** for real-time object recognition.  
-- [ ] Display **popups with Chinese names, pinyin, and pronunciation**.  
-- [ ] Implement **speech recording** and send audio to SpeechSuper API for assessment.  
-- [ ] Provide **feedback on pronunciation** (correct or retry).  
+- [x] Create a **SwiftUI view** for the camera interface using ARKit.  
+- [x] Integrate **Core ML** for real-time object recognition.  
+- [x] Display **popups with Chinese names, pinyin, and pronunciation**.  
+- [x] Implement **speech recording** and send audio to SpeechSuper API for assessment.  
+- [x] Provide **feedback on pronunciation** (correct or retry).  
 - [ ] Save correctly pronounced objects to Core Data.  
 - [ ] Test for **accuracy and performance** on multiple devices.  
 
