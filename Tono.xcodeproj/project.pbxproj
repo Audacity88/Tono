@@ -37,20 +37,6 @@
 			);
 			target = 37D6B8952D7A045E007C9ABD /* Tono */;
 		};
-		371EAA482D7A298E00EAA37B /* Exceptions for "Tono" folder in "TonoTests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Models/yolov8n.mlpackage,
-			);
-			target = 37D6B8AA2D7A045F007C9ABD /* TonoTests */;
-		};
-		371EAA492D7A298E00EAA37B /* Exceptions for "Tono" folder in "TonoUITests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Models/yolov8n.mlpackage,
-			);
-			target = 37D6B8B42D7A045F007C9ABD /* TonoUITests */;
-		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -58,8 +44,6 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				371EAA402D7A226300EAA37B /* Exceptions for "Tono" folder in "Tono" target */,
-				371EAA482D7A298E00EAA37B /* Exceptions for "Tono" folder in "TonoTests" target */,
-				371EAA492D7A298E00EAA37B /* Exceptions for "Tono" folder in "TonoUITests" target */,
 			);
 			path = Tono;
 			sourceTree = "<group>";
