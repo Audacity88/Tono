@@ -10,76 +10,118 @@ import CoreData
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
+    
+    var body: some View {
+        TabView {
+            ExploreView()
+                .tabItem {
+                    Label("Explore", systemImage: "camera.viewfinder")
+                }
+            
+            PracticeView()
+                .tabItem {
+                    Label("Practice", systemImage: "book.fill")
+                }
+            
+            ProfileView()
+                .tabItem {
+                    Label("Profile", systemImage: "person.fill")
+                }
+        }
+        .accentColor(.orange)
+    }
+}
 
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
-        animation: .default)
-    private var items: FetchedResults<Item>
-
+struct ExploreView: View {
     var body: some View {
         NavigationView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp!, formatter: itemFormatter)")
-                    } label: {
-                        Text(item.timestamp!, formatter: itemFormatter)
-                    }
+            VStack {
+                Text("Explore Mode")
+                    .font(.largeTitle)
+                    .padding()
+                
+                Text("Point your camera at objects to learn their Chinese names")
+                    .multilineTextAlignment(.center)
+                    .padding()
+                
+                Spacer()
+                
+                Button(action: {
+                    // This will be implemented later to start AR session
+                }) {
+                    Text("Start Scanning")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(Color.orange)
+                        .cornerRadius(10)
                 }
-                .onDelete(perform: deleteItems)
+                .padding(.bottom, 50)
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
-            Text("Select an item")
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
+            .navigationTitle("Explore")
         }
     }
 }
 
-private let itemFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .short
-    formatter.timeStyle = .medium
-    return formatter
-}()
+struct PracticeView: View {
+    var body: some View {
+        NavigationView {
+            VStack {
+                Text("Practice Mode")
+                    .font(.largeTitle)
+                    .padding()
+                
+                Text("Review your collected words and practice pronunciation")
+                    .multilineTextAlignment(.center)
+                    .padding()
+                
+                Spacer()
+                
+                Text("No words collected yet")
+                    .foregroundColor(.gray)
+                
+                Spacer()
+            }
+            .navigationTitle("Practice")
+        }
+    }
+}
+
+struct ProfileView: View {
+    var body: some View {
+        NavigationView {
+            VStack {
+                Text("Your Profile")
+                    .font(.largeTitle)
+                    .padding()
+                
+                VStack(alignment: .leading, spacing: 20) {
+                    HStack {
+                        Text("Level:")
+                            .font(.headline)
+                        Text("Beginner")
+                    }
+                    
+                    HStack {
+                        Text("Words Collected:")
+                            .font(.headline)
+                        Text("0")
+                    }
+                    
+                    HStack {
+                        Text("Points:")
+                            .font(.headline)
+                        Text("0")
+                    }
+                }
+                .padding()
+                
+                Spacer()
+            }
+            .navigationTitle("Profile")
+        }
+    }
+}
 
 #Preview {
     ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
