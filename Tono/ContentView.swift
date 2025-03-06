@@ -14,17 +14,20 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            // Explore Mode (AR View)
+            // Explore Mode (AR)
             ARExploreView()
                 .tabItem {
-                    Label("Explore", systemImage: "camera.viewfinder")
+                    Image(systemName: "camera.viewfinder")
+                    Text("Explore")
                 }
                 .tag(0)
             
-            // Practice Mode (Coming soon)
-            PracticeView()
+            // Practice Mode (placeholder)
+            Text("Practice Mode")
+                .font(.largeTitle)
                 .tabItem {
-                    Label("Practice", systemImage: "book.fill")
+                    Image(systemName: "book.fill")
+                    Text("Practice")
                 }
                 .tag(1)
             
@@ -35,10 +38,12 @@ struct ContentView: View {
                 }
                 .tag(2)
             
-            // Settings
-            SettingsView()
+            // Settings (placeholder)
+            Text("Settings")
+                .font(.largeTitle)
                 .tabItem {
-                    Label("Settings", systemImage: "gear")
+                    Image(systemName: "gear")
+                    Text("Settings")
                 }
                 .tag(3)
         }
@@ -139,6 +144,8 @@ private let itemFormatter: DateFormatter = {
     return formatter
 }()
 
-#Preview {
-    ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    }
 }

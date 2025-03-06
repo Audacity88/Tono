@@ -295,7 +295,7 @@ class ObjectRecognitionManager: ObservableObject {
             } catch {
                 print("Failed to perform Vision request with alternative orientation: \(error)")
                 DispatchQueue.main.async {
-                    self.isProcessing = false
+            self.isProcessing = false
                 }
             }
         }
@@ -306,11 +306,11 @@ class ObjectRecognitionManager: ObservableObject {
         DispatchQueue.main.async {
             self.isProcessing = false
             
-            guard error == nil else {
-                print("Vision error: \(error!.localizedDescription)")
-                return
-            }
-            
+        guard error == nil else {
+            print("Vision error: \(error!.localizedDescription)")
+            return
+        }
+        
             // Print a summary of results for debugging
             print("Vision results summary: \(request.results?.count ?? 0) observations")
             
@@ -373,7 +373,7 @@ class ObjectRecognitionManager: ObservableObject {
                 
                 // Handle classification results
                 if let topObservation = observations.first {
-                    let objectName = topObservation.identifier.lowercased()
+        let objectName = topObservation.identifier.lowercased()
                     let confidence = topObservation.confidence
                     
                     print("Detected object: \(objectName) with confidence: \(confidence)")
@@ -382,23 +382,23 @@ class ObjectRecognitionManager: ObservableObject {
                     // since classification doesn't provide location information
                     let defaultBoundingBox = CGRect(x: 0.4, y: 0.4, width: 0.2, height: 0.2)
                     print("Using default bounding box: \(defaultBoundingBox)")
-                    
-                    // Check if we have a translation for this object
+        
+        // Check if we have a translation for this object
                     if let translation = self.objectTranslations[objectName] {
                         self.currentDetection = DetectedObject(
-                            englishName: objectName,
-                            chineseName: translation.chinese,
-                            pinyin: translation.pinyin,
+                englishName: objectName,
+                chineseName: translation.chinese,
+                pinyin: translation.pinyin,
                             confidence: confidence,
                             boundingBox: defaultBoundingBox
-                        )
-                    } else {
-                        // No translation available
+            )
+        } else {
+            // No translation available
                         print("No translation found for: \(objectName)")
                         self.currentDetection = DetectedObject(
-                            englishName: objectName,
-                            chineseName: "未知",
-                            pinyin: "wèi zhī",
+                englishName: objectName,
+                chineseName: "未知",
+                pinyin: "wèi zhī",
                             confidence: confidence,
                             boundingBox: defaultBoundingBox
                         )
@@ -477,7 +477,7 @@ class ObjectRecognitionManager: ObservableObject {
     }
     
     // Simulate a detection when the model fails
-    private func simulateDetection() {
+    func simulateDetection() {
         print("Simulating object detection")
         
         // Get a random object from our translations dictionary
@@ -503,6 +503,16 @@ class ObjectRecognitionManager: ObservableObject {
                 boundingBox: randomBoundingBox
             )
         }
+    }
+    
+    // Get translation for an object
+    func getTranslation(for objectName: String) -> (chinese: String, pinyin: String)? {
+        return objectTranslations[objectName.lowercased()]
+    }
+    
+    // Set the current detection
+    func setCurrentDetection(_ detection: DetectedObject) {
+        self.currentDetection = detection
     }
 }
 

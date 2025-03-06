@@ -29,14 +29,41 @@ Tono is an iOS application designed to make learning Chinese vocabulary engaging
 - **Language**: Swift
 - **UI Framework**: SwiftUI
 - **AR**: ARKit
-- **Object Recognition**: Core ML
+- **Object Recognition**: Core ML (YOLOv8, Inceptionv3, MobileNet)
 - **Pronunciation Assessment**: SpeechSuper API, AudioKit
 - **Data Storage**: Core Data
+
+## Getting Started
+
+### Prerequisites
+
+- Xcode (latest version)
+- iOS device with ARKit support (iPhone 6s or later, running iOS 14+)
+
+### Installation
+
+1. Clone this repository
+   ```
+   git clone https://github.com/yourusername/Tono.git
+   ```
+2. Open the project in Xcode
+   ```
+   open Tono.xcodeproj
+   ```
+3. Build and run the project on your iOS device
 
 ## Development Status
 
 This project is currently in the initial development phase. See the [checklist](docs/Checklist.md) for progress updates.
 
+## Acknowledgments
+
+This project is based on the [CoreML-in-ARKit](https://github.com/hanleyweng/CoreML-in-ARKit) project by Hanley Weng, which provides a foundation for integrating Core ML with ARKit for object detection.
+
 ## License
 
-[License information to be added] 
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
+*Note: This project is a work in progress.* 
