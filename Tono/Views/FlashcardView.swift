@@ -5,10 +5,11 @@ import CoreData
 struct FlashcardView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.presentationMode) var presentationMode
+    @Environment(\.colorScheme) private var colorScheme
     
-    // Fetch objects for flashcards
+    // Fetch objects for flashcards - prioritize newer cards first
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \TaggedObject.lastReviewDate, ascending: true)],
+        sortDescriptors: [NSSortDescriptor(keyPath: \TaggedObject.timestamp, ascending: false)],
         predicate: NSPredicate(format: "reviewCount >= 0"),
         animation: .default)
     private var reviewObjects: FetchedResults<TaggedObject>
@@ -20,9 +21,15 @@ struct FlashcardView: View {
     @State private var sessionComplete = false
     @State private var correctCount = 0
     @State private var incorrectCount = 0
+    @StateObject private var speechManager = SpeechManager()
     
     // Maximum number of cards per session
     private let maxCards = 10
+    
+    // Computed property for pinyin text color
+    private var pinyinColor: Color {
+        return colorScheme == .dark ? Color.cyan : Color.blue
+    }
     
     var body: some View {
         VStack {
@@ -124,37 +131,70 @@ struct FlashcardView: View {
                         RoundedRectangle(cornerRadius: 20)
                             .fill(Color.white)
                             .shadow(radius: 10)
-                            .frame(width: 300, height: 400)
+                            .frame(width: 320, height: 420)
                         
-                        VStack(spacing: 20) {
-                            if let imageData = flashcards[currentIndex].image, let uiImage = UIImage(data: imageData) {
-                                Image(uiImage: uiImage)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 150)
-                                    .cornerRadius(10)
-                            }
+                        VStack(spacing: 15) {
+                            // Always show the Chinese character
+                            Text(flashcards[currentIndex].chinese ?? "未知")
+                                .font(.system(size: 60, weight: .bold))
+                                .foregroundColor(.red)
+                                .padding(.top, 20)
                             
-                            if isShowingAnswer {
-                                Text(flashcards[currentIndex].chinese ?? "未知")
-                                    .font(.system(size: 36, weight: .bold))
-                                    .foregroundColor(.red)
-                                
+                            // Always show the pinyin with pronunciation button
+                            HStack(spacing: 8) {
                                 Text(flashcards[currentIndex].pinyin ?? "")
                                     .font(.title2)
-                                    .foregroundColor(.secondary)
-                            } else {
-                                Text(flashcards[currentIndex].english ?? "unknown")
-                                    .font(.system(size: 36, weight: .bold))
+                                    .fontWeight(.medium)
+                                    .foregroundColor(pinyinColor)
+                                
+                                Button(action: {
+                                    speakChinese(flashcards[currentIndex].chinese ?? "")
+                                }) {
+                                    Image(systemName: speechManager.isSpeaking ? "speaker.wave.2.fill" : "speaker.wave.2")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.blue)
+                                        .padding(6)
+                                        .background(Color.blue.opacity(0.1))
+                                        .clipShape(Circle())
+                                }
+                                .disabled(speechManager.isSpeaking)
                             }
+                            .padding(.bottom, 10)
                             
-                            if !isShowingAnswer {
+                            Divider()
+                                .padding(.horizontal, 30)
+                            
+                            if isShowingAnswer {
+                                // Show the image
+                                if let imageData = flashcards[currentIndex].image, let uiImage = UIImage(data: imageData) {
+                                    Image(uiImage: uiImage.rotate90DegreesClockwise() ?? uiImage)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(height: 120)
+                                        .cornerRadius(10)
+                                        .padding(.top, 10)
+                                }
+                                
+                                // English meaning
+                                Text(flashcards[currentIndex].english ?? "unknown")
+                                    .font(.title3)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.primary)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal)
+                                    .padding(.top, 5)
+                                    .lineLimit(3)
+                                    .minimumScaleFactor(0.8)
+                            } else {
+                                Spacer()
+                                    .frame(height: 120)
+                                
                                 Button(action: {
                                     withAnimation {
                                         isShowingAnswer = true
                                     }
                                 }) {
-                                    Text("Show Answer")
+                                    Text("Show English")
                                         .font(.headline)
                                         .foregroundColor(.white)
                                         .padding()
@@ -162,9 +202,10 @@ struct FlashcardView: View {
                                         .background(Color.blue)
                                         .cornerRadius(10)
                                 }
+                                .padding(.bottom, 20)
                             }
                         }
-                        .padding(30)
+                        .padding(20)
                     }
                     .offset(x: offset.width, y: 0)
                     .rotationEffect(.degrees(Double(offset.width / 20)))
@@ -256,6 +297,17 @@ struct FlashcardView: View {
         }
     }
     
+    // Speak the Chinese text
+    private func speakChinese(_ text: String) {
+        if text.isEmpty {
+            return
+        }
+        
+        speechManager.speak(text) { _ in
+            // Speech completed or started
+        }
+    }
+    
     // Prepare flashcards from available objects
     private func prepareFlashcards() {
         // Convert FetchedResults to Array for easier manipulation
@@ -266,7 +318,7 @@ struct FlashcardView: View {
             return
         }
         
-        // Take up to maxCards objects, prioritizing those that haven't been reviewed recently
+        // Take up to maxCards objects, prioritizing the newest ones
         flashcards = Array(objects.prefix(maxCards))
     }
     

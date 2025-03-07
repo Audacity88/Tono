@@ -2,12 +2,25 @@ import SwiftUI
 
 // Settings View
 struct SettingsView: View {
+    @State private var showMissingTranslations = false
+    
     var body: some View {
         NavigationView {
             List {
                 Section(header: Text("App Settings")) {
                     Toggle("Enable Notifications", isOn: .constant(true))
                     Toggle("Dark Mode", isOn: .constant(false))
+                }
+                
+                Section(header: Text("Tools")) {
+                    Button(action: {
+                        showMissingTranslations = true
+                    }) {
+                        HStack {
+                            Image(systemName: "character.book.closed")
+                            Text("Check Missing Translations")
+                        }
+                    }
                 }
                 
                 Section(header: Text("Account")) {
@@ -22,6 +35,9 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
+            .sheet(isPresented: $showMissingTranslations) {
+                MissingTranslationsView()
+            }
         }
     }
 } 

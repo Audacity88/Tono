@@ -77,7 +77,7 @@ struct ObjectRow: View {
     var body: some View {
         HStack {
             if let imageData = object.image, let uiImage = UIImage(data: imageData) {
-                Image(uiImage: uiImage)
+                Image(uiImage: uiImage.rotate90DegreesClockwise() ?? uiImage)
                     .resizable()
                     .scaledToFill()
                     .frame(width: 60, height: 60)
@@ -128,14 +128,14 @@ struct ObjectRow: View {
 
 struct ObjectDetailView: View {
     let object: TaggedObject
-    @State private var isSpeaking = false
+    @StateObject private var speechManager = SpeechManager()
     
     var body: some View {
         ScrollView {
             VStack(alignment: .center, spacing: 20) {
                 // Object image
                 if let imageData = object.image, let uiImage = UIImage(data: imageData) {
-                    Image(uiImage: uiImage)
+                    Image(uiImage: uiImage.rotate90DegreesClockwise() ?? uiImage)
                         .resizable()
                         .scaledToFit()
                         .frame(maxWidth: .infinity)
@@ -170,21 +170,21 @@ struct ObjectDetailView: View {
                 
                 // Pronunciation button
                 Button(action: {
-                    isSpeaking.toggle()
                     speakWord(object.chinese ?? "")
                 }) {
                     HStack {
-                        Image(systemName: isSpeaking ? "pause.circle.fill" : "play.circle.fill")
+                        Image(systemName: speechManager.isSpeaking ? "pause.circle.fill" : "play.circle.fill")
                             .font(.system(size: 24))
-                        Text("Pronounce")
+                        Text(speechManager.isSpeaking ? "Speaking..." : "Pronounce")
                             .font(.headline)
                     }
                     .padding()
                     .frame(maxWidth: 200)
-                    .background(Color.blue)
+                    .background(speechManager.isSpeaking ? Color.gray : Color.blue)
                     .foregroundColor(.white)
                     .cornerRadius(10)
                 }
+                .disabled(speechManager.isSpeaking)
                 
                 // Review information
                 VStack(alignment: .leading, spacing: 8) {
@@ -227,15 +227,12 @@ struct ObjectDetailView: View {
     }
     
     private func speakWord(_ word: String) {
-        let utterance = AVSpeechUtterance(string: word)
-        utterance.voice = AVSpeechSynthesisVoice(language: "zh-CN")
-        utterance.rate = 0.5
+        if word.isEmpty {
+            return
+        }
         
-        let synthesizer = AVSpeechSynthesizer()
-        if isSpeaking {
-            synthesizer.speak(utterance)
-        } else {
-            synthesizer.stopSpeaking(at: .immediate)
+        speechManager.speak(word) { _ in
+            // Speech completed or started
         }
     }
     

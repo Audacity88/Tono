@@ -7,9 +7,9 @@ struct QuizView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.presentationMode) var presentationMode
     
-    // Fetch objects for quiz
+    // Fetch objects for quiz - prioritize newer cards first
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \TaggedObject.lastReviewDate, ascending: true)],
+        sortDescriptors: [NSSortDescriptor(keyPath: \TaggedObject.timestamp, ascending: false)],
         predicate: NSPredicate(format: "reviewCount >= 0"),
         animation: .default)
     private var allObjects: FetchedResults<TaggedObject>
@@ -21,6 +21,7 @@ struct QuizView: View {
     @State private var isCorrect = false
     @State private var quizComplete = false
     @State private var quizQuestions: [QuizQuestion] = []
+    @State private var attempts = 0
     
     // Speech synthesizer for pronunciation
     @StateObject private var speechManager = SpeechManager()
@@ -113,7 +114,7 @@ struct QuizView: View {
                     
                     // Question
                     if let imageData = currentQuestion.imageData, let uiImage = UIImage(data: imageData) {
-                        Image(uiImage: uiImage)
+                        Image(uiImage: uiImage.rotate90DegreesClockwise() ?? uiImage)
                             .resizable()
                             .scaledToFit()
                             .frame(height: 150)
@@ -134,23 +135,41 @@ struct QuizView: View {
                             let pinyin = index < currentQuestion.optionsPinyin.count ? currentQuestion.optionsPinyin[index] : ""
                             
                             Button(action: {
-                                if !showingFeedback {
+                                // Only allow selection if not already showing feedback or if the previous selection was incorrect
+                                if !showingFeedback || (showingFeedback && selectedAnswer != currentQuestion.correctAnswer) {
                                     selectedAnswer = option
                                     isCorrect = (option == currentQuestion.correctAnswer)
                                     showingFeedback = true
                                     
-                                    // Update score
+                                    // Play the audio for the selected option
+                                    speakText(option)
+                                    
+                                    // Only update score and SRS data if correct
                                     if isCorrect {
                                         score += 1
-                                    }
-                                    
-                                    // Update SRS data
-                                    if let object = currentQuestion.object {
-                                        PersistenceController.shared.updateReviewStatus(
-                                            for: object,
-                                            wasCorrect: isCorrect,
-                                            context: viewContext
-                                        )
+                                        attempts = 0
+                                        
+                                        // Update SRS data
+                                        if let object = currentQuestion.object {
+                                            PersistenceController.shared.updateReviewStatus(
+                                                for: object,
+                                                wasCorrect: true,
+                                                context: viewContext
+                                            )
+                                        }
+                                    } else {
+                                        attempts += 1
+                                        
+                                        // If multiple incorrect attempts, update SRS data
+                                        if attempts >= 2 && selectedAnswer != currentQuestion.correctAnswer {
+                                            if let object = currentQuestion.object {
+                                                PersistenceController.shared.updateReviewStatus(
+                                                    for: object,
+                                                    wasCorrect: false,
+                                                    context: viewContext
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }) {
@@ -211,31 +230,46 @@ struct QuizView: View {
                                 )
                             }
                             .buttonStyle(PlainButtonStyle())
+                            // Disable incorrect options after they've been selected
+                            .disabled(showingFeedback && option != currentQuestion.correctAnswer && option == selectedAnswer)
                         }
                     }
                     .padding(.horizontal)
                     
                     Spacer()
                     
-                    // Next button
-                    if showingFeedback {
+                    // Feedback message for incorrect answers
+                    if showingFeedback && !isCorrect {
+                        Text("Try again. Select the correct answer.")
+                            .font(.headline)
+                            .foregroundColor(.orange)
+                            .padding(.vertical, 8)
+                    }
+                    
+                    // Combined feedback and next/finish button when correct
+                    if showingFeedback && isCorrect {
                         Button(action: {
                             // Move to next question or complete quiz
                             if currentQuestionIndex < quizQuestions.count - 1 {
                                 currentQuestionIndex += 1
                                 selectedAnswer = nil
                                 showingFeedback = false
+                                attempts = 0
                             } else {
                                 quizComplete = true
                             }
                         }) {
-                            Text(currentQuestionIndex < quizQuestions.count - 1 ? "Next Question" : "Finish Quiz")
-                                .font(.headline)
-                                .foregroundColor(.white)
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(Color.blue)
-                                .cornerRadius(10)
+                            HStack {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.headline)
+                                Text("Correct! 👍 \(currentQuestionIndex < quizQuestions.count - 1 ? "Next Question" : "Finish Quiz")")
+                                    .font(.headline)
+                            }
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.green)
+                            .cornerRadius(10)
                         }
                         .padding(.horizontal)
                         .padding(.bottom, 20)
@@ -272,16 +306,13 @@ struct QuizView: View {
         // Determine how many questions to create
         let questionCount = min(maxQuestions, objects.count)
         
-        // Create shuffled copy of objects to use for questions
-        var shuffledObjects = objects.shuffled()
+        // Use the objects in their current order (newest first)
+        let targetObjects = Array(objects.prefix(questionCount))
         
         // Create questions
         var questions: [QuizQuestion] = []
         
-        for i in 0..<questionCount {
-            // Get the target object for this question
-            let targetObject = shuffledObjects[i % shuffledObjects.count]
-            
+        for targetObject in targetObjects {
             // Create a pool of other objects to use as distractors
             var distractors = objects.filter { $0 != targetObject }.shuffled()
             

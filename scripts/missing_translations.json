@@ -1,0 +1,1198 @@
+{
+  "objects": [
+    {
+      "english": "admiral",
+      "chinese": "",
+      "pinyin": "",
+      "category": "admiral"
+    },
+    {
+      "english": "african hunting dog, hyena dog, cape hunting dog, lycaon pictus",
+      "chinese": "",
+      "pinyin": "",
+      "category": "african hunting dog, hyena dog, cape hunting dog, lycaon pictus"
+    },
+    {
+      "english": "american alligator, alligator mississipiensis",
+      "chinese": "",
+      "pinyin": "",
+      "category": "american alligator, alligator mississipiensis"
+    },
+    {
+      "english": "american chameleon, anole, anolis carolinensis",
+      "chinese": "",
+      "pinyin": "",
+      "category": "american chameleon, anole, anolis carolinensis"
+    },
+    {
+      "english": "american coot, marsh hen, mud hen, water hen, fulica americana",
+      "chinese": "",
+      "pinyin": "",
+      "category": "american coot, marsh hen, mud hen, water hen, fulica americana"
+    },
+    {
+      "english": "american egret, great white heron, egretta albus",
+      "chinese": "",
+      "pinyin": "",
+      "category": "american egret, great white heron, egretta albus"
+    },
+    {
+      "english": "american lobster, northern lobster, maine lobster, homarus americanus",
+      "chinese": "",
+      "pinyin": "",
+      "category": "american lobster, northern lobster, maine lobster, homarus americanus"
+    },
+    {
+      "english": "american staffordshire terrier, staffordshire terrier, american pit bull terrier, pit bull terrier",
+      "chinese": "",
+      "pinyin": "",
+      "category": "american staffordshire terrier, staffordshire terrier, american pit bull terrier, pit bull terrier"
+    },
+    {
+      "english": "anemone fish",
+      "chinese": "",
+      "pinyin": "",
+      "category": "anemone fish"
+    },
+    {
+      "english": "ant, emmet, pismire",
+      "chinese": "",
+      "pinyin": "",
+      "category": "ant, emmet, pismire"
+    },
+    {
+      "english": "ashcan, trash can, garbage can, wastebin, ash bin, ash-bin, ashbin, dustbin, trash barrel, trash bin",
+      "chinese": "",
+      "pinyin": "",
+      "category": "ashcan, trash can, garbage can, wastebin, ash bin, ash-bin, ashbin, dustbin, trash barrel, trash bin"
+    },
+    {
+      "english": "band aid",
+      "chinese": "",
+      "pinyin": "",
+      "category": "band aid"
+    },
+    {
+      "english": "barn spider, araneus cavaticus",
+      "chinese": "",
+      "pinyin": "",
+      "category": "barn spider, araneus cavaticus"
+    },
+    {
+      "english": "barrel, cask",
+      "chinese": "",
+      "pinyin": "",
+      "category": "barrel, cask"
+    },
+    {
+      "english": "baseball",
+      "chinese": "",
+      "pinyin": "",
+      "category": "baseball"
+    },
+    {
+      "english": "bathing cap, swimming cap",
+      "chinese": "",
+      "pinyin": "",
+      "category": "bathing cap, swimming cap"
+    },
+    {
+      "english": "beach wagon, station wagon, wagon, estate car, beach waggon, station waggon, waggon",
+      "chinese": "",
+      "pinyin": "",
+      "category": "beach wagon, station wagon, wagon, estate car, beach waggon, station waggon, waggon"
+    },
+    {
+      "english": "bearskin, busby, shako",
+      "chinese": "",
+      "pinyin": "",
+      "category": "bearskin, busby, shako"
+    },
+    {
+      "english": "bee eater",
+      "chinese": "",
+      "pinyin": "",
+      "category": "bee eater"
+    },
+    {
+      "english": "bell cote, bell cot",
+      "chinese": "",
+      "pinyin": "",
+      "category": "bell cote, bell cot"
+    },
+    {
+      "english": "bighorn, bighorn sheep, cimarron, rocky mountain bighorn, rocky mountain sheep, ovis canadensis",
+      "chinese": "",
+      "pinyin": "",
+      "category": "bighorn, bighorn sheep, cimarron, rocky mountain bighorn, rocky mountain sheep, ovis canadensis"
+    },
+    {
+      "english": "binder, ring-binder",
+      "chinese": "",
+      "pinyin": "",
+      "category": "binder, ring-binder"
+    },
+    {
+      "english": "black and gold garden spider, argiope aurantia",
+      "chinese": "",
+      "pinyin": "",
+      "category": "black and gold garden spider, argiope aurantia"
+    },
+    {
+      "english": "black grouse",
+      "chinese": "",
+      "pinyin": "",
+      "category": "black grouse"
+    },
+    {
+      "english": "black swan, cygnus atratus",
+      "chinese": "",
+      "pinyin": "",
+      "category": "black swan, cygnus atratus"
+    },
+    {
+      "english": "black-and-tan coonhound",
+      "chinese": "",
+      "pinyin": "",
+      "category": "black-and-tan coonhound"
+    },
+    {
+      "english": "blenheim spaniel",
+      "chinese": "",
+      "pinyin": "",
+      "category": "blenheim spaniel"
+    },
+    {
+      "english": "bluetick",
+      "chinese": "",
+      "pinyin": "",
+      "category": "bluetick"
+    },
+    {
+      "english": "border terrier",
+      "chinese": "",
+      "pinyin": "",
+      "category": "border terrier"
+    },
+    {
+      "english": "bottlecap",
+      "chinese": "",
+      "pinyin": "",
+      "category": "bottlecap"
+    },
+    {
+      "english": "bow",
+      "chinese": "",
+      "pinyin": "",
+      "category": "bow"
+    },
+    {
+      "english": "brabancon griffon",
+      "chinese": "",
+      "pinyin": "",
+      "category": "brabancon griffon"
+    },
+    {
+      "english": "brass, memorial tablet, plaque",
+      "chinese": "",
+      "pinyin": "",
+      "category": "brass, memorial tablet, plaque"
+    },
+    {
+      "english": "buckle",
+      "chinese": "",
+      "pinyin": "",
+      "category": "buckle"
+    },
+    {
+      "english": "bull mastiff",
+      "chinese": "",
+      "pinyin": "",
+      "category": "bull mastiff"
+    },
+    {
+      "english": "bullet train, bullet",
+      "chinese": "",
+      "pinyin": "",
+      "category": "bullet train, bullet"
+    },
+    {
+      "english": "bullfrog, rana catesbeiana",
+      "chinese": "",
+      "pinyin": "",
+      "category": "bullfrog, rana catesbeiana"
+    },
+    {
+      "english": "cabbage butterfly",
+      "chinese": "",
+      "pinyin": "",
+      "category": "cabbage butterfly"
+    },
+    {
+      "english": "capuchin, ringtail, cebus capucinus",
+      "chinese": "",
+      "pinyin": "",
+      "category": "capuchin, ringtail, cebus capucinus"
+    },
+    {
+      "english": "cardigan, cardigan welsh corgi",
+      "chinese": "",
+      "pinyin": "",
+      "category": "cardigan, cardigan welsh corgi"
+    },
+    {
+      "english": "cash machine, cash dispenser, automated teller machine, automatic teller machine, automated teller, automatic teller, atm",
+      "chinese": "",
+      "pinyin": "",
+      "category": "cash machine, cash dispenser, automated teller machine, automatic teller machine, automated teller, automatic teller, atm"
+    },
+    {
+      "english": "cassette",
+      "chinese": "",
+      "pinyin": "",
+      "category": "cassette"
+    },
+    {
+      "english": "chain",
+      "chinese": "",
+      "pinyin": "",
+      "category": "chain"
+    },
+    {
+      "english": "chain mail, ring mail, mail, chain armor, chain armour, ring armor, ring armour",
+      "chinese": "",
+      "pinyin": "",
+      "category": "chain mail, ring mail, mail, chain armor, chain armour, ring armor, ring armour"
+    },
+    {
+      "english": "chainlink fence",
+      "chinese": "",
+      "pinyin": "",
+      "category": "chainlink fence"
+    },
+    {
+      "english": "chest",
+      "chinese": "",
+      "pinyin": "",
+      "category": "chest"
+    },
+    {
+      "english": "cliff dwelling",
+      "chinese": "",
+      "pinyin": "",
+      "category": "cliff dwelling"
+    },
+    {
+      "english": "clog, geta, patten, sabot",
+      "chinese": "",
+      "pinyin": "",
+      "category": "clog, geta, patten, sabot"
+    },
+    {
+      "english": "cock",
+      "chinese": "",
+      "pinyin": "",
+      "category": "cock"
+    },
+    {
+      "english": "cocker spaniel, english cocker spaniel, cocker",
+      "chinese": "",
+      "pinyin": "",
+      "category": "cocker spaniel, english cocker spaniel, cocker"
+    },
+    {
+      "english": "coffeepot",
+      "chinese": "",
+      "pinyin": "",
+      "category": "coffeepot"
+    },
+    {
+      "english": "collie",
+      "chinese": "",
+      "pinyin": "",
+      "category": "collie"
+    },
+    {
+      "english": "colobus, colobus monkey",
+      "chinese": "",
+      "pinyin": "",
+      "category": "colobus, colobus monkey"
+    },
+    {
+      "english": "coral reef",
+      "chinese": "",
+      "pinyin": "",
+      "category": "coral reef"
+    },
+    {
+      "english": "corn",
+      "chinese": "",
+      "pinyin": "",
+      "category": "corn"
+    },
+    {
+      "english": "cowboy boot",
+      "chinese": "",
+      "pinyin": "",
+      "category": "cowboy boot"
+    },
+    {
+      "english": "crib, cot",
+      "chinese": "",
+      "pinyin": "",
+      "category": "crib, cot"
+    },
+    {
+      "english": "desk",
+      "chinese": "",
+      "pinyin": "",
+      "category": "desk"
+    },
+    {
+      "english": "dial telephone, dial phone",
+      "chinese": "",
+      "pinyin": "",
+      "category": "dial telephone, dial phone"
+    },
+    {
+      "english": "diamondback, diamondback rattlesnake, crotalus adamanteus",
+      "chinese": "",
+      "pinyin": "",
+      "category": "diamondback, diamondback rattlesnake, crotalus adamanteus"
+    },
+    {
+      "english": "doberman, doberman pinscher",
+      "chinese": "",
+      "pinyin": "",
+      "category": "doberman, doberman pinscher"
+    },
+    {
+      "english": "dome",
+      "chinese": "",
+      "pinyin": "",
+      "category": "dome"
+    },
+    {
+      "english": "dragonfly, darning needle, devil's darning needle, sewing needle, snake feeder, snake doctor, mosquito hawk, skeeter hawk",
+      "chinese": "",
+      "pinyin": "",
+      "category": "dragonfly, darning needle, devil's darning needle, sewing needle, snake feeder, snake doctor, mosquito hawk, skeeter hawk"
+    },
+    {
+      "english": "drake",
+      "chinese": "",
+      "pinyin": "",
+      "category": "drake"
+    },
+    {
+      "english": "earthstar",
+      "chinese": "",
+      "pinyin": "",
+      "category": "earthstar"
+    },
+    {
+      "english": "eel",
+      "chinese": "",
+      "pinyin": "",
+      "category": "eel"
+    },
+    {
+      "english": "eft",
+      "chinese": "",
+      "pinyin": "",
+      "category": "eft"
+    },
+    {
+      "english": "electric fan, blower",
+      "chinese": "",
+      "pinyin": "",
+      "category": "electric fan, blower"
+    },
+    {
+      "english": "electric guitar",
+      "chinese": "",
+      "pinyin": "",
+      "category": "electric guitar"
+    },
+    {
+      "english": "electric ray, crampfish, numbfish, torpedo",
+      "chinese": "",
+      "pinyin": "",
+      "category": "electric ray, crampfish, numbfish, torpedo"
+    },
+    {
+      "english": "english foxhound",
+      "chinese": "",
+      "pinyin": "",
+      "category": "english foxhound"
+    },
+    {
+      "english": "english setter",
+      "chinese": "",
+      "pinyin": "",
+      "category": "english setter"
+    },
+    {
+      "english": "eskimo dog, husky",
+      "chinese": "",
+      "pinyin": "",
+      "category": "eskimo dog, husky"
+    },
+    {
+      "english": "espresso maker",
+      "chinese": "",
+      "pinyin": "",
+      "category": "espresso maker"
+    },
+    {
+      "english": "european fire salamander, salamandra salamandra",
+      "chinese": "",
+      "pinyin": "",
+      "category": "european fire salamander, salamandra salamandra"
+    },
+    {
+      "english": "fire engine, fire truck",
+      "chinese": "",
+      "pinyin": "",
+      "category": "fire engine, fire truck"
+    },
+    {
+      "english": "fly",
+      "chinese": "",
+      "pinyin": "",
+      "category": "fly"
+    },
+    {
+      "english": "fountain",
+      "chinese": "",
+      "pinyin": "",
+      "category": "fountain"
+    },
+    {
+      "english": "french bulldog",
+      "chinese": "",
+      "pinyin": "",
+      "category": "french bulldog"
+    },
+    {
+      "english": "french horn, horn",
+      "chinese": "",
+      "pinyin": "",
+      "category": "french horn, horn"
+    },
+    {
+      "english": "frilled lizard, chlamydosaurus kingi",
+      "chinese": "",
+      "pinyin": "",
+      "category": "frilled lizard, chlamydosaurus kingi"
+    },
+    {
+      "english": "garden spider, aranea diademata",
+      "chinese": "",
+      "pinyin": "",
+      "category": "garden spider, aranea diademata"
+    },
+    {
+      "english": "gasmask, respirator, gas helmet",
+      "chinese": "",
+      "pinyin": "",
+      "category": "gasmask, respirator, gas helmet"
+    },
+    {
+      "english": "german short-haired pointer",
+      "chinese": "",
+      "pinyin": "",
+      "category": "german short-haired pointer"
+    },
+    {
+      "english": "giant schnauzer",
+      "chinese": "",
+      "pinyin": "",
+      "category": "giant schnauzer"
+    },
+    {
+      "english": "goose",
+      "chinese": "",
+      "pinyin": "",
+      "category": "goose"
+    },
+    {
+      "english": "great dane",
+      "chinese": "",
+      "pinyin": "",
+      "category": "great dane"
+    },
+    {
+      "english": "great grey owl, great gray owl, strix nebulosa",
+      "chinese": "",
+      "pinyin": "",
+      "category": "great grey owl, great gray owl, strix nebulosa"
+    },
+    {
+      "english": "great white shark, white shark, man-eater, man-eating shark, carcharodon carcharias",
+      "chinese": "",
+      "pinyin": "",
+      "category": "great white shark, white shark, man-eater, man-eating shark, carcharodon carcharias"
+    },
+    {
+      "english": "green lizard, lacerta viridis",
+      "chinese": "",
+      "pinyin": "",
+      "category": "green lizard, lacerta viridis"
+    },
+    {
+      "english": "green snake, grass snake",
+      "chinese": "",
+      "pinyin": "",
+      "category": "green snake, grass snake"
+    },
+    {
+      "english": "grey whale, gray whale, devilfish, eschrichtius gibbosus, eschrichtius robustus",
+      "chinese": "",
+      "pinyin": "",
+      "category": "grey whale, gray whale, devilfish, eschrichtius gibbosus, eschrichtius robustus"
+    },
+    {
+      "english": "hair slide",
+      "chinese": "",
+      "pinyin": "",
+      "category": "hair slide"
+    },
+    {
+      "english": "half track",
+      "chinese": "",
+      "pinyin": "",
+      "category": "half track"
+    },
+    {
+      "english": "harp",
+      "chinese": "",
+      "pinyin": "",
+      "category": "harp"
+    },
+    {
+      "english": "hen",
+      "chinese": "",
+      "pinyin": "",
+      "category": "hen"
+    },
+    {
+      "english": "hog, pig, grunter, squealer, sus scrofa",
+      "chinese": "",
+      "pinyin": "",
+      "category": "hog, pig, grunter, squealer, sus scrofa"
+    },
+    {
+      "english": "hognose snake, puff adder, sand viper",
+      "chinese": "",
+      "pinyin": "",
+      "category": "hognose snake, puff adder, sand viper"
+    },
+    {
+      "english": "hoopskirt, crinoline",
+      "chinese": "",
+      "pinyin": "",
+      "category": "hoopskirt, crinoline"
+    },
+    {
+      "english": "horned viper, cerastes, sand viper, horned asp, cerastes cornutus",
+      "chinese": "",
+      "pinyin": "",
+      "category": "horned viper, cerastes, sand viper, horned asp, cerastes cornutus"
+    },
+    {
+      "english": "ipod",
+      "chinese": "",
+      "pinyin": "",
+      "category": "ipod"
+    },
+    {
+      "english": "ibex, capra ibex",
+      "chinese": "",
+      "pinyin": "",
+      "category": "ibex, capra ibex"
+    },
+    {
+      "english": "ice cream, icecream",
+      "chinese": "",
+      "pinyin": "",
+      "category": "ice cream, icecream"
+    },
+    {
+      "english": "indian cobra, naja naja",
+      "chinese": "",
+      "pinyin": "",
+      "category": "indian cobra, naja naja"
+    },
+    {
+      "english": "irish setter, red setter",
+      "chinese": "",
+      "pinyin": "",
+      "category": "irish setter, red setter"
+    },
+    {
+      "english": "irish terrier",
+      "chinese": "",
+      "pinyin": "",
+      "category": "irish terrier"
+    },
+    {
+      "english": "irish wolfhound",
+      "chinese": "",
+      "pinyin": "",
+      "category": "irish wolfhound"
+    },
+    {
+      "english": "iron, smoothing iron",
+      "chinese": "",
+      "pinyin": "",
+      "category": "iron, smoothing iron"
+    },
+    {
+      "english": "jean, blue jean, denim",
+      "chinese": "",
+      "pinyin": "",
+      "category": "jean, blue jean, denim"
+    },
+    {
+      "english": "jinrikisha, ricksha, rickshaw",
+      "chinese": "",
+      "pinyin": "",
+      "category": "jinrikisha, ricksha, rickshaw"
+    },
+    {
+      "english": "kelpie",
+      "chinese": "",
+      "pinyin": "",
+      "category": "kelpie"
+    },
+    {
+      "english": "king crab, alaska crab, alaskan king crab, alaska king crab, paralithodes camtschatica",
+      "chinese": "",
+      "pinyin": "",
+      "category": "king crab, alaska crab, alaskan king crab, alaska king crab, paralithodes camtschatica"
+    },
+    {
+      "english": "komodo dragon, komodo lizard, dragon lizard, giant lizard, varanus komodoensis",
+      "chinese": "",
+      "pinyin": "",
+      "category": "komodo dragon, komodo lizard, dragon lizard, giant lizard, varanus komodoensis"
+    },
+    {
+      "english": "leonberg",
+      "chinese": "",
+      "pinyin": "",
+      "category": "leonberg"
+    },
+    {
+      "english": "leopard, panthera pardus",
+      "chinese": "",
+      "pinyin": "",
+      "category": "leopard, panthera pardus"
+    },
+    {
+      "english": "lesser panda, red panda, panda, bear cat, cat bear, ailurus fulgens",
+      "chinese": "",
+      "pinyin": "",
+      "category": "lesser panda, red panda, panda, bear cat, cat bear, ailurus fulgens"
+    },
+    {
+      "english": "letter opener, paper knife, paperknife",
+      "chinese": "",
+      "pinyin": "",
+      "category": "letter opener, paper knife, paperknife"
+    },
+    {
+      "english": "lion, king of beasts, panthera leo",
+      "chinese": "",
+      "pinyin": "",
+      "category": "lion, king of beasts, panthera leo"
+    },
+    {
+      "english": "loafer",
+      "chinese": "",
+      "pinyin": "",
+      "category": "loafer"
+    },
+    {
+      "english": "long-horned beetle, longicorn, longicorn beetle",
+      "chinese": "",
+      "pinyin": "",
+      "category": "long-horned beetle, longicorn, longicorn beetle"
+    },
+    {
+      "english": "mailbag, postbag",
+      "chinese": "",
+      "pinyin": "",
+      "category": "mailbag, postbag"
+    },
+    {
+      "english": "maillot",
+      "chinese": "",
+      "pinyin": "",
+      "category": "maillot"
+    },
+    {
+      "english": "maillot, tank suit",
+      "chinese": "",
+      "pinyin": "",
+      "category": "maillot, tank suit"
+    },
+    {
+      "english": "mask",
+      "chinese": "",
+      "pinyin": "",
+      "category": "mask"
+    },
+    {
+      "english": "miniature pinscher",
+      "chinese": "",
+      "pinyin": "",
+      "category": "miniature pinscher"
+    },
+    {
+      "english": "miniature schnauzer",
+      "chinese": "",
+      "pinyin": "",
+      "category": "miniature schnauzer"
+    },
+    {
+      "english": "missile",
+      "chinese": "",
+      "pinyin": "",
+      "category": "missile"
+    },
+    {
+      "english": "mortar",
+      "chinese": "",
+      "pinyin": "",
+      "category": "mortar"
+    },
+    {
+      "english": "mountain bike, all-terrain bike, off-roader",
+      "chinese": "",
+      "pinyin": "",
+      "category": "mountain bike, all-terrain bike, off-roader"
+    },
+    {
+      "english": "otter",
+      "chinese": "",
+      "pinyin": "",
+      "category": "otter"
+    },
+    {
+      "english": "ox",
+      "chinese": "",
+      "pinyin": "",
+      "category": "ox"
+    },
+    {
+      "english": "oxcart",
+      "chinese": "",
+      "pinyin": "",
+      "category": "oxcart"
+    },
+    {
+      "english": "pajama, pyjama, pj's, jammies",
+      "chinese": "",
+      "pinyin": "",
+      "category": "pajama, pyjama, pj's, jammies"
+    },
+    {
+      "english": "panpipe, pandean pipe, syrinx",
+      "chinese": "",
+      "pinyin": "",
+      "category": "panpipe, pandean pipe, syrinx"
+    },
+    {
+      "english": "pay-phone, pay-station",
+      "chinese": "",
+      "pinyin": "",
+      "category": "pay-phone, pay-station"
+    },
+    {
+      "english": "plane, carpenter's plane, woodworking plane",
+      "chinese": "",
+      "pinyin": "",
+      "category": "plane, carpenter's plane, woodworking plane"
+    },
+    {
+      "english": "plate rack",
+      "chinese": "",
+      "pinyin": "",
+      "category": "plate rack"
+    },
+    {
+      "english": "platypus, duckbill, duckbilled platypus, duck-billed platypus, ornithorhynchus anatinus",
+      "chinese": "",
+      "pinyin": "",
+      "category": "platypus, duckbill, duckbilled platypus, duck-billed platypus, ornithorhynchus anatinus"
+    },
+    {
+      "english": "plow, plough",
+      "chinese": "",
+      "pinyin": "",
+      "category": "plow, plough"
+    },
+    {
+      "english": "pole",
+      "chinese": "",
+      "pinyin": "",
+      "category": "pole"
+    },
+    {
+      "english": "polecat, fitch, foulmart, foumart, mustela putorius",
+      "chinese": "",
+      "pinyin": "",
+      "category": "polecat, fitch, foulmart, foumart, mustela putorius"
+    },
+    {
+      "english": "pot, flowerpot",
+      "chinese": "",
+      "pinyin": "",
+      "category": "pot, flowerpot"
+    },
+    {
+      "english": "radio, wireless",
+      "chinese": "",
+      "pinyin": "",
+      "category": "radio, wireless"
+    },
+    {
+      "english": "ram, tup",
+      "chinese": "",
+      "pinyin": "",
+      "category": "ram, tup"
+    },
+    {
+      "english": "red fox, vulpes vulpes",
+      "chinese": "",
+      "pinyin": "",
+      "category": "red fox, vulpes vulpes"
+    },
+    {
+      "english": "red wolf, maned wolf, canis rufus, canis niger",
+      "chinese": "",
+      "pinyin": "",
+      "category": "red wolf, maned wolf, canis rufus, canis niger"
+    },
+    {
+      "english": "redshank, tringa totanus",
+      "chinese": "",
+      "pinyin": "",
+      "category": "redshank, tringa totanus"
+    },
+    {
+      "english": "rifle",
+      "chinese": "",
+      "pinyin": "",
+      "category": "rifle"
+    },
+    {
+      "english": "robin, american robin, turdus migratorius",
+      "chinese": "",
+      "pinyin": "",
+      "category": "robin, american robin, turdus migratorius"
+    },
+    {
+      "english": "rock crab, cancer irroratus",
+      "chinese": "",
+      "pinyin": "",
+      "category": "rock crab, cancer irroratus"
+    },
+    {
+      "english": "safe",
+      "chinese": "",
+      "pinyin": "",
+      "category": "safe"
+    },
+    {
+      "english": "saint bernard, st bernard",
+      "chinese": "",
+      "pinyin": "",
+      "category": "saint bernard, st bernard"
+    },
+    {
+      "english": "sandbar, sand bar",
+      "chinese": "",
+      "pinyin": "",
+      "category": "sandbar, sand bar"
+    },
+    {
+      "english": "scale, weighing machine",
+      "chinese": "",
+      "pinyin": "",
+      "category": "scale, weighing machine"
+    },
+    {
+      "english": "screw",
+      "chinese": "",
+      "pinyin": "",
+      "category": "screw"
+    },
+    {
+      "english": "sea anemone, anemone",
+      "chinese": "",
+      "pinyin": "",
+      "category": "sea anemone, anemone"
+    },
+    {
+      "english": "sea lion",
+      "chinese": "",
+      "pinyin": "",
+      "category": "sea lion"
+    },
+    {
+      "english": "sea snake",
+      "chinese": "",
+      "pinyin": "",
+      "category": "sea snake"
+    },
+    {
+      "english": "sea urchin",
+      "chinese": "",
+      "pinyin": "",
+      "category": "sea urchin"
+    },
+    {
+      "english": "shih-tzu",
+      "chinese": "",
+      "pinyin": "",
+      "category": "shih-tzu"
+    },
+    {
+      "english": "shopping basket",
+      "chinese": "",
+      "pinyin": "",
+      "category": "shopping basket"
+    },
+    {
+      "english": "shower cap",
+      "chinese": "",
+      "pinyin": "",
+      "category": "shower cap"
+    },
+    {
+      "english": "silky terrier, sydney silky",
+      "chinese": "",
+      "pinyin": "",
+      "category": "silky terrier, sydney silky"
+    },
+    {
+      "english": "slug",
+      "chinese": "",
+      "pinyin": "",
+      "category": "slug"
+    },
+    {
+      "english": "sorrel",
+      "chinese": "",
+      "pinyin": "",
+      "category": "sorrel"
+    },
+    {
+      "english": "speedboat",
+      "chinese": "",
+      "pinyin": "",
+      "category": "speedboat"
+    },
+    {
+      "english": "spider monkey, ateles geoffroyi",
+      "chinese": "",
+      "pinyin": "",
+      "category": "spider monkey, ateles geoffroyi"
+    },
+    {
+      "english": "squirrel monkey, saimiri sciureus",
+      "chinese": "",
+      "pinyin": "",
+      "category": "squirrel monkey, saimiri sciureus"
+    },
+    {
+      "english": "standard schnauzer",
+      "chinese": "",
+      "pinyin": "",
+      "category": "standard schnauzer"
+    },
+    {
+      "english": "steel arch bridge",
+      "chinese": "",
+      "pinyin": "",
+      "category": "steel arch bridge"
+    },
+    {
+      "english": "stole",
+      "chinese": "",
+      "pinyin": "",
+      "category": "stole"
+    },
+    {
+      "english": "street sign",
+      "chinese": "",
+      "pinyin": "",
+      "category": "street sign"
+    },
+    {
+      "english": "sunglass",
+      "chinese": "",
+      "pinyin": "",
+      "category": "sunglass"
+    },
+    {
+      "english": "theater curtain, theatre curtain",
+      "chinese": "",
+      "pinyin": "",
+      "category": "theater curtain, theatre curtain"
+    },
+    {
+      "english": "thunder snake, worm snake, carphophis amoenus",
+      "chinese": "",
+      "pinyin": "",
+      "category": "thunder snake, worm snake, carphophis amoenus"
+    },
+    {
+      "english": "tibetan terrier, chrysanthemum dog",
+      "chinese": "",
+      "pinyin": "",
+      "category": "tibetan terrier, chrysanthemum dog"
+    },
+    {
+      "english": "tick",
+      "chinese": "",
+      "pinyin": "",
+      "category": "tick"
+    },
+    {
+      "english": "tiger cat",
+      "chinese": "",
+      "pinyin": "",
+      "category": "tiger cat"
+    },
+    {
+      "english": "tiger shark, galeocerdo cuvieri",
+      "chinese": "",
+      "pinyin": "",
+      "category": "tiger shark, galeocerdo cuvieri"
+    },
+    {
+      "english": "tiger, panthera tigris",
+      "chinese": "",
+      "pinyin": "",
+      "category": "tiger, panthera tigris"
+    },
+    {
+      "english": "timber wolf, grey wolf, gray wolf, canis lupus",
+      "chinese": "",
+      "pinyin": "",
+      "category": "timber wolf, grey wolf, gray wolf, canis lupus"
+    },
+    {
+      "english": "toilet seat",
+      "chinese": "",
+      "pinyin": "",
+      "category": "toilet seat"
+    },
+    {
+      "english": "toy terrier",
+      "chinese": "",
+      "pinyin": "",
+      "category": "toy terrier"
+    },
+    {
+      "english": "toyshop",
+      "chinese": "",
+      "pinyin": "",
+      "category": "toyshop"
+    },
+    {
+      "english": "tractor",
+      "chinese": "",
+      "pinyin": "",
+      "category": "tractor"
+    },
+    {
+      "english": "trailer truck, tractor trailer, trucking rig, rig, articulated lorry, semi",
+      "chinese": "",
+      "pinyin": "",
+      "category": "trailer truck, tractor trailer, trucking rig, rig, articulated lorry, semi"
+    },
+    {
+      "english": "walker hound, walker foxhound",
+      "chinese": "",
+      "pinyin": "",
+      "category": "walker hound, walker foxhound"
+    },
+    {
+      "english": "warplane, military plane",
+      "chinese": "",
+      "pinyin": "",
+      "category": "warplane, military plane"
+    },
+    {
+      "english": "water bottle",
+      "chinese": "",
+      "pinyin": "",
+      "category": "water bottle"
+    },
+    {
+      "english": "water buffalo, water ox, asiatic buffalo, bubalus bubalis",
+      "chinese": "",
+      "pinyin": "",
+      "category": "water buffalo, water ox, asiatic buffalo, bubalus bubalis"
+    },
+    {
+      "english": "water jug",
+      "chinese": "",
+      "pinyin": "",
+      "category": "water jug"
+    },
+    {
+      "english": "water ouzel, dipper",
+      "chinese": "",
+      "pinyin": "",
+      "category": "water ouzel, dipper"
+    },
+    {
+      "english": "water snake",
+      "chinese": "",
+      "pinyin": "",
+      "category": "water snake"
+    },
+    {
+      "english": "whiptail, whiptail lizard",
+      "chinese": "",
+      "pinyin": "",
+      "category": "whiptail, whiptail lizard"
+    },
+    {
+      "english": "white stork, ciconia ciconia",
+      "chinese": "",
+      "pinyin": "",
+      "category": "white stork, ciconia ciconia"
+    },
+    {
+      "english": "window screen",
+      "chinese": "",
+      "pinyin": "",
+      "category": "window screen"
+    },
+    {
+      "english": "wire-haired fox terrier",
+      "chinese": "",
+      "pinyin": "",
+      "category": "wire-haired fox terrier"
+    },
+    {
+      "english": "wreck",
+      "chinese": "",
+      "pinyin": "",
+      "category": "wreck"
+    },
+    {
+      "english": "yellow lady's slipper, yellow lady-slipper, cypripedium calceolus, cypripedium parviflorum",
+      "chinese": "",
+      "pinyin": "",
+      "category": "yellow lady's slipper, yellow lady-slipper, cypripedium calceolus, cypripedium parviflorum"
+    }
+  ]
+}

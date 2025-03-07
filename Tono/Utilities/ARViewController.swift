@@ -558,7 +558,7 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
         utterance.voice = AVSpeechSynthesisVoice(language: "zh-CN")
         
         // Adjust speech rate (0.0 to 1.0, default is 0.5)
-        utterance.rate = 0.0
+        utterance.rate = 0.0  // Slow rate for better clarity
         
         // Adjust pitch (0.5 to 2.0, default is 1.0)
         utterance.pitchMultiplier = 1.0
@@ -571,7 +571,7 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
             speechSynthesizer.stopSpeaking(at: .immediate)
         }
         
-        // Speak the utterance
+        // Speak the text
         speechSynthesizer.speak(utterance)
     }
     
@@ -809,7 +809,10 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
         
         // Crop the image
         if let cgImage = image.cgImage?.cropping(to: cropRect) {
-            return UIImage(cgImage: cgImage)
+            let croppedImage = UIImage(cgImage: cgImage)
+            
+            // Rotate the image 90 degrees clockwise to fix the orientation
+            return croppedImage.rotate90DegreesClockwise()
         }
         
         return nil
@@ -951,5 +954,23 @@ extension UIFont {
     func withTraits(traits: UIFontDescriptor.SymbolicTraits) -> UIFont {
         let descriptor = self.fontDescriptor.withSymbolicTraits(traits)
         return UIFont(descriptor: descriptor!, size: 0)
+    }
+}
+
+extension UIImage {
+    func rotate90DegreesClockwise() -> UIImage? {
+        UIGraphicsBeginImageContext(CGSize(width: self.size.height, height: self.size.width))
+        guard let context = UIGraphicsGetCurrentContext() else { return nil }
+        
+        context.translateBy(x: self.size.height / 2, y: self.size.width / 2)
+        context.rotate(by: .pi / 2)
+        context.translateBy(x: -self.size.height / 2, y: -self.size.width / 2)
+        
+        self.draw(in: CGRect(x: 0, y: 0, width: self.size.height, height: self.size.width))
+        
+        let rotatedImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return rotatedImage
     }
 } 

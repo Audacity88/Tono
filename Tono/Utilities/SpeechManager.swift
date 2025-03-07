@@ -2,6 +2,20 @@ import Foundation
 import AVFoundation
 import SwiftUI
 
+// Speech synthesizer delegate to handle completion
+class SpeechSynthesizerDelegate: NSObject, AVSpeechSynthesizerDelegate {
+    private let completion: () -> Void
+    
+    init(completion: @escaping () -> Void) {
+        self.completion = completion
+        super.init()
+    }
+    
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+        completion()
+    }
+}
+
 // Speech Manager to handle text-to-speech
 class SpeechManager: ObservableObject {
     private let synthesizer = AVSpeechSynthesizer()
@@ -37,10 +51,10 @@ class SpeechManager: ObservableObject {
         
         // Configure for Chinese
         utterance.voice = AVSpeechSynthesisVoice(language: "zh-CN")
-        utterance.rate = 0.4  // Slower rate for better clarity
+        utterance.rate = 0.0  // Slow rate for better clarity
         utterance.pitchMultiplier = 1.0
         utterance.volume = 1.0  // Maximum volume
-        utterance.preUtteranceDelay = 0.2  // Add a small delay before speaking
+        utterance.preUtteranceDelay = 0.1  // Add a small delay before speaking
         
         // Create and retain the delegate
         self.delegate = SpeechSynthesizerDelegate { [weak self] in
@@ -56,41 +70,5 @@ class SpeechManager: ObservableObject {
         // Speak the text
         print("Speaking text: \(text)")
         synthesizer.speak(utterance)
-    }
-}
-
-// Delegate to handle speech completion
-class SpeechSynthesizerDelegate: NSObject, AVSpeechSynthesizerDelegate {
-    private let completion: () -> Void
-    
-    init(completion: @escaping () -> Void) {
-        self.completion = completion
-        super.init()
-    }
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didStart utterance: AVSpeechUtterance) {
-        print("Speech started")
-    }
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        print("Speech finished")
-        completion()
-    }
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
-        print("Speech cancelled")
-        completion()
-    }
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didPause utterance: AVSpeechUtterance) {
-        print("Speech paused")
-    }
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didContinue utterance: AVSpeechUtterance) {
-        print("Speech continued")
-    }
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, willSpeakRangeOfSpeechString characterRange: NSRange, utterance: AVSpeechUtterance) {
-        // This is called when the synthesizer is about to speak a range of characters
     }
 } 

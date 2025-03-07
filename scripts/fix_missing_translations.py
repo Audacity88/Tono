@@ -7,7 +7,7 @@ import openai
 # Set your OpenAI API key from environment variable
 # export OPENAI_API_KEY="your-api-key"
 
-def load_translations(filename="translated_labels.json"):
+def load_translations(filename="missing_translations.json"):
     """Load the translated labels from the JSON file."""
     try:
         with open(filename, 'r', encoding='utf-8') as f:

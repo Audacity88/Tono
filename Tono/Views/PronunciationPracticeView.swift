@@ -7,9 +7,9 @@ struct PronunciationPracticeView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.presentationMode) var presentationMode
     
-    // Fetch objects for pronunciation practice
+    // Fetch objects for pronunciation practice - prioritize newer cards first
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \TaggedObject.lastReviewDate, ascending: true)],
+        sortDescriptors: [NSSortDescriptor(keyPath: \TaggedObject.timestamp, ascending: false)],
         predicate: NSPredicate(format: "reviewCount >= 0"),
         animation: .default)
     private var reviewObjects: FetchedResults<TaggedObject>
@@ -129,7 +129,7 @@ struct PronunciationPracticeView: View {
                     // Practice card
                     VStack(spacing: 20) {
                         if let imageData = practiceObjects[currentIndex].image, let uiImage = UIImage(data: imageData) {
-                            Image(uiImage: uiImage)
+                            Image(uiImage: uiImage.rotate90DegreesClockwise() ?? uiImage)
                                 .resizable()
                                 .scaledToFit()
                                 .frame(height: 150)
@@ -247,7 +247,7 @@ struct PronunciationPracticeView: View {
             return
         }
         
-        // Take up to maxItems objects, prioritizing those that haven't been reviewed recently
+        // Take up to maxItems objects, prioritizing the newest ones
         practiceObjects = Array(objects.prefix(maxItems))
     }
     
