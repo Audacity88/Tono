@@ -1,0 +1,64 @@
+{
+  "objects": [
+    {
+      "english": "apple",
+      "chinese": "苹果",
+      "pinyin": "píngguǒ",
+      "category": "test_sample"
+    },
+    {
+      "english": "computer",
+      "chinese": "电脑",
+      "pinyin": "diànnǎo",
+      "category": "test_sample"
+    },
+    {
+      "english": "keyboard",
+      "chinese": "键盘",
+      "pinyin": "jiànpán",
+      "category": "test_sample"
+    },
+    {
+      "english": "mountain",
+      "chinese": "山",
+      "pinyin": "shān",
+      "category": "test_sample"
+    },
+    {
+      "english": "ocean",
+      "chinese": "海洋",
+      "pinyin": "hǎiyáng",
+      "category": "test_sample"
+    },
+    {
+      "english": "camera",
+      "chinese": "相机",
+      "pinyin": "xiàngjī",
+      "category": "test_sample"
+    },
+    {
+      "english": "bicycle",
+      "chinese": "自行车",
+      "pinyin": "zìxíngchē",
+      "category": "test_sample"
+    },
+    {
+      "english": "umbrella",
+      "chinese": "雨伞",
+      "pinyin": "yǔsǎn",
+      "category": "test_sample"
+    },
+    {
+      "english": "coffee",
+      "chinese": "咖啡",
+      "pinyin": "kāfēi",
+      "category": "test_sample"
+    },
+    {
+      "english": "book",
+      "chinese": "书",
+      "pinyin": "shū",
+      "category": "test_sample"
+    }
+  ]
+}
