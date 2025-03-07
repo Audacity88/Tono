@@ -5,8 +5,28 @@ import Vision
 class MLModelCategoriesExtractor {
     static let shared = MLModelCategoriesExtractor()
     
-    // Get all categories from the Inceptionv3 model
+    // YOLO class labels
+    private let yoloClassLabels = [
+        "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat",
+        "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat",
+        "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack",
+        "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball",
+        "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket",
+        "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple",
+        "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair",
+        "couch", "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote",
+        "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "book",
+        "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"
+    ]
+    
+    // Get all categories from the model
     func extractCategories() -> [String] {
+        // For YOLOv8n, we return the predefined class labels
+        return yoloClassLabels
+    }
+    
+    // Get categories from Inceptionv3 (legacy method)
+    func extractCategoriesFromInceptionv3() -> [String] {
         // First try to find the model in the bundle
         guard let modelURL = Bundle.main.url(forResource: "Inceptionv3", withExtension: "mlmodel") else {
             print("Failed to find model in bundle")
@@ -67,26 +87,8 @@ class MLModelCategoriesExtractor {
     
     // Clean up the label to make it more readable
     private func cleanLabel(_ label: String) -> String {
-        // Remove numbers and underscores
-        var cleanedLabel = label
-        
         // Replace underscores with spaces
-        cleanedLabel = cleanedLabel.replacingOccurrences(of: "_", with: " ")
-        
-        // Remove any leading numbers and dots (e.g., "123. cat" -> "cat")
-        if let range = cleanedLabel.range(of: #"^\d+\.\s*"#, options: .regularExpression) {
-            cleanedLabel = String(cleanedLabel[range.upperBound...])
-        }
-        
-        // Trim whitespace
-        cleanedLabel = cleanedLabel.trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        // Capitalize first letter of each word
-        cleanedLabel = cleanedLabel.split(separator: " ")
-            .map { $0.prefix(1).capitalized + $0.dropFirst() }
-            .joined(separator: " ")
-        
-        return cleanedLabel
+        return label.replacingOccurrences(of: "_", with: " ")
     }
     
     // Save categories to a file

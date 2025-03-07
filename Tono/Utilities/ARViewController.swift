@@ -33,9 +33,11 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
     // Text-to-speech synthesizer
     let speechSynthesizer = AVSpeechSynthesizer()
     
-    // COREML
-    var visionRequests = [VNRequest]()
-    let dispatchQueueML = DispatchQueue(label: "com.tono.dispatchqueueml") // A Serial Queue
+    // YOLO Object Detector
+    let objectDetector = YOLOv8ObjectDetector.shared
+    
+    // A Serial Queue for ML processing
+    let dispatchQueueML = DispatchQueue(label: "com.tono.dispatchqueueml")
     var debugTextView: UITextView!
     
     // Flag to control ML processing
@@ -55,6 +57,9 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
     
     // Track the last detected object to avoid duplicate logging
     private var lastDetectedObject: String = ""
+    
+    // Bounding boxes for detected objects
+    private var boundingBoxes: [(node: SCNNode, view: UIView)] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -167,26 +172,8 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
     }
     
     func setupVisionModel() {
-        do {
-            // Try to load Inceptionv3 model
-            if let model = try? VNCoreMLModel(for: Inceptionv3().model) {
-                // Set up Vision-CoreML Request
-                let classificationRequest = VNCoreMLRequest(model: model, completionHandler: classificationCompleteHandler)
-                classificationRequest.imageCropAndScaleOption = .centerCrop
-                visionRequests = [classificationRequest]
-                print("Loaded Inceptionv3 model")
-            } else if let model = try? VNCoreMLModel(for: MobileNet().model) {
-                // Fallback to MobileNet if Inceptionv3 is not available
-                let classificationRequest = VNCoreMLRequest(model: model, completionHandler: classificationCompleteHandler)
-                classificationRequest.imageCropAndScaleOption = .centerCrop
-                visionRequests = [classificationRequest]
-                print("Loaded MobileNet model")
-            } else {
-                print("Failed to load any CoreML model")
-            }
-        } catch {
-            print("Error setting up Vision model: \(error)")
-        }
+        // No need to set up Vision model here as we're using YOLOv8ObjectDetector
+        print("Using YOLOv8n object detector")
     }
     
     func setupAudioSession() {
@@ -596,81 +583,122 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
         }
     }
     
-    func classificationCompleteHandler(request: VNRequest, error: Error?) {
-        // Catch Errors
-        if error != nil {
-            print("Error: " + (error?.localizedDescription)!)
-            return
-        }
-        guard let observations = request.results else {
-            print("No results")
-            return
-        }
+    func updateCoreML() {
+        // Skip processing if ML is not active
+        guard isMLProcessingActive else { return }
         
-        // Get Classifications
-        let classifications = observations[0...1] // top 2 results
-            .compactMap({ $0 as? VNClassificationObservation })
-            .map({ "\($0.identifier) \(String(format:"- %.2f", $0.confidence))" })
-            .joined(separator: "\n")
+        ///////////////////////////
+        // Get Camera Image as RGB
+        let pixbuff : CVPixelBuffer? = (sceneView.session.currentFrame?.capturedImage)
+        if pixbuff == nil { return }
         
-        
-        DispatchQueue.main.async {
-            // Extract the current object name and confidence
-            var objectName:String = "…"
-            var confidence: Float = 0.0
+        // Use YOLOv8 object detector
+        objectDetector.detectObjects(in: pixbuff!) { [weak self] detections, error in
+            guard let self = self else { return }
             
-            if let firstResult = observations.first as? VNClassificationObservation {
-                let currentObject = firstResult.identifier
-                objectName = currentObject.trimmingCharacters(in: .whitespacesAndNewlines)
-                confidence = firstResult.confidence
-                
-                // Store the confidence for feature points visualization
-                self.currentDetectionConfidence = confidence
-                
-                // Only update if the object has changed
-                if currentObject != self.lastDetectedObject {
-                    print("Detected: \(currentObject) (\(String(format:"%.2f", confidence)))")
-                    self.lastDetectedObject = currentObject
-                    
-                    // Only look up translation when the object changes
-                    self.translateToChinese(objectName)
-                    
-                    // Show feature points if confidence is high enough and object is not already tagged
-                    if confidence > 0.3 && !self.isObjectAlreadyTagged(objectName) {
-                        self.isShowingFeaturePoints = true
-                        // Feature points will be updated in the renderer method
-                    }
-                } else if confidence > 0.3 && !self.isObjectAlreadyTagged(objectName) {
-                    // Keep showing feature points for the same object if it's still detected with high confidence
-                    self.isShowingFeaturePoints = true
-                } else {
-                    // Stop showing new feature points if confidence is low or object is already tagged
-                    self.isShowingFeaturePoints = false
-                }
-            } else {
-                // If no observation, use the classifications string to extract object name
-                objectName = classifications.components(separatedBy: "-")[0]
-                objectName = objectName.components(separatedBy: ",")[0]
-                objectName = objectName.trimmingCharacters(in: .whitespacesAndNewlines)
-                
-                // Only update if the object has changed
-                if objectName != self.lastDetectedObject && objectName != "…" {
-                    print("Detected (fallback): \(objectName)")
-                    self.lastDetectedObject = objectName
-                    
-                    // Only look up translation when the object changes
-                    self.translateToChinese(objectName)
-                }
+            if let error = error {
+                print("Detection error: \(error)")
+                return
             }
             
-            // Display Debug Text on screen
-            var debugText:String = ""
-            debugText += classifications
-            self.debugTextView.text = debugText
+            guard let detections = detections, !detections.isEmpty else {
+                // No detections
+                return
+            }
             
-            // Store the latest prediction (but don't translate again)
-            self.latestPrediction = objectName
+            DispatchQueue.main.async {
+                // Clear previous bounding boxes
+                self.clearBoundingBoxes()
+                
+                // Process the top detection
+                if let topDetection = detections.first {
+                    let objectName = topDetection.label
+                    let confidence = topDetection.confidence
+                    
+                    // Store the confidence for feature points visualization
+                    self.currentDetectionConfidence = confidence
+                    
+                    // Display debug info
+                    var debugText = ""
+                    for detection in detections.prefix(3) {
+                        debugText += "\(detection.label) - \(String(format: "%.2f", detection.confidence))\n"
+                    }
+                    self.debugTextView.text = debugText
+                    
+                    // Only update if the object has changed
+                    if objectName != self.lastDetectedObject {
+                        print("Detected: \(objectName) (\(String(format:"%.2f", confidence)))")
+                        self.lastDetectedObject = objectName
+                        
+                        // Only look up translation when the object changes
+                        self.translateToChinese(objectName)
+                        
+                        // Show feature points if confidence is high enough and object is not already tagged
+                        if confidence > 0.3 && !self.isObjectAlreadyTagged(objectName) {
+                            self.isShowingFeaturePoints = true
+                            // Feature points will be updated in the renderer method
+                        }
+                    } else if confidence > 0.3 && !self.isObjectAlreadyTagged(objectName) {
+                        // Keep showing feature points for the same object if it's still detected with high confidence
+                        self.isShowingFeaturePoints = true
+                    } else {
+                        // Stop showing new feature points if confidence is low or object is already tagged
+                        self.isShowingFeaturePoints = false
+                    }
+                    
+                    // Store the latest prediction
+                    self.latestPrediction = objectName
+                    
+                    // Draw bounding boxes for all detections
+                    for detection in detections {
+                        self.drawBoundingBox(for: detection)
+                    }
+                }
+            }
         }
+    }
+    
+    // Draw a bounding box for a detected object
+    private func drawBoundingBox(for detection: YOLOv8ObjectDetector.DetectedObject) {
+        // Convert normalized coordinates to screen coordinates
+        let viewWidth = sceneView.bounds.width
+        let viewHeight = sceneView.bounds.height
+        
+        let x = detection.boundingBox.minX * viewWidth
+        let y = (1 - detection.boundingBox.maxY) * viewHeight
+        let width = detection.boundingBox.width * viewWidth
+        let height = detection.boundingBox.height * viewHeight
+        
+        // Create a 2D box in the UI
+        let boxView = UIView(frame: CGRect(x: x, y: y, width: width, height: height))
+        boxView.layer.borderColor = UIColor.green.cgColor
+        boxView.layer.borderWidth = 2
+        boxView.backgroundColor = UIColor.clear
+        
+        // Add label
+        let label = UILabel(frame: CGRect(x: 0, y: -20, width: width, height: 20))
+        label.text = "\(detection.label) \(String(format: "%.2f", detection.confidence))"
+        label.textColor = UIColor.green
+        label.font = UIFont.systemFont(ofSize: 12)
+        label.adjustsFontSizeToFitWidth = true
+        boxView.addSubview(label)
+        
+        // Add to view
+        sceneView.addSubview(boxView)
+        
+        // Store reference to remove later
+        let boxNode = SCNNode() // Dummy node to store reference
+        boxNode.name = "boundingBox"
+        // Store the view as a value in our boundingBoxes array instead of using userData
+        boundingBoxes.append((node: boxNode, view: boxView))
+    }
+    
+    // Clear all bounding boxes
+    private func clearBoundingBoxes() {
+        for boxData in boundingBoxes {
+            boxData.view.removeFromSuperview()
+        }
+        boundingBoxes.removeAll()
     }
     
     func translateToChinese(_ englishWord: String) {
@@ -699,29 +727,6 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
         // Update debug text with a more concise format
         DispatchQueue.main.async {
             self.debugTextView.text = "\(self.latestPrediction)\n\(self.latestChineseTranslation) (\(self.latestPinyin))"
-        }
-    }
-    
-    func updateCoreML() {
-        // Skip processing if ML is not active
-        guard isMLProcessingActive else { return }
-        
-        ///////////////////////////
-        // Get Camera Image as RGB
-        let pixbuff : CVPixelBuffer? = (sceneView.session.currentFrame?.capturedImage)
-        if pixbuff == nil { return }
-        let ciImage = CIImage(cvPixelBuffer: pixbuff!)
-        
-        ///////////////////////////
-        // Prepare CoreML/Vision Request
-        let imageRequestHandler = VNImageRequestHandler(ciImage: ciImage, options: [:])
-        
-        ///////////////////////////
-        // Run Image Request
-        do {
-            try imageRequestHandler.perform(self.visionRequests)
-        } catch {
-            print(error)
         }
     }
     

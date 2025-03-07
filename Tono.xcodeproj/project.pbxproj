@@ -39,11 +39,21 @@
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		37B7D1ED2D7B99A9005AACF8 /* Exceptions for "Tono" folder in "Copy Bundle Resources" phase from "Tono" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 37D6B8942D7A045E007C9ABD /* Resources */;
+			membershipExceptions = (
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		37D6B8982D7A045E007C9ABD /* Tono */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				371EAA402D7A226300EAA37B /* Exceptions for "Tono" folder in "Tono" target */,
+				37B7D1ED2D7B99A9005AACF8 /* Exceptions for "Tono" folder in "Copy Bundle Resources" phase from "Tono" target */,
 			);
 			path = Tono;
 			sourceTree = "<group>";
@@ -334,6 +344,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Tono needs camera access to recognize objects for Chinese learning<";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -391,6 +402,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Tono needs camera access to recognize objects for Chinese learning<";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
