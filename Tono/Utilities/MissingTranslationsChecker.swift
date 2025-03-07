@@ -79,7 +79,7 @@ class MissingTranslationsChecker {
 }
 
 // SwiftUI View for checking missing translations
-struct MissingTranslationsView: View {
+struct MissingTranslationsCheckerView: View {
     @State private var missingTranslations: [String] = []
     @State private var isChecking = false
     @State private var fileURL: URL? = nil
@@ -184,8 +184,8 @@ struct MissingTranslationsView: View {
 }
 
 // Preview provider
-struct MissingTranslationsView_Previews: PreviewProvider {
+struct MissingTranslationsCheckerView_Previews: PreviewProvider {
     static var previews: some View {
-        MissingTranslationsView()
+        MissingTranslationsCheckerView()
     }
 } 

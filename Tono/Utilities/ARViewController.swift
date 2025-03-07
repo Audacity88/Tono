@@ -33,8 +33,8 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
     // Text-to-speech synthesizer
     let speechSynthesizer = AVSpeechSynthesizer()
     
-    // YOLO Object Detector
-    let objectDetector = YOLOv8ObjectDetector.shared
+    // Model manager for object detection
+    let modelManager = ModelManager.shared
     
     // A Serial Queue for ML processing
     let dispatchQueueML = DispatchQueue(label: "com.tono.dispatchqueueml")
@@ -84,6 +84,10 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
         // Enable Default Lighting - makes the 3D text a bit poppier.
         sceneView.autoenablesDefaultLighting = true
         
+        // Optimize AR performance
+        sceneView.antialiasingMode = .none // Disable antialiasing to improve performance
+        sceneView.preferredFramesPerSecond = 30 // Limit to 30 FPS to reduce CPU usage
+        
         // Create debug text view
         setupDebugTextView()
         
@@ -123,6 +127,25 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
                                               selector: #selector(handleClearLabelsNotification),
                                               name: NSNotification.Name("ClearARLabels"),
                                               object: nil)
+        
+        // Register for model change notification
+        NotificationCenter.default.addObserver(self,
+                                              selector: #selector(handleModelChanged),
+                                              name: NSNotification.Name("ModelChanged"),
+                                              object: nil)
+    }
+    
+    @objc func handleModelChanged() {
+        // Update the UI to reflect the new model
+        DispatchQueue.main.async {
+            self.debugTextView.text = "Switching to \(self.modelManager.currentModelType.rawValue) model..."
+            
+            // Clear existing bounding boxes
+            self.clearBoundingBoxes()
+            
+            // Clear existing labels
+            self.clearLabels()
+        }
     }
     
     @objc func appWillResignActive() {
@@ -172,8 +195,8 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
     }
     
     func setupVisionModel() {
-        // No need to set up Vision model here as we're using YOLOv8ObjectDetector
-        print("Using YOLOv8n object detector")
+        // No need to set up Vision model here as we're using ModelManager
+        print("Using \(modelManager.currentModelType.rawValue) model")
     }
     
     func setupAudioSession() {
@@ -201,6 +224,10 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
         
         // Enable plane detection
         configuration.planeDetection = [.horizontal, .vertical]
+        
+        // Optimize AR configuration for performance
+        configuration.environmentTexturing = .none // Disable environment texturing
+        configuration.isLightEstimationEnabled = false // Disable light estimation
         
         // Run the view's session
         sceneView.session.run(configuration)
@@ -233,6 +260,18 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
         }
     }
     
+    // Add this method to properly manage ARFrame retention
+    func renderer(_ renderer: SCNSceneRenderer, didRenderScene scene: SCNScene, atTime time: TimeInterval) {
+        // This method is called after each frame is rendered
+        // We can use it to ensure we're not holding onto ARFrames unnecessarily
+        
+        // Clear any references to the current frame after processing
+        DispatchQueue.main.async {
+            // Release any strong references to the current frame
+            self.lastCapturedImage = nil
+        }
+    }
+    
     // MARK: - Feature Points Visualization
     
     func updateFeaturePoints() {
@@ -257,7 +296,7 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
         let points = pointCloud.points
         
         // Limit the number of points to display for performance
-        let maxPoints = min(points.count, 100)
+        let maxPoints = min(points.count, 50) // Reduced from 100 to 50 for better performance
         
         // Add each feature point as a small sphere
         for i in 0..<maxPoints {
@@ -572,13 +611,18 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
         }
         
         // Continuously run CoreML whenever it's ready. (Preventing 'hiccups' in Frame Rate)
-        dispatchQueueML.async {
+        dispatchQueueML.async { [weak self] in
+            guard let self = self else { return }
+            
             // 1. Run Update.
             self.updateCoreML()
             
             // 2. Loop this function only if ML processing is still active
             if self.isMLProcessingActive {
-                self.loopCoreMLUpdate()
+                // Add a small delay to reduce CPU usage and frame retention
+                DispatchQueue.global().asyncAfter(deadline: .now() + 0.1) {
+                    self.loopCoreMLUpdate()
+                }
             }
         }
     }
@@ -587,120 +631,164 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
         // Skip processing if ML is not active
         guard isMLProcessingActive else { return }
         
+        // Check if the current model is ready
+        if !modelManager.isCurrentModelReady() {
+            // Update UI to show that the model is initializing
+            DispatchQueue.main.async {
+                self.debugTextView.text = "Initializing \(self.modelManager.currentModelType.rawValue) model..."
+            }
+            return
+        }
+        
         ///////////////////////////
         // Get Camera Image as RGB
         let pixbuff : CVPixelBuffer? = (sceneView.session.currentFrame?.capturedImage)
         if pixbuff == nil { return }
         
-        // Use YOLOv8 object detector
-        objectDetector.detectObjects(in: pixbuff!) { [weak self] detections, error in
-            guard let self = self else { return }
+        // Create a local copy to avoid holding reference to the ARFrame
+        var localPixelBuffer: CVPixelBuffer? = nil
+        CVPixelBufferCreate(kCFAllocatorDefault,
+                           CVPixelBufferGetWidth(pixbuff!),
+                           CVPixelBufferGetHeight(pixbuff!),
+                           CVPixelBufferGetPixelFormatType(pixbuff!),
+                           nil,
+                           &localPixelBuffer)
+        
+        if let localBuffer = localPixelBuffer {
+            CVPixelBufferLockBaseAddress(pixbuff!, CVPixelBufferLockFlags.readOnly)
+            CVPixelBufferLockBaseAddress(localBuffer, CVPixelBufferLockFlags(rawValue: 0))
             
-            if let error = error {
-                print("Detection error: \(error)")
-                return
-            }
+            // Copy the pixel data
+            let pixelData = CVPixelBufferGetBaseAddress(pixbuff!)
+            let localData = CVPixelBufferGetBaseAddress(localBuffer)
+            let dataSize = CVPixelBufferGetDataSize(pixbuff!)
+            memcpy(localData, pixelData, dataSize)
             
-            guard let detections = detections, !detections.isEmpty else {
-                // No detections
-                return
-            }
+            CVPixelBufferUnlockBaseAddress(localBuffer, CVPixelBufferLockFlags(rawValue: 0))
+            CVPixelBufferUnlockBaseAddress(pixbuff!, CVPixelBufferLockFlags.readOnly)
             
-            DispatchQueue.main.async {
-                // Clear previous bounding boxes
-                self.clearBoundingBoxes()
+            // Use ModelManager to detect objects
+            modelManager.detectObjects(in: localBuffer) { [weak self] detections, error in
+                guard let self = self else { return }
                 
-                // Process the top detection
-                if let topDetection = detections.first {
-                    let objectName = topDetection.label
-                    let confidence = topDetection.confidence
+                if let error = error {
+                    print("Detection error: \(error)")
                     
-                    // Store the confidence for feature points visualization
-                    self.currentDetectionConfidence = confidence
-                    
-                    // Display debug info
-                    var debugText = ""
-                    for detection in detections.prefix(3) {
-                        debugText += "\(detection.label) - \(String(format: "%.2f", detection.confidence))\n"
+                    // Update UI to show the error
+                    DispatchQueue.main.async {
+                        self.debugTextView.text = "Error: \(error.localizedDescription)"
                     }
-                    self.debugTextView.text = debugText
+                    return
+                }
+                
+                // Process the detections
+                self.processDetections(detections)
+            }
+        }
+    }
+    
+    // Process detections from the model
+    func processDetections(_ detections: [DetectedObject]?) {
+        guard let detections = detections, !detections.isEmpty else {
+            return
+        }
+        
+        // Get the top detection
+        if let topDetection = detections.first {
+            // Update the latest prediction
+            let objectName = topDetection.label
+            
+            // Only update if this is a new detection or confidence is higher
+            if objectName != lastDetectedObject || topDetection.confidence > currentDetectionConfidence {
+                lastDetectedObject = objectName
+                currentDetectionConfidence = topDetection.confidence
+                
+                // Get translation for the detected object
+                if let translation = translationManager.getTranslation(for: objectName) {
+                    // Update the latest prediction and translation
+                    latestPrediction = objectName
+                    latestChineseTranslation = translation.chinese
+                    latestPinyin = translation.pinyin
                     
-                    // Only update if the object has changed
-                    if objectName != self.lastDetectedObject {
-                        print("Detected: \(objectName) (\(String(format:"%.2f", confidence)))")
-                        self.lastDetectedObject = objectName
-                        
-                        // Only look up translation when the object changes
-                        self.translateToChinese(objectName)
-                        
-                        // Show feature points if confidence is high enough and object is not already tagged
-                        if confidence > 0.3 && !self.isObjectAlreadyTagged(objectName) {
-                            self.isShowingFeaturePoints = true
-                            // Feature points will be updated in the renderer method
-                        }
-                    } else if confidence > 0.3 && !self.isObjectAlreadyTagged(objectName) {
-                        // Keep showing feature points for the same object if it's still detected with high confidence
-                        self.isShowingFeaturePoints = true
+                    // Update debug text view
+                    DispatchQueue.main.async {
+                        self.debugTextView.text = "\(objectName): \(Int(topDetection.confidence * 100))%\n\(translation.chinese) (\(translation.pinyin))"
+                    }
+                    
+                    // Show feature points if confidence is high enough
+                    isShowingFeaturePoints = topDetection.confidence > 0.5
+                    
+                    // Update bounding boxes if using YOLO
+                    if modelManager.currentModelType == .yolo {
+                        updateBoundingBoxes(for: detections)
                     } else {
-                        // Stop showing new feature points if confidence is low or object is already tagged
-                        self.isShowingFeaturePoints = false
-                    }
-                    
-                    // Store the latest prediction
-                    self.latestPrediction = objectName
-                    
-                    // Draw bounding boxes for all detections
-                    for detection in detections {
-                        self.drawBoundingBox(for: detection)
+                        // Clear bounding boxes if not using YOLO
+                        clearBoundingBoxes()
                     }
                 }
             }
         }
     }
     
-    // Draw a bounding box for a detected object
-    private func drawBoundingBox(for detection: YOLOv8ObjectDetector.DetectedObject) {
-        // Convert normalized coordinates to screen coordinates
-        let viewWidth = sceneView.bounds.width
-        let viewHeight = sceneView.bounds.height
-        
-        let x = detection.boundingBox.minX * viewWidth
-        let y = (1 - detection.boundingBox.maxY) * viewHeight
-        let width = detection.boundingBox.width * viewWidth
-        let height = detection.boundingBox.height * viewHeight
-        
-        // Create a 2D box in the UI
-        let boxView = UIView(frame: CGRect(x: x, y: y, width: width, height: height))
-        boxView.layer.borderColor = UIColor.green.cgColor
-        boxView.layer.borderWidth = 2
-        boxView.backgroundColor = UIColor.clear
-        
-        // Add label
-        let label = UILabel(frame: CGRect(x: 0, y: -20, width: width, height: 20))
-        label.text = "\(detection.label) \(String(format: "%.2f", detection.confidence))"
-        label.textColor = UIColor.green
-        label.font = UIFont.systemFont(ofSize: 12)
-        label.adjustsFontSizeToFitWidth = true
-        boxView.addSubview(label)
-        
-        // Add to view
-        sceneView.addSubview(boxView)
-        
-        // Store reference to remove later
-        let boxNode = SCNNode() // Dummy node to store reference
-        boxNode.name = "boundingBox"
-        // Store the view as a value in our boundingBoxes array instead of using userData
-        boundingBoxes.append((node: boxNode, view: boxView))
+    // Update bounding boxes for detected objects (only for YOLO)
+    func updateBoundingBoxes(for detections: [DetectedObject]?) {
+        DispatchQueue.main.async {
+            // Clear existing bounding boxes
+            self.clearBoundingBoxes()
+            
+            // Only show bounding boxes for YOLO model
+            guard self.modelManager.currentModelType == .yolo, let detections = detections else {
+                return
+            }
+            
+            // Create new bounding boxes
+            for detection in detections {
+                // Only show boxes for objects with confidence above threshold
+                guard detection.confidence > 0.3 else { continue }
+                
+                // Create a bounding box in the AR scene
+                self.addBoundingBox(for: detection)
+            }
+        }
     }
     
     // Clear all bounding boxes
-    private func clearBoundingBoxes() {
-        for boxData in boundingBoxes {
-            boxData.view.removeFromSuperview()
+    func clearBoundingBoxes() {
+        for (node, view) in boundingBoxes {
+            node.removeFromParentNode()
+            view.removeFromSuperview()
         }
         boundingBoxes.removeAll()
     }
     
+    // Clear all labels
+    func clearLabels() {
+        // Remove all placed nodes
+        for node in placedNodes {
+            node.removeFromParentNode()
+        }
+        placedNodes.removeAll()
+        
+        // Reset latest prediction
+        latestPrediction = "…"
+        latestChineseTranslation = "..."
+        latestPinyin = "..."
+        
+        // Reset last detected object
+        lastDetectedObject = ""
+        
+        // Update debug text view
+        DispatchQueue.main.async {
+            self.debugTextView.text = "Labels cleared"
+        }
+    }
+    
+    @objc func handleClearLabelsNotification() {
+        clearLabels()
+        clearBoundingBoxes()
+    }
+    
+    // Translate English word to Chinese
     func translateToChinese(_ englishWord: String) {
         // First try the full phrase
         let fullPhrase = englishWord.lowercased()
@@ -728,6 +816,17 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
         DispatchQueue.main.async {
             self.debugTextView.text = "\(self.latestPrediction)\n\(self.latestChineseTranslation) (\(self.latestPinyin))"
         }
+    }
+    
+    // Check if an object is already tagged in the scene
+    func isObjectAlreadyTagged(_ objectName: String) -> Bool {
+        // Check if any of the placed nodes contain this object name
+        for node in placedNodes {
+            if let nodeName = node.name, nodeName.contains(objectName) {
+                return true
+            }
+        }
+        return false
     }
     
     // MARK: - Object Capture and Storage
@@ -885,72 +984,42 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
         }
     }
     
-    // MARK: - Reset Functionality
-    
-    /// Handle notification to clear labels
-    @objc func handleClearLabelsNotification() {
-        clearAllLabels()
-    }
-    
-    /// Clears all placed label nodes from the AR scene
-    func clearAllLabels() {
-        // Remove all nodes from the scene
-        for node in placedNodes {
-            node.removeFromParentNode()
-        }
+    // Add a bounding box for a detected object
+    func addBoundingBox(for detection: DetectedObject) {
+        // Convert normalized coordinates to screen coordinates
+        let viewWidth = sceneView.bounds.width
+        let viewHeight = sceneView.bounds.height
         
-        // Clear the array
-        placedNodes.removeAll()
+        let boxRect = CGRect(
+            x: detection.boundingBox.minX * viewWidth,
+            y: (1 - detection.boundingBox.maxY) * viewHeight,
+            width: detection.boundingBox.width * viewWidth,
+            height: detection.boundingBox.height * viewHeight
+        )
         
-        // Show confirmation to the user
-        showResetConfirmation()
+        // Create a view for the bounding box
+        let boxView = UIView(frame: boxRect)
+        boxView.layer.borderColor = UIColor.red.cgColor
+        boxView.layer.borderWidth = 2
+        boxView.backgroundColor = UIColor.clear
         
-        print("Cleared all placed labels from AR scene")
-    }
-    
-    /// Shows a confirmation that labels were cleared
-    private func showResetConfirmation() {
-        // Make sure we're on the main thread
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            
-            let confirmationView = UIView(frame: CGRect(x: 0, y: 0, width: 200, height: 50))
-            confirmationView.backgroundColor = UIColor.blue.withAlphaComponent(0.7)
-            confirmationView.layer.cornerRadius = 10
-            confirmationView.center = CGPoint(x: self.view.bounds.midX, y: self.view.bounds.height - 100)
-            
-            let label = UILabel(frame: confirmationView.bounds)
-            label.text = "Labels Cleared!"
-            label.textColor = .white
-            label.textAlignment = .center
-            label.font = UIFont.boldSystemFont(ofSize: 16)
-            
-            confirmationView.addSubview(label)
-            self.view.addSubview(confirmationView)
-            
-            // Animate the confirmation
-            confirmationView.alpha = 0
-            UIView.animate(withDuration: 0.3, animations: {
-                confirmationView.alpha = 1
-            }) { _ in
-                UIView.animate(withDuration: 0.3, delay: 1.0, options: [], animations: {
-                    confirmationView.alpha = 0
-                }) { _ in
-                    confirmationView.removeFromSuperview()
-                }
-            }
-        }
-    }
-    
-    // Check if an object is already tagged in the scene
-    func isObjectAlreadyTagged(_ objectName: String) -> Bool {
-        // Check if any of the placed nodes contain this object name
-        for node in placedNodes {
-            if let nodeName = node.name, nodeName.contains(objectName) {
-                return true
-            }
-        }
-        return false
+        // Add label to the box
+        let label = UILabel(frame: CGRect(x: 0, y: -25, width: boxRect.width, height: 20))
+        label.text = "\(detection.label) (\(Int(detection.confidence * 100))%)"
+        label.textColor = UIColor.red
+        label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.textAlignment = .center
+        label.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        boxView.addSubview(label)
+        
+        // Add the box view to the main view
+        sceneView.addSubview(boxView)
+        
+        // Create a node in the AR scene for the bounding box
+        let boxNode = SCNNode()
+        
+        // Store the box view and node for later removal
+        boundingBoxes.append((node: boxNode, view: boxView))
     }
 }
 

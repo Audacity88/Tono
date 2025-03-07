@@ -27,6 +27,14 @@ class TranslationManager {
     }
     
     private func loadTranslations() {
+        // First load the main translations
+        loadMainTranslations()
+        
+        // Then load YOLO translations
+        loadYOLOTranslations()
+    }
+    
+    private func loadMainTranslations() {
         // First try to load from the bundle
         if let url = Bundle.main.url(forResource: "translations", withExtension: "json") {
             do {
@@ -41,6 +49,27 @@ class TranslationManager {
         } else {
             print("Translations file not found in bundle")
             loadFallbackTranslations()
+        }
+    }
+    
+    private func loadYOLOTranslations() {
+        // Try to load YOLO translations from the bundle
+        if let url = Bundle.main.url(forResource: "yolo_translations", withExtension: "json") {
+            do {
+                let data = try Data(contentsOf: url)
+                let yoloTranslations = try JSONDecoder().decode(TranslationData.self, from: data)
+                
+                // Add YOLO translations to the dictionary
+                for object in yoloTranslations.objects {
+                    translationDictionary[object.english.lowercased()] = (chinese: object.chinese, pinyin: object.pinyin)
+                }
+                
+                print("Successfully loaded YOLO translations")
+            } catch {
+                print("Error loading YOLO translations: \(error)")
+            }
+        } else {
+            print("YOLO translations file not found in bundle")
         }
     }
     
@@ -94,7 +123,8 @@ class TranslationManager {
             "phone": ("手机", "shǒu jī"),
             "person": ("人", "rén"),
             "dog": ("狗", "gǒu"),
-            "cat": ("猫", "māo")
+            "cat": ("猫", "māo"),
+            "mouse": ("鼠标", "shǔbiāo")  // Added mouse translation as a fallback
         ]
     }
     

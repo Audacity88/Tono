@@ -3,6 +3,7 @@ import SwiftUI
 // Settings View
 struct SettingsView: View {
     @State private var showMissingTranslations = false
+    @State private var selectedModel: ModelType = ModelManager.shared.currentModelType
     
     var body: some View {
         NavigationView {
@@ -10,6 +11,24 @@ struct SettingsView: View {
                 Section(header: Text("App Settings")) {
                     Toggle("Enable Notifications", isOn: .constant(true))
                     Toggle("Dark Mode", isOn: .constant(false))
+                }
+                
+                Section(header: Text("Model Selection")) {
+                    Picker("Object Recognition Model", selection: $selectedModel) {
+                        ForEach(ModelType.allCases) { model in
+                            Text(model.rawValue).tag(model)
+                        }
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .onChange(of: selectedModel) { newValue in
+                        ModelManager.shared.currentModelType = newValue
+                    }
+                    
+                    // Description of the selected model
+                    Text(selectedModel.description)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.top, 4)
                 }
                 
                 Section(header: Text("Tools")) {
@@ -38,6 +57,11 @@ struct SettingsView: View {
             .sheet(isPresented: $showMissingTranslations) {
                 MissingTranslationsView()
             }
+            .onAppear {
+                // Update the selected model when the view appears
+                selectedModel = ModelManager.shared.currentModelType
+            }
         }
     }
-} 
+}
+

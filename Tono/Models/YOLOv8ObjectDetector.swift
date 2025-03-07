@@ -28,6 +28,10 @@ class YOLOv8ObjectDetector {
     private var isInitialized = false
     private var initializationError: Error?
     
+    // Throttle detection to reduce CPU usage
+    private var lastDetectionTime: TimeInterval = 0
+    private let detectionThrottleInterval: TimeInterval = 0.2 // 5 detections per second max
+    
     // Completion handler type
     typealias DetectionCompletion = (_ detections: [DetectedObject]?, _ error: Error?) -> Void
     
@@ -114,18 +118,24 @@ class YOLOv8ObjectDetector {
                 return
             }
             
-            // Load the model
+            // Load the model with memory optimization options
             let model: MLModel
             do {
+                // Create model configuration with memory optimization
+                let config = MLModelConfiguration()
+                config.computeUnits = .cpuAndGPU // Use both CPU and GPU for better performance
+                config.allowLowPrecisionAccumulationOnGPU = true // Allow low precision for better performance
+                config.preferredMetalDevice = MTLCreateSystemDefaultDevice() // Use default Metal device
+                
                 if finalModelURL.pathExtension == "mlpackage" {
                     // Compile the model first if it's an .mlpackage
                     print("Compiling model...")
                     let compiledModelURL = try MLModel.compileModel(at: finalModelURL)
                     print("Model compiled successfully at: \(compiledModelURL.path)")
-                    model = try MLModel(contentsOf: compiledModelURL)
+                    model = try MLModel(contentsOf: compiledModelURL, configuration: config)
                 } else {
                     // Load directly if it's already compiled
-                    model = try MLModel(contentsOf: finalModelURL)
+                    model = try MLModel(contentsOf: finalModelURL, configuration: config)
                 }
                 print("Model loaded successfully")
             } catch {
@@ -198,8 +208,11 @@ class YOLOv8ObjectDetector {
         // Sort by confidence (highest first)
         detectedObjects.sort { $0.confidence > $1.confidence }
         
+        // Limit the number of detections to reduce memory usage
+        let limitedDetections = Array(detectedObjects.prefix(5))
+        
         // Return the results
-        currentDetectionCompletion?(detectedObjects, nil)
+        currentDetectionCompletion?(limitedDetections, nil)
         currentDetectionCompletion = nil
     }
     
@@ -217,6 +230,15 @@ class YOLOv8ObjectDetector {
             }
             return
         }
+        
+        // Throttle detection to reduce CPU usage
+        let currentTime = CACurrentMediaTime()
+        if currentTime - lastDetectionTime < detectionThrottleInterval {
+            // Skip this detection to reduce CPU usage
+            completion(nil, nil)
+            return
+        }
+        lastDetectionTime = currentTime
         
         // Store the completion handler
         currentDetectionCompletion = completion
@@ -237,8 +259,13 @@ class YOLOv8ObjectDetector {
         }
     }
     
-    // Get all available class labels
+    // Get all class labels
     func getClassLabels() -> [String] {
         return yoloClassLabels
+    }
+    
+    // Check if the model is initialized and ready to use
+    func isModelInitialized() -> Bool {
+        return isInitialized
     }
 } 
