@@ -23,6 +23,13 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
     // Store placed nodes to prevent duplicates
     var placedNodes: [SCNNode] = []
     
+    // Feature points visualization
+    var featurePointsNode: SCNNode?
+    var isShowingFeaturePoints = false
+    var currentDetectionConfidence: Float = 0.0
+    var lastFeaturePointsUpdateTime: TimeInterval = 0
+    var featurePointsFadingStarted = false
+    
     // Text-to-speech synthesizer
     let speechSynthesizer = AVSpeechSynthesizer()
     
@@ -45,6 +52,9 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
     
     // Last captured image for object detection
     var lastCapturedImage: UIImage?
+    
+    // Track the last detected object to avoid duplicate logging
+    private var lastDetectedObject: String = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -102,6 +112,12 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
                                               selector: #selector(appDidBecomeActive), 
                                               name: UIApplication.didBecomeActiveNotification, 
                                               object: nil)
+        
+        // Register for clear labels notification
+        NotificationCenter.default.addObserver(self,
+                                              selector: #selector(handleClearLabelsNotification),
+                                              name: NSNotification.Name("ClearARLabels"),
+                                              object: nil)
     }
     
     @objc func appWillResignActive() {
@@ -139,10 +155,10 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
     }
     
     func setupDebugTextView() {
-        debugTextView = UITextView(frame: CGRect(x: 20, y: 20, width: 250, height: 100))
-        debugTextView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        debugTextView = UITextView(frame: CGRect(x: 20, y: 20, width: 200, height: 60))
+        debugTextView.backgroundColor = UIColor.black.withAlphaComponent(0.3)
         debugTextView.textColor = UIColor.white
-        debugTextView.font = UIFont.systemFont(ofSize: 12)
+        debugTextView.font = UIFont.systemFont(ofSize: 10)
         debugTextView.isEditable = false
         debugTextView.isSelectable = false
         debugTextView.layer.cornerRadius = 8
@@ -214,7 +230,90 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
     
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
         DispatchQueue.main.async {
-            // Do any desired updates to SceneKit here.
+            // Update feature points visualization if needed
+            if self.isShowingFeaturePoints && self.currentDetectionConfidence > 0.3 {
+                // Only update feature points if it's been more than 1 second since last update
+                if time - self.lastFeaturePointsUpdateTime > 1.0 {
+                    self.updateFeaturePoints()
+                    self.lastFeaturePointsUpdateTime = time
+                    self.featurePointsFadingStarted = false
+                }
+            } else if self.featurePointsNode != nil && !self.featurePointsFadingStarted {
+                // Start fading out feature points if they exist but we're not showing new ones
+                self.startFeaturePointsFade()
+                self.featurePointsFadingStarted = true
+            }
+        }
+    }
+    
+    // MARK: - Feature Points Visualization
+    
+    func updateFeaturePoints() {
+        // Remove existing feature points node if it exists
+        featurePointsNode?.removeFromParentNode()
+        
+        // Get current feature points from the AR session
+        guard let pointCloud = sceneView.session.currentFrame?.rawFeaturePoints else {
+            return
+        }
+        
+        // Create a new node to hold all feature points
+        featurePointsNode = SCNNode()
+        
+        // Create a material for the feature points
+        let material = SCNMaterial()
+        material.diffuse.contents = UIColor.cyan
+        material.lightingModel = .constant
+        material.transparency = 1.0  // Start fully visible
+        
+        // Get the points from the point cloud
+        let points = pointCloud.points
+        
+        // Limit the number of points to display for performance
+        let maxPoints = min(points.count, 100)
+        
+        // Add each feature point as a small sphere
+        for i in 0..<maxPoints {
+            let point = points[i]
+            
+            // Create a small sphere for each point
+            let sphere = SCNSphere(radius: 0.002) // 2mm radius
+            sphere.materials = [material]
+            
+            // Create a node for the sphere
+            let node = SCNNode(geometry: sphere)
+            node.position = SCNVector3(point.x, point.y, point.z)
+            
+            // Add the node to the feature points parent node
+            featurePointsNode?.addChildNode(node)
+        }
+        
+        // Add the feature points node to the scene
+        sceneView.scene.rootNode.addChildNode(featurePointsNode!)
+        
+        // Reset fading state
+        featurePointsFadingStarted = false
+    }
+    
+    // Start a gradual fade-out of feature points
+    func startFeaturePointsFade() {
+        guard let featurePointsNode = featurePointsNode else { return }
+        
+        // Create a fade-out animation
+        let fadeAction = SCNAction.fadeOut(duration: 3.0)
+        
+        // After fading out, remove the node
+        let removeAction = SCNAction.removeFromParentNode()
+        
+        // Combine the actions
+        let sequence = SCNAction.sequence([fadeAction, removeAction])
+        
+        // Run the animation on the feature points node
+        featurePointsNode.runAction(sequence) {
+            // Reset after animation completes
+            self.featurePointsNode = nil
+            self.isShowingFeaturePoints = false
+            self.featurePointsFadingStarted = false
         }
     }
     
@@ -516,43 +615,90 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
         
         
         DispatchQueue.main.async {
-            // Print Classifications
-            print(classifications)
-            print("--")
+            // Extract the current object name and confidence
+            var objectName:String = "…"
+            var confidence: Float = 0.0
+            
+            if let firstResult = observations.first as? VNClassificationObservation {
+                let currentObject = firstResult.identifier
+                objectName = currentObject.trimmingCharacters(in: .whitespacesAndNewlines)
+                confidence = firstResult.confidence
+                
+                // Store the confidence for feature points visualization
+                self.currentDetectionConfidence = confidence
+                
+                // Only update if the object has changed
+                if currentObject != self.lastDetectedObject {
+                    print("Detected: \(currentObject) (\(String(format:"%.2f", confidence)))")
+                    self.lastDetectedObject = currentObject
+                    
+                    // Only look up translation when the object changes
+                    self.translateToChinese(objectName)
+                    
+                    // Show feature points if confidence is high enough and object is not already tagged
+                    if confidence > 0.3 && !self.isObjectAlreadyTagged(objectName) {
+                        self.isShowingFeaturePoints = true
+                        // Feature points will be updated in the renderer method
+                    }
+                } else if confidence > 0.3 && !self.isObjectAlreadyTagged(objectName) {
+                    // Keep showing feature points for the same object if it's still detected with high confidence
+                    self.isShowingFeaturePoints = true
+                } else {
+                    // Stop showing new feature points if confidence is low or object is already tagged
+                    self.isShowingFeaturePoints = false
+                }
+            } else {
+                // If no observation, use the classifications string to extract object name
+                objectName = classifications.components(separatedBy: "-")[0]
+                objectName = objectName.components(separatedBy: ",")[0]
+                objectName = objectName.trimmingCharacters(in: .whitespacesAndNewlines)
+                
+                // Only update if the object has changed
+                if objectName != self.lastDetectedObject && objectName != "…" {
+                    print("Detected (fallback): \(objectName)")
+                    self.lastDetectedObject = objectName
+                    
+                    // Only look up translation when the object changes
+                    self.translateToChinese(objectName)
+                }
+            }
             
             // Display Debug Text on screen
             var debugText:String = ""
             debugText += classifications
             self.debugTextView.text = debugText
             
-            // Store the latest prediction
-            var objectName:String = "…"
-            objectName = classifications.components(separatedBy: "-")[0]
-            objectName = objectName.components(separatedBy: ",")[0]
-            self.latestPrediction = objectName.trimmingCharacters(in: .whitespacesAndNewlines)
-            
-            // Look up Chinese translation and pinyin
-            self.translateToChinese(self.latestPrediction)
+            // Store the latest prediction (but don't translate again)
+            self.latestPrediction = objectName
         }
     }
     
     func translateToChinese(_ englishWord: String) {
-        // Extract the main word (remove any descriptors)
-        let mainWord = englishWord.components(separatedBy: " ")[0].lowercased()
+        // First try the full phrase
+        let fullPhrase = englishWord.lowercased()
         
-        // Look up in dictionary
-        if let translation = translationManager.getTranslation(for: mainWord) {
+        // Then try just the first word as fallback
+        let firstWord = englishWord.components(separatedBy: " ")[0].lowercased()
+        
+        // Look up in dictionary - try full phrase first, then fall back to first word
+        if let translation = translationManager.getTranslation(for: fullPhrase) {
             latestChineseTranslation = translation.chinese
             latestPinyin = translation.pinyin
+            print("Translation: '\(fullPhrase)' → '\(translation.chinese)' (\(translation.pinyin))")
+        } else if let translation = translationManager.getTranslation(for: firstWord) {
+            latestChineseTranslation = translation.chinese
+            latestPinyin = translation.pinyin
+            print("Translation (first word): '\(firstWord)' → '\(translation.chinese)' (\(translation.pinyin))")
         } else {
             // If not found, use a default message
             latestChineseTranslation = "未知"
             latestPinyin = "wèizhī"
+            print("No translation found for: '\(englishWord)'")
         }
         
-        // Update debug text
+        // Update debug text with a more concise format
         DispatchQueue.main.async {
-            self.debugTextView.text += "\n\nChinese: \(self.latestChineseTranslation)\nPinyin: \(self.latestPinyin)"
+            self.debugTextView.text = "\(self.latestPrediction)\n\(self.latestChineseTranslation) (\(self.latestPinyin))"
         }
     }
     
@@ -701,6 +847,102 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
                 }
             }
         }
+    }
+    
+    // MARK: - AR Session Management
+    
+    // Pause the AR session and ML processing
+    func pauseARSession() {
+        if isMLProcessingActive {
+            isMLProcessingActive = false
+            sceneView.session.pause()
+            print("AR session paused")
+        }
+    }
+    
+    // Resume the AR session and ML processing
+    func resumeARSession() {
+        if !isMLProcessingActive {
+            isMLProcessingActive = true
+            
+            // Resume the AR session with the current configuration
+            let configuration = ARWorldTrackingConfiguration()
+            configuration.planeDetection = [.horizontal, .vertical]
+            sceneView.session.run(configuration)
+            
+            // Restart the ML loop
+            loopCoreMLUpdate()
+            
+            print("AR session resumed")
+        }
+    }
+    
+    // MARK: - Reset Functionality
+    
+    /// Handle notification to clear labels
+    @objc func handleClearLabelsNotification() {
+        clearAllLabels()
+    }
+    
+    /// Clears all placed label nodes from the AR scene
+    func clearAllLabels() {
+        // Remove all nodes from the scene
+        for node in placedNodes {
+            node.removeFromParentNode()
+        }
+        
+        // Clear the array
+        placedNodes.removeAll()
+        
+        // Show confirmation to the user
+        showResetConfirmation()
+        
+        print("Cleared all placed labels from AR scene")
+    }
+    
+    /// Shows a confirmation that labels were cleared
+    private func showResetConfirmation() {
+        // Make sure we're on the main thread
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            
+            let confirmationView = UIView(frame: CGRect(x: 0, y: 0, width: 200, height: 50))
+            confirmationView.backgroundColor = UIColor.blue.withAlphaComponent(0.7)
+            confirmationView.layer.cornerRadius = 10
+            confirmationView.center = CGPoint(x: self.view.bounds.midX, y: self.view.bounds.height - 100)
+            
+            let label = UILabel(frame: confirmationView.bounds)
+            label.text = "Labels Cleared!"
+            label.textColor = .white
+            label.textAlignment = .center
+            label.font = UIFont.boldSystemFont(ofSize: 16)
+            
+            confirmationView.addSubview(label)
+            self.view.addSubview(confirmationView)
+            
+            // Animate the confirmation
+            confirmationView.alpha = 0
+            UIView.animate(withDuration: 0.3, animations: {
+                confirmationView.alpha = 1
+            }) { _ in
+                UIView.animate(withDuration: 0.3, delay: 1.0, options: [], animations: {
+                    confirmationView.alpha = 0
+                }) { _ in
+                    confirmationView.removeFromSuperview()
+                }
+            }
+        }
+    }
+    
+    // Check if an object is already tagged in the scene
+    func isObjectAlreadyTagged(_ objectName: String) -> Bool {
+        // Check if any of the placed nodes contain this object name
+        for node in placedNodes {
+            if let nodeName = node.name, nodeName.contains(objectName) {
+                return true
+            }
+        }
+        return false
     }
 }
 

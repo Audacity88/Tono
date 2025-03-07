@@ -9,13 +9,19 @@ struct ARExploreView: View {
     @State private var detectedObject: (english: String, chinese: String, pinyin: String)?
     @State private var showPopup = false
     
+    // This property will be set by the parent view (ContentView)
+    var isActive: Bool = true
+    
     var body: some View {
         ZStack {
             // AR View
-            ARViewWrapper(onObjectDetected: { english, chinese, pinyin in
-                detectedObject = (english, chinese, pinyin)
-                showPopup = true
-            })
+            ARViewWrapper(
+                onObjectDetected: { english, chinese, pinyin in
+                    detectedObject = (english, chinese, pinyin)
+                    showPopup = true
+                },
+                isActive: isActive
+            )
             .edgesIgnoringSafeArea(.all)
             
             // Popup for detected object
@@ -57,11 +63,34 @@ struct ARExploreView: View {
                 }
             }
             
-            // Instructions overlay
+            // UI Controls
             VStack {
+                // Top controls
                 HStack {
+                    // Reset button
+                    Button(action: {
+                        // Post notification directly to clear labels
+                        NotificationCenter.default.post(name: NSNotification.Name("ClearARLabels"), object: nil)
+                    }) {
+                        Image(systemName: "arrow.counterclockwise.circle.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(.white)
+                            .padding(10)
+                            .background(Color.blue.opacity(0.8))
+                            .clipShape(Circle())
+                            .shadow(radius: 3)
+                            .overlay(
+                                Circle()
+                                    .stroke(Color.white, lineWidth: 1.5)
+                                    .opacity(0.7)
+                            )
+                    }
+                    .padding(.leading, 20)
+                    .padding(.top, 10)
+                    
                     Spacer()
                     
+                    // Instructions
                     Text("Tap on objects to identify them")
                         .font(.caption)
                         .foregroundColor(.white)
@@ -69,18 +98,17 @@ struct ARExploreView: View {
                         .background(Color.black.opacity(0.5))
                         .cornerRadius(8)
                         .padding(.top, 10)
-                        .padding(.trailing, 10)
+                        .padding(.trailing, 20)
                 }
                 
                 Spacer()
             }
         }
-        .statusBar(hidden: true)
     }
 }
 
 struct ARExploreView_Previews: PreviewProvider {
     static var previews: some View {
-        ARExploreView()
+        ARExploreView(isActive: true)
     }
 } 

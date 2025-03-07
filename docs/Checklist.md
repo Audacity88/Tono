@@ -39,7 +39,7 @@
 
 - [x] Add **Core Data** to the project for local storage.  
 - [ ] Define data models in Core Data for:
-  - [ ] Objects (name, image, pronunciation, SRS data).  
+  - [x] Objects (name, image, pronunciation, SRS data).  
   - [ ] SRS schedule (last review date, interval, performance).  
   - [ ] User achievements and progress.  
 - [ ] Implement a simple **CRUD** (Create, Read, Update, Delete) interface for testing.  

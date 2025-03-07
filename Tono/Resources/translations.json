@@ -1,448 +1,6016 @@
 {
   "objects": [
     {
-      "english": "apple",
-      "chinese": "苹果",
-      "pinyin": "píng guǒ",
-      "category": "food"
+      "english": "tench, Tinca tinca",
+      "chinese": "泥鳅",
+      "pinyin": "ní qiū",
+      "category": "tench"
     },
     {
-      "english": "chair",
-      "chinese": "椅子",
-      "pinyin": "yǐ zi",
-      "category": "furniture"
+      "english": "goldfish, Carassius auratus",
+      "chinese": "金鱼",
+      "pinyin": "jīn yú",
+      "category": "goldfish"
     },
     {
-      "english": "table",
-      "chinese": "桌子",
-      "pinyin": "zhuō zi",
-      "category": "furniture"
+      "english": "Great Pyrenees",
+      "chinese": "大白熊犬",
+      "pinyin": "Dà bái xióng quǎn",
+      "category": "Great Pyrenees"
     },
     {
-      "english": "book",
-      "chinese": "书",
-      "pinyin": "shū",
-      "category": "stationery"
+      "english": "tiger beetle",
+      "chinese": "虎甲虫",
+      "pinyin": "hǔ jiǎchóng",
+      "category": "tiger beetle"
     },
     {
-      "english": "cup",
-      "chinese": "杯子",
-      "pinyin": "bēi zi",
-      "category": "kitchenware"
+      "english": "hammerhead, hammerhead shark",
+      "chinese": "錘头",
+      "pinyin": "chuí tóu",
+      "category": "hammerhead"
     },
     {
-      "english": "bottle",
-      "chinese": "瓶子",
-      "pinyin": "píng zi",
-      "category": "kitchenware"
+      "english": "electric locomotive",
+      "chinese": "电力机车",
+      "pinyin": "diàn lì jī chē",
+      "category": "electric locomotive"
     },
     {
-      "english": "laptop",
-      "chinese": "笔记本电脑",
-      "pinyin": "bǐ jì běn diàn nǎo",
-      "category": "electronics"
+      "english": "stingray",
+      "chinese": "魟鱼",
+      "pinyin": "hóng yú",
+      "category": "stingray"
     },
     {
-      "english": "phone",
-      "chinese": "手机",
-      "pinyin": "shǒu jī",
-      "category": "electronics"
+      "english": "cocktail shaker",
+      "chinese": "鸡尾酒摇匀器",
+      "pinyin": "jī wěi jiǔ yáo yún qì",
+      "category": "cocktail shaker"
     },
     {
-      "english": "cell phone",
-      "chinese": "手机",
-      "pinyin": "shǒu jī",
-      "category": "electronics"
+      "english": "hen-of-the-woods, hen of the woods, Polyporus frondosus, Grifola frondosa",
+      "chinese": "牛肝菌",
+      "pinyin": "niú gān jùn",
+      "category": "hen-of-the-woods"
     },
     {
-      "english": "pen",
-      "chinese": "钢笔",
-      "pinyin": "gāng bǐ",
-      "category": "stationery"
+      "english": "ostrich, Struthio camelus",
+      "chinese": "鸵鸟",
+      "pinyin": "tuó niǎo",
+      "category": "ostrich"
     },
     {
-      "english": "glasses",
-      "chinese": "眼镜",
-      "pinyin": "yǎn jìng",
-      "category": "accessories"
+      "english": "brambling, Fringilla montifringilla",
+      "chinese": "燕雀",
+      "pinyin": "yàn què",
+      "category": "brambling"
     },
     {
-      "english": "keyboard",
-      "chinese": "键盘",
-      "pinyin": "jiàn pán",
-      "category": "electronics"
+      "english": "goldfinch, Carduelis carduelis",
+      "chinese": "金翅雀",
+      "pinyin": "jīn chì què",
+      "category": "goldfinch"
     },
     {
-      "english": "mouse",
-      "chinese": "鼠标",
-      "pinyin": "shǔ biāo",
-      "category": "electronics"
+      "english": "house finch, linnet, Carpodacus mexicanus",
+      "chinese": "家朱雀",
+      "pinyin": "jiā zhū què",
+      "category": "house finch"
     },
     {
-      "english": "headphones",
-      "chinese": "耳机",
-      "pinyin": "ěr jī",
-      "category": "electronics"
+      "english": "junco, snowbird",
+      "chinese": "灰雀",
+      "pinyin": "huī què",
+      "category": "junco"
     },
     {
-      "english": "watch",
-      "chinese": "手表",
-      "pinyin": "shǒu biǎo",
-      "category": "accessories"
+      "english": "indigo bunting, indigo finch, indigo bird, Passerina cyanea",
+      "chinese": "靛蓝文鸟",
+      "pinyin": "diàn lán wén niǎo",
+      "category": "indigo bunting"
     },
     {
-      "english": "backpack",
-      "chinese": "背包",
-      "pinyin": "bēi bāo",
-      "category": "accessories"
+      "english": "American black bear, black bear, Ursus americanus, Euarctos americanus",
+      "chinese": "美洲黑熊",
+      "pinyin": "měi zhōu hēi xióng",
+      "category": "American black bear"
     },
     {
-      "english": "door",
-      "chinese": "门",
-      "pinyin": "mén",
-      "category": "home"
+      "english": "bulbul",
+      "chinese": "鹎类鸟",
+      "pinyin": "bēi lèi niǎo",
+      "category": "bulbul"
     },
     {
-      "english": "window",
-      "chinese": "窗户",
-      "pinyin": "chuāng hu",
-      "category": "home"
+      "english": "jay",
+      "chinese": "松鸦",
+      "pinyin": "sōngyā",
+      "category": "jay"
     },
     {
-      "english": "light",
-      "chinese": "灯",
-      "pinyin": "dēng",
-      "category": "home"
+      "english": "magpie",
+      "chinese": "喜鹊",
+      "pinyin": "xǐquè",
+      "category": "magpie"
     },
     {
-      "english": "television",
-      "chinese": "电视",
-      "pinyin": "diàn shì",
-      "category": "electronics"
+      "english": "chickadee",
+      "chinese": "山雀",
+      "pinyin": "shānquè",
+      "category": "chickadee"
     },
     {
-      "english": "tv",
-      "chinese": "电视",
-      "pinyin": "diàn shì",
-      "category": "electronics"
+      "english": "American black bear, black bear, Ursus americanus, Euarctos americanus",
+      "chinese": "美洲黑熊",
+      "pinyin": "měi zhōu hēi xióng",
+      "category": "American black bear"
     },
     {
-      "english": "remote",
-      "chinese": "遥控器",
-      "pinyin": "yáo kòng qì",
-      "category": "electronics"
+      "english": "kite",
+      "chinese": "风筝",
+      "pinyin": "fēngzheng",
+      "category": "kite"
     },
     {
-      "english": "person",
-      "chinese": "人",
-      "pinyin": "rén",
-      "category": "people"
+      "english": "bald eagle, American eagle, Haliaeetus leucocephalus",
+      "chinese": "白头海雕",
+      "pinyin": "báitóu hǎidiāo",
+      "category": "bald eagle"
     },
     {
-      "english": "dog",
-      "chinese": "狗",
-      "pinyin": "gǒu",
-      "category": "animals"
+      "english": "vulture",
+      "chinese": "秃鹫",
+      "pinyin": "tūjiù",
+      "category": "vulture"
     },
     {
-      "english": "cat",
-      "chinese": "猫",
-      "pinyin": "māo",
-      "category": "animals"
+      "english": "Great Pyrenees",
+      "chinese": "大白熊犬",
+      "pinyin": "Dà bái xióng quǎn",
+      "category": "Great Pyrenees"
     },
     {
-      "english": "car",
-      "chinese": "汽车",
-      "pinyin": "qì chē",
-      "category": "transportation"
+      "english": "fire screen, fireguard",
+      "chinese": "防火屏",
+      "pinyin": "fáng huǒ píng",
+      "category": "fire screen"
     },
     {
-      "english": "bicycle",
-      "chinese": "自行车",
-      "pinyin": "zì xíng chē",
-      "category": "transportation"
+      "english": "smooth newt",
+      "chinese": "平滑蝾螈",
+      "pinyin": "pínghuá róngyuán",
+      "category": "smooth newt"
     },
     {
-      "english": "couch",
-      "chinese": "沙发",
-      "pinyin": "shā fā",
-      "category": "furniture"
+      "english": "common newt, Triturus vulgaris",
+      "chinese": "普通蝾螈",
+      "pinyin": "pǔtōng róngyuán",
+      "category": "common newt"
     },
     {
-      "english": "sofa",
-      "chinese": "沙发",
-      "pinyin": "shā fā",
-      "category": "furniture"
+      "english": "spotted salamander, Ambystoma maculatum",
+      "chinese": "斑点蝾螈",
+      "pinyin": "bāndiǎn róngyuán",
+      "category": "spotted salamander"
     },
     {
-      "english": "potted plant",
-      "chinese": "盆栽",
-      "pinyin": "pén zāi",
-      "category": "home"
+      "english": "axolotl, mud puppy, Ambystoma mexicanum",
+      "chinese": "墨西哥蝾螈",
+      "pinyin": "mòxīgē róngyuán",
+      "category": "axolotl"
     },
     {
-      "english": "dining table",
-      "chinese": "餐桌",
-      "pinyin": "cān zhuō",
-      "category": "furniture"
+      "english": "American black bear, black bear, Ursus americanus, Euarctos americanus",
+      "chinese": "美洲黑熊",
+      "pinyin": "měi zhōu hēi xióng",
+      "category": "American black bear"
     },
     {
-      "english": "toilet",
-      "chinese": "厕所",
-      "pinyin": "cè suǒ",
-      "category": "home"
+      "english": "tree frog, tree-frog",
+      "chinese": "树蛙",
+      "pinyin": "Shùwā",
+      "category": "tree frog"
     },
     {
-      "english": "bed",
-      "chinese": "床",
-      "pinyin": "chuáng",
-      "category": "furniture"
+      "english": "tailed frog, bell toad, ribbed toad, tailed toad, Ascaphus trui",
+      "chinese": "尾蛙",
+      "pinyin": "Wěiwā",
+      "category": "tailed frog"
     },
     {
-      "english": "refrigerator",
+      "english": "loggerhead, loggerhead turtle, Caretta caretta",
+      "chinese": "真海龟",
+      "pinyin": "Zhēn hǎiguī",
+      "category": "loggerhead"
+    },
+    {
+      "english": "leatherback turtle, leatherback, leathery turtle, Dermochelys coriacea",
+      "chinese": "皮革龟",
+      "pinyin": "Pígé guī",
+      "category": "leatherback turtle"
+    },
+    {
+      "english": "mud turtle",
+      "chinese": "泥龟",
+      "pinyin": "Ní guī",
+      "category": "mud turtle"
+    },
+    {
+      "english": "terrapin",
+      "chinese": "泥龟",
+      "pinyin": "Ní guī",
+      "category": "terrapin"
+    },
+    {
+      "english": "box turtle, box tortoise",
+      "chinese": "箱龟",
+      "pinyin": "Xiānguī",
+      "category": "box turtle"
+    },
+    {
+      "english": "banded gecko",
+      "chinese": "带纹壁虎",
+      "pinyin": "Dài wén bìhǔ",
+      "category": "banded gecko"
+    },
+    {
+      "english": "green mamba",
+      "chinese": "绿曼巴",
+      "pinyin": "lǜ màn bā",
+      "category": "green mamba"
+    },
+    {
+      "english": "carolina anole",
+      "chinese": "卡罗来纳变色龙",
+      "pinyin": "Kǎluó lái nà biàn sè lóng",
+      "category": "carolina anole"
+    },
+    {
+      "english": "desert grassland whiptail lizard",
+      "chinese": "沙漠草原鞭尾蜥蜴",
+      "pinyin": "Shāmò cǎoyuán biānwěi xīyì",
+      "category": "desert grassland whiptail lizard"
+    },
+    {
+      "english": "agama",
+      "chinese": "龙蜥",
+      "pinyin": "Lóng xī",
+      "category": "agama"
+    },
+    {
+      "english": "frilled-necked lizard",
+      "chinese": "褶颈蜥",
+      "pinyin": "Zhě jǐng xī",
+      "category": "frilled-necked lizard"
+    },
+    {
+      "english": "alligator lizard",
+      "chinese": "短吻鳄蜥",
+      "pinyin": "Duǎn wěn è xī",
+      "category": "alligator lizard"
+    },
+    {
+      "english": "Gila monster, Heloderma suspectum",
+      "chinese": "吉拉蜥蜴",
+      "pinyin": "jí lā xī yì",
+      "category": "Gila monster"
+    },
+    {
+      "english": "European gallinule, Porphyrio porphyrio",
+      "chinese": "紫水鸡",
+      "pinyin": "zǐ shuǐ jī",
+      "category": "European gallinule"
+    },
+    {
+      "english": "African chameleon, Chamaeleo chamaeleon",
+      "chinese": "非洲变色龙",
+      "pinyin": "fēi zhōu biàn sè lóng",
+      "category": "African chameleon"
+    },
+    {
+      "english": "Komodo dragon, Komodo lizard, dragon lizard, giant lizard, Varanus komodoeis',",
+      "chinese": "巨蜥龙",
+      "pinyin": "jù xī lóng",
+      "category": "Komodo dragon"
+    },
+    {
+      "english": "African crocodile, Nile crocodile, Crocodylus niloticus",
+      "chinese": "非洲鳄鱼",
+      "pinyin": "fēi zhōu è yú",
+      "category": "African crocodile"
+    },
+    {
+      "english": "American black bear, black bear, Ursus americanus, Euarctos americanus",
+      "chinese": "美洲黑熊",
+      "pinyin": "měi zhōu hēi xióng",
+      "category": "American black bear"
+    },
+    {
+      "english": "triceratops",
+      "chinese": "三角龙",
+      "pinyin": "sān jiǎo lóng",
+      "category": "triceratops"
+    },
+    {
+      "english": "worm fence, snake fence, snake-rail fence, Virginia fence",
+      "chinese": "蛇栅栏",
+      "pinyin": "shé zhà lán",
+      "category": "worm fence"
+    },
+    {
+      "english": "ringneck snake, ring-necked snake, ring snake",
+      "chinese": "戒颈蛇",
+      "pinyin": "jiè jǐng shé",
+      "category": "ringneck snake"
+    },
+    {
+      "english": "eastern hog-nosed snake",
+      "chinese": "东部猪鼻蛇",
+      "pinyin": "dōng bù zhū bí shé",
+      "category": "eastern hog-nosed snake"
+    },
+    {
+      "english": "smooth green snake",
+      "chinese": "平滑绿蛇",
+      "pinyin": "píng huá lǜ shé",
+      "category": "smooth green snake"
+    },
+    {
+      "english": "king snake, kingsnake",
+      "chinese": "王蛇",
+      "pinyin": "wáng shé",
+      "category": "king snake"
+    },
+    {
+      "english": "garter snake, grass snake",
+      "chinese": "蛇纹蛇",
+      "pinyin": "shé wén shé",
+      "category": "garter snake"
+    },
+    {
+      "english": "water tower",
+      "chinese": "水塔",
+      "pinyin": "shuǐ tǎ",
+      "category": "water tower"
+    },
+    {
+      "english": "vine snake",
+      "chinese": "藤蛇",
+      "pinyin": "téng shé",
+      "category": "vine snake"
+    },
+    {
+      "english": "night snake, Hypsiglena torquata",
+      "chinese": "夜蛇",
+      "pinyin": "yè shé",
+      "category": "night snake"
+    },
+    {
+      "english": "boa constrictor, Constrictor constrictor",
+      "chinese": "真蟒",
+      "pinyin": "zhēn mǎng",
+      "category": "boa constrictor"
+    },
+    {
+      "english": "African elephant, Loxodonta africana",
+      "chinese": "非洲象",
+      "pinyin": "Fēizhōu xiàng",
+      "category": "African elephant"
+    },
+    {
+      "english": "Indian elephant, Elephas maximus",
+      "chinese": "印度象",
+      "pinyin": "yìn dù xiàng",
+      "category": "Indian elephant"
+    },
+    {
+      "english": "green mamba",
+      "chinese": "绿曼巴",
+      "pinyin": "lǜ màn bā",
+      "category": "green mamba"
+    },
+    {
+      "english": "sea cucumber, holothurian",
+      "chinese": "海参",
+      "pinyin": "hǎishēn",
+      "category": "sea cucumber"
+    },
+    {
+      "english": "saharan horned viper",
+      "chinese": "撒哈拉角蝰",
+      "pinyin": "sā hā lā jiǎo kuí",
+      "category": "saharan horned viper"
+    },
+    {
+      "english": "eastern diamondback rattlesnake",
+      "chinese": "东方钻背响尾蛇",
+      "pinyin": "dōng fāng zuàn bèi xiǎng wěi shé",
+      "category": "eastern diamondback rattlesnake"
+    },
+    {
+      "english": "sidewinder, horned rattlesnake, Crotalus cerastes",
+      "chinese": "侧颜蝰",
+      "pinyin": "cè yán kuí",
+      "category": "sidewinder"
+    },
+    {
+      "english": "trilobite",
+      "chinese": "三叶虫",
+      "pinyin": "sān yè chóng",
+      "category": "trilobite"
+    },
+    {
+      "english": "harvestman, daddy longlegs, Phalangium opilio",
+      "chinese": "收割者",
+      "pinyin": "shōu gē zhě",
+      "category": "harvestman"
+    },
+    {
+      "english": "scorpion",
+      "chinese": "蝎子",
+      "pinyin": "xiē zi",
+      "category": "scorpion"
+    },
+    {
+      "english": "yellow lady's slipper, yellow lady-slipper, Cypripedium calceolus, Cypripium parviflorum\",",
+      "chinese": "黄杨兰",
+      "pinyin": "huáng yáng lán",
+      "category": "yellow lady's slipper"
+    },
+    {
+      "english": "barn",
+      "chinese": "谷仓",
+      "pinyin": "gǔ cāng",
+      "category": "barn"
+    },
+    {
+      "english": "European gallinule, Porphyrio porphyrio",
+      "chinese": "紫水鸡",
+      "pinyin": "zǐ shuǐ jī",
+      "category": "European gallinule"
+    },
+    {
+      "english": "southern black widow",
+      "chinese": "南方黑寡妇",
+      "pinyin": "nán fāng hēi guǎ fù",
+      "category": "southern black widow"
+    },
+    {
+      "english": "tarantula",
+      "chinese": "狼蛛",
+      "pinyin": "láng zhū",
+      "category": "tarantula"
+    },
+    {
+      "english": "wolf spider, hunting spider",
+      "chinese": "狼蛛",
+      "pinyin": "láng zhū",
+      "category": "wolf spider"
+    },
+    {
+      "english": "slide rule, slipstick",
+      "chinese": "滑尺",
+      "pinyin": "huá chǐ",
+      "category": "slide rule"
+    },
+    {
+      "english": "centipede",
+      "chinese": "蜈蚣",
+      "pinyin": "wú gōng",
+      "category": "centipede"
+    },
+    {
+      "english": "black stork, Ciconia nigra",
+      "chinese": "黑鹳",
+      "pinyin": "hēi guàn",
+      "category": "black stork"
+    },
+    {
+      "english": "ptarmigan",
+      "chinese": "柳鸡",
+      "pinyin": "liǔ jī",
+      "category": "ptarmigan"
+    },
+    {
+      "english": "ruffed grouse, partridge, Bonasa umbellus",
+      "chinese": "鸟类",
+      "pinyin": "niǎo lèi",
+      "category": "ruffed grouse"
+    },
+    {
+      "english": "prairie chicken, prairie grouse, prairie fowl",
+      "chinese": "草原鸡",
+      "pinyin": "cǎo yuán jī",
+      "category": "prairie chicken"
+    },
+    {
+      "english": "peacock",
+      "chinese": "孔雀",
+      "pinyin": "kǒng què",
+      "category": "peacock"
+    },
+    {
+      "english": "quail",
+      "chinese": "鹌鹑",
+      "pinyin": "ān chún",
+      "category": "quail"
+    },
+    {
+      "english": "partridge",
+      "chinese": "鹧鸪",
+      "pinyin": "zhè gū",
+      "category": "partridge"
+    },
+    {
+      "english": "grey fox, gray fox, Urocyon cinereoargenteus",
+      "chinese": "灰狐",
+      "pinyin": "huī hú",
+      "category": "grey fox"
+    },
+    {
+      "english": "macaw",
+      "chinese": "金刚鹦鹉",
+      "pinyin": "jīn gāng yīng wǔ",
+      "category": "macaw"
+    },
+    {
+      "english": "sulphur-crested cockatoo, Kakatoe galerita, Cacatua galerita",
+      "chinese": "硫磺鹦鹉",
+      "pinyin": "liú huáng yīng wǔ",
+      "category": "sulphur-crested cockatoo"
+    },
+    {
+      "english": "lorikeet",
+      "chinese": "鹦鹉",
+      "pinyin": "yīngwǔ",
+      "category": "lorikeet"
+    },
+    {
+      "english": "coucal",
+      "chinese": "鸦鹃",
+      "pinyin": "yājuān",
+      "category": "coucal"
+    },
+    {
+      "english": "bee",
+      "chinese": "蜜蜂",
+      "pinyin": "mìfēng",
+      "category": "bee"
+    },
+    {
+      "english": "hornbill",
+      "chinese": "犀鸟",
+      "pinyin": "xīniǎo",
+      "category": "hornbill"
+    },
+    {
+      "english": "hummingbird",
+      "chinese": "蜂鸟",
+      "pinyin": "fēngniǎo",
+      "category": "hummingbird"
+    },
+    {
+      "english": "jacamar",
+      "chinese": "翠鸟",
+      "pinyin": "cuìniǎo",
+      "category": "jacamar"
+    },
+    {
+      "english": "toucan",
+      "chinese": "巨嘴鸟",
+      "pinyin": "jùzuǐniǎo",
+      "category": "toucan"
+    },
+    {
+      "english": "platypus, duckbill, duckbilled platypus, duck-billed platypus, Ornithorhyhus anatinus',",
+      "chinese": "鸭嘴兽",
+      "pinyin": "yāzuǐshòu",
+      "category": "platypus"
+    },
+    {
+      "english": "red-breasted merganser, Mergus serrator",
+      "chinese": "红胸秋沙鸭",
+      "pinyin": "hóngxiōng qiūshāyā",
+      "category": "red-breasted merganser"
+    },
+    {
+      "english": "mongoose",
+      "chinese": "獴",
+      "pinyin": "měng",
+      "category": "mongoose"
+    },
+    {
+      "english": "black stork, Ciconia nigra",
+      "chinese": "黑鹳",
+      "pinyin": "hēi guàn",
+      "category": "black stork"
+    },
+    {
+      "english": "tusker",
+      "chinese": "长牙象",
+      "pinyin": "chángyá xiàng",
+      "category": "tusker"
+    },
+    {
+      "english": "echidna, spiny anteater, anteater",
+      "chinese": "针鼹",
+      "pinyin": "zhēnyǎn",
+      "category": "echidna"
+    },
+    {
+      "english": "platypus, duckbill, duckbilled platypus, duck-billed platypus, Ornithorhyhus anatinus',",
+      "chinese": "鸭嘴兽",
+      "pinyin": "yāzuǐshòu",
+      "category": "platypus"
+    },
+    {
+      "english": "wallaby, brush kangaroo",
+      "chinese": "袋鼠",
+      "pinyin": "dàishǔ",
+      "category": "wallaby"
+    },
+    {
+      "english": "koala, koala bear, kangaroo bear, native bear, Phascolarctos cinereus",
+      "chinese": "树袋熊",
+      "pinyin": "shù dài xióng",
+      "category": "koala"
+    },
+    {
+      "english": "wombat",
+      "chinese": "袋熊",
+      "pinyin": "dài xióng",
+      "category": "wombat"
+    },
+    {
+      "english": "jellyfish",
+      "chinese": "水母",
+      "pinyin": "shuǐ mǔ",
+      "category": "jellyfish"
+    },
+    {
+      "english": "sea cucumber, holothurian",
+      "chinese": "海参",
+      "pinyin": "hǎishēn",
+      "category": "sea cucumber"
+    },
+    {
+      "english": "brain coral",
+      "chinese": "脑珊瑚",
+      "pinyin": "nǎo shān hú",
+      "category": "brain coral"
+    },
+    {
+      "english": "flatworm, platyhelminth",
+      "chinese": "扁虫",
+      "pinyin": "biǎn chóng",
+      "category": "flatworm"
+    },
+    {
+      "english": "nematode, nematode worm, roundworm",
+      "chinese": "线虫",
+      "pinyin": "xiàn chóng",
+      "category": "nematode"
+    },
+    {
+      "english": "conch",
+      "chinese": "海螺",
+      "pinyin": "hǎi luó",
+      "category": "conch"
+    },
+    {
+      "english": "snail",
+      "chinese": "蜗牛",
+      "pinyin": "wō niú",
+      "category": "snail"
+    },
+    {
+      "english": "sea slug, nudibranch",
+      "chinese": "海兔",
+      "pinyin": "hǎi tù",
+      "category": "sea slug"
+    },
+    {
+      "english": "sea cucumber, holothurian",
+      "chinese": "海参",
+      "pinyin": "hǎishēn",
+      "category": "sea cucumber"
+    },
+    {
+      "english": "chiton, coat-of-mail shell, sea cradle, polyplacophore",
+      "chinese": "贝壳虫",
+      "pinyin": "bèi ké chóng",
+      "category": "chiton"
+    },
+    {
+      "english": "chambered nautilus, pearly nautilus, nautilus",
+      "chinese": "鹦鹉螺",
+      "pinyin": "yīng wǔ luó",
+      "category": "chambered nautilus"
+    },
+    {
+      "english": "Dungeness crab, Cancer magister",
+      "chinese": "龙虾",
+      "pinyin": "lóng xiā",
+      "category": "Dungeness crab"
+    },
+    {
+      "english": "rock beauty, Holocanthus tricolor",
+      "chinese": "三色天使鱼",
+      "pinyin": "sān sè tiān shǐ yú",
+      "category": "rock beauty"
+    },
+    {
+      "english": "fiddler crab",
+      "chinese": "招潮蟹",
+      "pinyin": "zhāo cháo xiè",
+      "category": "fiddler crab"
+    },
+    {
+      "english": "red wine",
+      "chinese": "红葡萄酒",
+      "pinyin": "hóng pú táo jiǔ",
+      "category": "red wine"
+    },
+    {
+      "english": "American black bear, black bear, Ursus americanus, Euarctos americanus",
+      "chinese": "美洲黑熊",
+      "pinyin": "měi zhōu hēi xióng",
+      "category": "American black bear"
+    },
+    {
+      "english": "spiny lobster, langouste, rock lobster, crawfish, crayfish, sea crawfish",
+      "chinese": "龙虾",
+      "pinyin": "lóng xiā",
+      "category": "spiny lobster"
+    },
+    {
+      "english": "crayfish, crawfish, crawdad, crawdaddy",
+      "chinese": "小龙虾",
+      "pinyin": "xiǎo lóng xiā",
+      "category": "crayfish"
+    },
+    {
+      "english": "hermit crab",
+      "chinese": "寄居蟹",
+      "pinyin": "jì jū xiè",
+      "category": "hermit crab"
+    },
+    {
+      "english": "isopod",
+      "chinese": "等足目",
+      "pinyin": "děng zú mù",
+      "category": "isopod"
+    },
+    {
+      "english": "white wolf, Arctic wolf, Canis lupus tundrarum",
+      "chinese": "白狼",
+      "pinyin": "bái láng",
+      "category": "white wolf"
+    },
+    {
+      "english": "black stork, Ciconia nigra",
+      "chinese": "黑鹳",
+      "pinyin": "hēi guàn",
+      "category": "black stork"
+    },
+    {
+      "english": "spoonbill",
+      "chinese": "勺嘴鹳",
+      "pinyin": "sháo zuǐ guàn",
+      "category": "spoonbill"
+    },
+    {
+      "english": "flamingo",
+      "chinese": "火烈鸟",
+      "pinyin": "huǒ liè niǎo",
+      "category": "flamingo"
+    },
+    {
+      "english": "little blue heron, Egretta caerulea",
+      "chinese": "小蓝鹭",
+      "pinyin": "xiǎo lán lù",
+      "category": "little blue heron"
+    },
+    {
+      "english": "Great Pyrenees",
+      "chinese": "大白熊犬",
+      "pinyin": "Dà bái xióng quǎn",
+      "category": "Great Pyrenees"
+    },
+    {
+      "english": "bittern",
+      "chinese": "苍鹭",
+      "pinyin": "cāng lù",
+      "category": "bittern"
+    },
+    {
+      "english": "crane",
+      "chinese": "起重机",
+      "pinyin": "qǐ zhòng jī",
+      "category": "crane"
+    },
+    {
+      "english": "limpkin, Aramus pictus",
+      "chinese": "水雉",
+      "pinyin": "shuǐ zhì",
+      "category": "limpkin"
+    },
+    {
+      "english": "common iguana, iguana, Iguana iguana",
+      "chinese": "鬣蜥",
+      "pinyin": "liè xī",
+      "category": "common iguana"
+    },
+    {
+      "english": "American black bear, black bear, Ursus americanus, Euarctos americanus",
+      "chinese": "美洲黑熊",
+      "pinyin": "měi zhōu hēi xióng",
+      "category": "American black bear"
+    },
+    {
+      "english": "bustard",
+      "chinese": "鸨",
+      "pinyin": "bǎo",
+      "category": "bustard"
+    },
+    {
+      "english": "ruddy turnstone, Arenaria interpres",
+      "chinese": "赤背杓鹬",
+      "pinyin": "chì bèi sháo yù",
+      "category": "ruddy turnstone"
+    },
+    {
+      "english": "red-backed sandpiper, dunlin, Erolia alpina",
+      "chinese": "红背鹬",
+      "pinyin": "hóng bèi yù",
+      "category": "red-backed sandpiper"
+    },
+    {
+      "english": "common iguana, iguana, Iguana iguana",
+      "chinese": "鬣蜥",
+      "pinyin": "liè xī",
+      "category": "common iguana"
+    },
+    {
+      "english": "dowitcher",
+      "chinese": "长嘴鹬",
+      "pinyin": "cháng zuǐ yù",
+      "category": "dowitcher"
+    },
+    {
+      "english": "oystercatcher, oyster catcher",
+      "chinese": "蛎鹬",
+      "pinyin": "lì yù",
+      "category": "oystercatcher"
+    },
+    {
+      "english": "pelican",
+      "chinese": "鹈鹕",
+      "pinyin": "tí hú",
+      "category": "pelican"
+    },
+    {
+      "english": "king penguin, Aptenodytes patagonica",
+      "chinese": "凤凰企鹅",
+      "pinyin": "fèng huáng qǐ é",
+      "category": "king penguin"
+    },
+    {
+      "english": "albatross, mollymawk",
+      "chinese": "信天翁",
+      "pinyin": "xìn tiān wēng",
+      "category": "albatross"
+    },
+    {
+      "english": "grey fox, gray fox, Urocyon cinereoargenteus",
+      "chinese": "灰狐",
+      "pinyin": "huī hú",
+      "category": "grey fox"
+    },
+    {
+      "english": "killer whale, killer, orca, grampus, sea wolf, Orcinus orca",
+      "chinese": "杀人鲸",
+      "pinyin": "shā rén jīng",
+      "category": "killer whale"
+    },
+    {
+      "english": "dugong, Dugong dugon",
+      "chinese": "儒艮",
+      "pinyin": "rú gěn",
+      "category": "dugong"
+    },
+    {
+      "english": "sea cucumber, holothurian",
+      "chinese": "海参",
+      "pinyin": "hǎishēn",
+      "category": "sea cucumber"
+    },
+    {
+      "english": "Chihuahua",
+      "chinese": "吉娃娃",
+      "pinyin": "jí wá wá",
+      "category": "Chihuahua"
+    },
+    {
+      "english": "Japanese spaniel",
+      "chinese": "日本狆",
+      "pinyin": "rì běn zhōng",
+      "category": "Japanese spaniel"
+    },
+    {
+      "english": "Maltese dog, Maltese terrier, Maltese",
+      "chinese": "马耳他犬",
+      "pinyin": "mǎ ěr tā quǎn",
+      "category": "Maltese dog"
+    },
+    {
+      "english": "Pekinese, Pekingese, Peke",
+      "chinese": "北京犬",
+      "pinyin": "běi jīng quǎn",
+      "category": "Pekinese"
+    },
+    {
+      "english": "shih tzu",
+      "chinese": "狮子狗",
+      "pinyin": "shī zǐ gǒu",
+      "category": "shih tzu"
+    },
+    {
+      "english": "king crab, Alaska crab, Alaskan king crab, Alaska king crab, Paralithodesamtschatica',",
+      "chinese": "阿拉斯加帝王蟹",
+      "pinyin": "ā lā sī jiā dì wáng xiè",
+      "category": "king crab"
+    },
+    {
+      "english": "papillon",
+      "chinese": "蝴蝶犬",
+      "pinyin": "hú dié quǎn",
+      "category": "papillon"
+    },
+    {
+      "english": "toy poodle",
+      "chinese": "玩具贵宾犬",
+      "pinyin": "wán jù guì bīn quǎn",
+      "category": "toy poodle"
+    },
+    {
+      "english": "Rhodesian ridgeback",
+      "chinese": "罗德西亚脊背犬",
+      "pinyin": "luó dé xī yà jǐ bèi quǎn",
+      "category": "Rhodesian ridgeback"
+    },
+    {
+      "english": "Afghan hound, Afghan",
+      "chinese": "阿富汗猎犬",
+      "pinyin": "ā fù hàn liè quǎn",
+      "category": "Afghan hound"
+    },
+    {
+      "english": "basset, basset hound",
+      "chinese": "巴吉度猎犬",
+      "pinyin": "bā jí dù liè quǎn",
+      "category": "basset"
+    },
+    {
+      "english": "beagle",
+      "chinese": "贝格尔猎犬",
+      "pinyin": "bèi gé ěr liè quǎn",
+      "category": "beagle"
+    },
+    {
+      "english": "bloodhound, sleuthhound",
+      "chinese": "血猎犬",
+      "pinyin": "xiě liè quǎn",
+      "category": "bloodhound"
+    },
+    {
+      "english": "bluetick coonhound",
+      "chinese": "蓝斑猎浣熊犬",
+      "pinyin": "lán bān liè huàn xióng quǎn",
+      "category": "bluetick coonhound"
+    },
+    {
+      "english": "black widow, Latrodectus mactans",
+      "chinese": "黑寡妇",
+      "pinyin": "hēi guǎfù",
+      "category": "black widow"
+    },
+    {
+      "english": "treeing walker coonhound",
+      "chinese": "树立行走猎犬",
+      "pinyin": "shùlì xíngzǒu lièquǎn",
+      "category": "treeing walker coonhound"
+    },
+    {
+      "english": "English springer, English springer spaniel",
+      "chinese": "格罗尼达尔犬",
+      "pinyin": "Gé luō ní dá ěr quǎn",
+      "category": "English springer"
+    },
+    {
+      "english": "redbone",
+      "chinese": "红骨猎犬",
+      "pinyin": "hónggǔ lièquǎn",
+      "category": "redbone"
+    },
+    {
+      "english": "borzoi, Russian wolfhound",
+      "chinese": "俄罗斯猎狼犬",
+      "pinyin": "éluósī liè láng quǎn",
+      "category": "borzoi"
+    },
+    {
+      "english": "Irish water spaniel",
+      "chinese": "爱尔兰水猎犬",
+      "pinyin": "Ài'ěrlán shuǐlièquǎn",
+      "category": "Irish water spaniel"
+    },
+    {
+      "english": "Italian greyhound",
+      "chinese": "意大利灰狗",
+      "pinyin": "yìdàlì huī gǒu",
+      "category": "Italian greyhound"
+    },
+    {
+      "english": "whippet",
+      "chinese": "惠比特猎犬",
+      "pinyin": "huìbǐtè lièquǎn",
+      "category": "whippet"
+    },
+    {
+      "english": "Ibizan hound, Ibizan Podenco",
+      "chinese": "伊比萨猎犬",
+      "pinyin": "yībǐsà lièquǎn",
+      "category": "Ibizan hound"
+    },
+    {
+      "english": "Norwegian elkhound, elkhound",
+      "chinese": "挪威麋鹿犬",
+      "pinyin": "nuówēi mílù quǎn",
+      "category": "Norwegian elkhound"
+    },
+    {
+      "english": "otterhound, otter hound",
+      "chinese": "水獭猎犬",
+      "pinyin": "shuǐtǎ lièquǎn",
+      "category": "otterhound"
+    },
+    {
+      "english": "Saluki, gazelle hound",
+      "chinese": "萨路基猎犬",
+      "pinyin": "sàlùjī lièquǎn",
+      "category": "Saluki"
+    },
+    {
+      "english": "Scottish deerhound, deerhound",
+      "chinese": "苏格兰鹿猎犬",
+      "pinyin": "sūgélán lù lièquǎn",
+      "category": "Scottish deerhound"
+    },
+    {
+      "english": "Weimaraner",
+      "chinese": "魏玛猎犬",
+      "pinyin": "wèimǎ lièquǎn",
+      "category": "Weimaraner"
+    },
+    {
+      "english": "Staffordshire bullterrier, Staffordshire bull terrier",
+      "chinese": "斯塔福郡斗牛梗",
+      "pinyin": "sītǎfú jùn dòuniú gěng",
+      "category": "Staffordshire bullterrier"
+    },
+    {
+      "english": "American black bear, black bear, Ursus americanus, Euarctos americanus",
+      "chinese": "美洲黑熊",
+      "pinyin": "měi zhōu hēi xióng",
+      "category": "American black bear"
+    },
+    {
+      "english": "Bedlington terrier",
+      "chinese": "贝灵顿梗",
+      "pinyin": "Bèilíngdùn gěng",
+      "category": "Bedlington terrier"
+    },
+    {
+      "english": "Border collie",
+      "chinese": "边境牧羊犬",
+      "pinyin": "biān jìng mù yáng quǎn",
+      "category": "Border collie"
+    },
+    {
+      "english": "Kerry blue terrier",
+      "chinese": "凯利蓝梗",
+      "pinyin": "Kǎilì lán gěng",
+      "category": "Kerry blue terrier"
+    },
+    {
+      "english": "Irish water spaniel",
+      "chinese": "爱尔兰水猎犬",
+      "pinyin": "Ài'ěrlán shuǐlièquǎn",
+      "category": "Irish water spaniel"
+    },
+    {
+      "english": "Norfolk terrier",
+      "chinese": "诺福克梗",
+      "pinyin": "Nuòfúkè gěng",
+      "category": "Norfolk terrier"
+    },
+    {
+      "english": "Norwich terrier",
+      "chinese": "诺维奇梗",
+      "pinyin": "Nuòwéiqí gěng",
+      "category": "Norwich terrier"
+    },
+    {
+      "english": "Yorkshire terrier",
+      "chinese": "约克夏梗",
+      "pinyin": "Yuēkèxià gěng",
+      "category": "Yorkshire terrier"
+    },
+    {
+      "english": "wire fox terrier",
+      "chinese": "丝毛猎狐梗",
+      "pinyin": "Sīmáo liè hú gěng",
+      "category": "wire fox terrier"
+    },
+    {
+      "english": "Lakeland terrier",
+      "chinese": "莱克兰梗",
+      "pinyin": "Láikèlán gěng",
+      "category": "Lakeland terrier"
+    },
+    {
+      "english": "Sealyham terrier, Sealyham",
+      "chinese": "西里汉梗",
+      "pinyin": "Xīlǐhàn gěng",
+      "category": "Sealyham terrier"
+    },
+    {
+      "english": "Airedale, Airedale terrier",
+      "chinese": "艾尔戴尔梗",
+      "pinyin": "Ài'ěrdài'ěr gěng",
+      "category": "Airedale"
+    },
+    {
+      "english": "cairn, cairn terrier",
+      "chinese": "凯恩梗",
+      "pinyin": "Kǎi'ēn gěng",
+      "category": "cairn"
+    },
+    {
+      "english": "Australian terrier",
+      "chinese": "澳大利亚梗",
+      "pinyin": "Àodàlìyà gěng",
+      "category": "Australian terrier"
+    },
+    {
+      "english": "Dandie Dinmont, Dandie Dinmont terrier",
+      "chinese": "丹迪丁蒙梗",
+      "pinyin": "Dāndí dīngméng gěng",
+      "category": "Dandie Dinmont"
+    },
+    {
+      "english": "Boston bull, Boston terrier",
+      "chinese": "苏格兰波士顿犬",
+      "pinyin": "Sūgélán bōshìdùn quǎn",
+      "category": "Boston bull"
+    },
+    {
+      "english": "miniature poodle",
+      "chinese": "迷你贵宾犬",
+      "pinyin": "mí nǐ guì bīn quǎn",
+      "category": "miniature poodle"
+    },
+    {
+      "english": "giant panda, panda, panda bear, coon bear, Ailuropoda melanoleuca",
+      "chinese": "大熊猫",
+      "pinyin": "dà xióng māo",
+      "category": "giant panda"
+    },
+    {
+      "english": "standard poodle",
+      "chinese": "标准贵宾犬",
+      "pinyin": "biāo zhǔn guì bīn quǎn",
+      "category": "standard poodle"
+    },
+    {
+      "english": "Scotch terrier, Scottish terrier, Scottie",
+      "chinese": "苏格兰梗",
+      "pinyin": "Sūgélán gěng",
+      "category": "Scotch terrier"
+    },
+    {
+      "english": "Tibetan mastiff",
+      "chinese": "藏獒",
+      "pinyin": "Zàng áo",
+      "category": "Tibetan mastiff"
+    },
+    {
+      "english": "australian silky terrier",
+      "chinese": "澳洲丝毛梗",
+      "pinyin": "Àozhōu sīmáo gěng",
+      "category": "australian silky terrier"
+    },
+    {
+      "english": "soft-coated wheaten terrier",
+      "chinese": "软毛小麦梗",
+      "pinyin": "Ruǎn máo xiǎomài gěng",
+      "category": "soft-coated wheaten terrier"
+    },
+    {
+      "english": "West Highland white terrier",
+      "chinese": "西高地白梗",
+      "pinyin": "Xīgāodì bái gěng",
+      "category": "West Highland white terrier"
+    },
+    {
+      "english": "Lhasa, Lhasa apso",
+      "chinese": "拉萨犬",
+      "pinyin": "Lāsà quǎn",
+      "category": "Lhasa"
+    },
+    {
+      "english": "flat-coated retriever",
+      "chinese": "平毛寻回犬",
+      "pinyin": "Píng máo xún huí quǎn",
+      "category": "flat-coated retriever"
+    },
+    {
+      "english": "curly-coated retriever",
+      "chinese": "卷毛寻回犬",
+      "pinyin": "Juǎn máo xún huí quǎn",
+      "category": "curly-coated retriever"
+    },
+    {
+      "english": "golden retriever",
+      "chinese": "金毛寻回犬",
+      "pinyin": "Jīn máo xún huí quǎn",
+      "category": "golden retriever"
+    },
+    {
+      "english": "Labrador retriever",
+      "chinese": "拉布拉多寻回犬",
+      "pinyin": "Lābùlāduō xún huí quǎn",
+      "category": "Labrador retriever"
+    },
+    {
+      "english": "Chesapeake Bay retriever",
+      "chinese": "切萨皮克湾寻回犬",
+      "pinyin": "Qièsàpíkè wān xún huí quǎn",
+      "category": "Chesapeake Bay retriever"
+    },
+    {
+      "english": "German shepherd, German shepherd dog, German police dog, alsatian",
+      "chinese": "德国牧羊犬",
+      "pinyin": "dé guó mù yáng quǎn",
+      "category": "German shepherd"
+    },
+    {
+      "english": "vizsla, Hungarian pointer",
+      "chinese": "维兹拉犬",
+      "pinyin": "wéi zī lā quǎn",
+      "category": "vizsla"
+    },
+    {
+      "english": "English springer, English springer spaniel",
+      "chinese": "格罗尼达尔犬",
+      "pinyin": "Gé luō ní dá ěr quǎn",
+      "category": "English springer"
+    },
+    {
+      "english": "Irish water spaniel",
+      "chinese": "爱尔兰水猎犬",
+      "pinyin": "Ài'ěrlán shuǐlièquǎn",
+      "category": "Irish water spaniel"
+    },
+    {
+      "english": "Gordon setter",
+      "chinese": "戈登雪达犬",
+      "pinyin": "Gēdēng xuědá quǎn",
+      "category": "Gordon setter"
+    },
+    {
+      "english": "Brittany spaniel",
+      "chinese": "布列塔尼猎犬",
+      "pinyin": "Bùliètǎní lièquǎn",
+      "category": "Brittany spaniel"
+    },
+    {
+      "english": "clumber, clumber spaniel",
+      "chinese": "克伦伯",
+      "pinyin": "kè lún bó",
+      "category": "clumber"
+    },
+    {
+      "english": "English springer, English springer spaniel",
+      "chinese": "格罗尼达尔犬",
+      "pinyin": "Gé luō ní dá ěr quǎn",
+      "category": "English springer"
+    },
+    {
+      "english": "Welsh springer spaniel",
+      "chinese": "威尔士春田猎犬",
+      "pinyin": "Wēi'ěrshì chūntián lièquǎn",
+      "category": "Welsh springer spaniel"
+    },
+    {
+      "english": "cocker spaniels",
+      "chinese": "可卡犬",
+      "pinyin": "kě kǎ quǎn",
+      "category": "cocker spaniels"
+    },
+    {
+      "english": "Sussex spaniel",
+      "chinese": "苏塞克斯猎犬",
+      "pinyin": "sū sāi kè sī liè quǎn",
+      "category": "Sussex spaniel"
+    },
+    {
+      "english": "Irish water spaniel",
+      "chinese": "爱尔兰水猎犬",
+      "pinyin": "Ài'ěrlán shuǐlièquǎn",
+      "category": "Irish water spaniel"
+    },
+    {
+      "english": "kuvasz",
+      "chinese": "库瓦兹",
+      "pinyin": "kù wǎ zī",
+      "category": "kuvasz"
+    },
+    {
+      "english": "schipperke",
+      "chinese": "锡普凯克犬",
+      "pinyin": "xī pǔ kǎi quǎn",
+      "category": "schipperke"
+    },
+    {
+      "english": "groenendael",
+      "chinese": "格罗尼达尔",
+      "pinyin": "gé luó ní dá ěr",
+      "category": "groenendael"
+    },
+    {
+      "english": "malinois",
+      "chinese": "马林努阿犬",
+      "pinyin": "mǎ lín nǔ ā quǎn",
+      "category": "malinois"
+    },
+    {
+      "english": "briard",
+      "chinese": "布里亚德犬",
+      "pinyin": "bù lǐ yà dé quǎn",
+      "category": "briard"
+    },
+    {
+      "english": "australian kelpie",
+      "chinese": "澳大利亚牧羊犬",
+      "pinyin": "ào dà lì yà mù yáng quǎn",
+      "category": "australian kelpie"
+    },
+    {
+      "english": "komondor",
+      "chinese": "科蒙达犬",
+      "pinyin": "kē méng dá quǎn",
+      "category": "komondor"
+    },
+    {
+      "english": "Old English sheepdog, bobtail",
+      "chinese": "英国古代牧羊犬",
+      "pinyin": "yīng guó gǔ dài mù yáng quǎn",
+      "category": "Old English sheepdog"
+    },
+    {
+      "english": "Shetland sheepdog, Shetland sheep dog, Shetland",
+      "chinese": "谢特兰羊犬",
+      "pinyin": "xiè tè lán yáng quǎn",
+      "category": "Shetland sheepdog"
+    },
+    {
+      "english": "Border collie",
+      "chinese": "边境牧羊犬",
+      "pinyin": "biān jìng mù yáng quǎn",
+      "category": "Border collie"
+    },
+    {
+      "english": "Border collie",
+      "chinese": "边境牧羊犬",
+      "pinyin": "biān jìng mù yáng quǎn",
+      "category": "Border collie"
+    },
+    {
+      "english": "Bouvier des Flandres, Bouviers des Flandres",
+      "chinese": "佛兰德斯牧牛犬",
+      "pinyin": "fó lán dé sī mù niú quǎn",
+      "category": "Bouvier des Flandres"
+    },
+    {
+      "english": "Rottweiler",
+      "chinese": "罗威纳犬",
+      "pinyin": "luó wēi nà quǎn",
+      "category": "Rottweiler"
+    },
+    {
+      "english": "German shepherd, German shepherd dog, German police dog, alsatian",
+      "chinese": "德国牧羊犬",
+      "pinyin": "dé guó mù yáng quǎn",
+      "category": "German shepherd"
+    },
+    {
+      "english": "dobermann",
+      "chinese": "杜宾犬",
+      "pinyin": "dù bīn quǎn",
+      "category": "dobermann"
+    },
+    {
+      "english": "miniature poodle",
+      "chinese": "迷你贵宾犬",
+      "pinyin": "mí nǐ guì bīn quǎn",
+      "category": "miniature poodle"
+    },
+    {
+      "english": "Greater Swiss Mountain dog",
+      "chinese": "大瑞士山地犬",
+      "pinyin": "dà ruì shì shān dì quǎn",
+      "category": "Greater Swiss Mountain dog"
+    },
+    {
+      "english": "Bernese mountain dog",
+      "chinese": "伯恩山犬",
+      "pinyin": "bó ēn shān quǎn",
+      "category": "Bernese mountain dog"
+    },
+    {
+      "english": "Appenzeller",
+      "chinese": "英波泽尔",
+      "pinyin": "Yīng bō zé ěr",
+      "category": "Appenzeller"
+    },
+    {
+      "english": "EntleBucher",
+      "chinese": "恩特勒布赫",
+      "pinyin": "Ēn tè lè bù hè",
+      "category": "EntleBucher"
+    },
+    {
+      "english": "boxer",
+      "chinese": "拳师犬",
+      "pinyin": "Quán shī quǎn",
+      "category": "boxer"
+    },
+    {
+      "english": "bullmastiff",
+      "chinese": "斗牛獒",
+      "pinyin": "Dòu niú áo",
+      "category": "bullmastiff"
+    },
+    {
+      "english": "Tibetan mastiff",
+      "chinese": "藏獒",
+      "pinyin": "Zàng áo",
+      "category": "Tibetan mastiff"
+    },
+    {
+      "english": "French loaf",
+      "chinese": "法式面包",
+      "pinyin": "fǎ shì miàn bāo",
+      "category": "French loaf"
+    },
+    {
+      "english": "Great Pyrenees",
+      "chinese": "大白熊犬",
+      "pinyin": "Dà bái xióng quǎn",
+      "category": "Great Pyrenees"
+    },
+    {
+      "english": "st. bernard",
+      "chinese": "圣伯纳德",
+      "pinyin": "Shèng bó nà dé",
+      "category": "st. bernard"
+    },
+    {
+      "english": "Siberian husky",
+      "chinese": "西伯利亚哈士奇",
+      "pinyin": "Xī bó lì yà hā shì qí",
+      "category": "Siberian husky"
+    },
+    {
+      "english": "malamute, malemute, Alaskan malamute",
+      "chinese": "阿拉斯加雪橇犬",
+      "pinyin": "Ā lā sī jiā xuě qiāo quǎn",
+      "category": "malamute"
+    },
+    {
+      "english": "Siberian husky",
+      "chinese": "西伯利亚哈士奇",
+      "pinyin": "Xī bó lì yà hā shì qí",
+      "category": "Siberian husky"
+    },
+    {
+      "english": "dalmatian, coach dog, carriage dog",
+      "chinese": "达尔马提亚犬",
+      "pinyin": "Dá ěr mǎ tí yà quǎn",
+      "category": "dalmatian"
+    },
+    {
+      "english": "affenpinscher, monkey pinscher, monkey dog",
+      "chinese": "猴猴犬",
+      "pinyin": "Hóu hóu quǎn",
+      "category": "affenpinscher"
+    },
+    {
+      "english": "basenji",
+      "chinese": "巴仙吉犬",
+      "pinyin": "Bā xiān jí quǎn",
+      "category": "basenji"
+    },
+    {
+      "english": "pug, pug-dog",
+      "chinese": "巴哥犬",
+      "pinyin": "Bā gē quǎn",
+      "category": "pug"
+    },
+    {
+      "english": "leonberger",
+      "chinese": "萨摩耶犬",
+      "pinyin": "sà mò yé quǎn",
+      "category": "leonberger"
+    },
+    {
+      "english": "Newfoundland, Newfoundland dog",
+      "chinese": "纽芬兰犬",
+      "pinyin": "niǔ fēn lán quǎn",
+      "category": "Newfoundland"
+    },
+    {
+      "english": "pyrenean mountain dog",
+      "chinese": "金毛犬",
+      "pinyin": "jīn máo quǎn",
+      "category": "pyrenean mountain dog"
+    },
+    {
+      "english": "Samoyed, Samoyede",
+      "chinese": "萨摩耶犬",
+      "pinyin": "sà mò yé quǎn",
+      "category": "Samoyed"
+    },
+    {
+      "english": "Pomeranian",
+      "chinese": "博美犬",
+      "pinyin": "bó měi quǎn",
+      "category": "Pomeranian"
+    },
+    {
+      "english": "chow, chow chow",
+      "chinese": "鬆獅犬",
+      "pinyin": "sōng shī quǎn",
+      "category": "chow"
+    },
+    {
+      "english": "keeshond",
+      "chinese": "凯斯犬",
+      "pinyin": "kǎi sī quǎn",
+      "category": "keeshond"
+    },
+    {
+      "english": "griffon bruxellois",
+      "chinese": "布鲁塞尔格里芬犬",
+      "pinyin": "bù lǔ sài ěr gé lǐ fēn quǎn",
+      "category": "griffon bruxellois"
+    },
+    {
+      "english": "Pembroke, Pembroke Welsh corgi",
+      "chinese": "佩姆布罗克威尔士柯基犬",
+      "pinyin": "pèi mǔ bù luò kè wēi ěr shì kē jī quǎn",
+      "category": "Pembroke"
+    },
+    {
+      "english": "cardigan",
+      "chinese": "羊毛衫",
+      "pinyin": "yángmáoshān",
+      "category": "cardigan"
+    },
+    {
+      "english": "toy poodle",
+      "chinese": "玩具贵宾犬",
+      "pinyin": "wán jù guì bīn quǎn",
+      "category": "toy poodle"
+    },
+    {
+      "english": "miniature poodle",
+      "chinese": "迷你贵宾犬",
+      "pinyin": "mí nǐ guì bīn quǎn",
+      "category": "miniature poodle"
+    },
+    {
+      "english": "standard poodle",
+      "chinese": "标准贵宾犬",
+      "pinyin": "biāo zhǔn guì bīn quǎn",
+      "category": "standard poodle"
+    },
+    {
+      "english": "Mexican hairless",
+      "chinese": "墨西哥无毛犬",
+      "pinyin": "mò xī gē wú máo quǎn",
+      "category": "Mexican hairless"
+    },
+    {
+      "english": "grey fox, gray fox, Urocyon cinereoargenteus",
+      "chinese": "灰狐",
+      "pinyin": "huī hú",
+      "category": "grey fox"
+    },
+    {
+      "english": "alaskan tundra wolf",
+      "chinese": "阿拉斯加苔原狼",
+      "pinyin": "Ālāsījiā táiyuán láng",
+      "category": "alaskan tundra wolf"
+    },
+    {
+      "english": "red wine",
+      "chinese": "红葡萄酒",
+      "pinyin": "hóng pú táo jiǔ",
+      "category": "red wine"
+    },
+    {
+      "english": "coyote, prairie wolf, brush wolf, Canis latrans",
+      "chinese": "郊狼",
+      "pinyin": "jiāo láng",
+      "category": "coyote"
+    },
+    {
+      "english": "dingo, warrigal, warragal, Canis dingo",
+      "chinese": "野狗",
+      "pinyin": "yěgǒu",
+      "category": "dingo"
+    },
+    {
+      "english": "dhole, Cuon alpinus",
+      "chinese": "印度独狼",
+      "pinyin": "Yìndù dú láng",
+      "category": "dhole"
+    },
+    {
+      "english": "African elephant, Loxodonta africana",
+      "chinese": "非洲象",
+      "pinyin": "Fēizhōu xiàng",
+      "category": "African elephant"
+    },
+    {
+      "english": "hyena, hyaena",
+      "chinese": "鬣狗",
+      "pinyin": "liègǒu",
+      "category": "hyena"
+    },
+    {
+      "english": "red wine",
+      "chinese": "红葡萄酒",
+      "pinyin": "hóng pú táo jiǔ",
+      "category": "red wine"
+    },
+    {
+      "english": "kit fox, Vulpes macrotis",
+      "chinese": "小狐狸",
+      "pinyin": "xiǎo húlí",
+      "category": "kit fox"
+    },
+    {
+      "english": "Arctic fox, white fox, Alopex lagopus",
+      "chinese": "北极狐",
+      "pinyin": "Běijí hú",
+      "category": "Arctic fox"
+    },
+    {
+      "english": "grey fox, gray fox, Urocyon cinereoargenteus",
+      "chinese": "灰狐",
+      "pinyin": "huī hú",
+      "category": "grey fox"
+    },
+    {
+      "english": "tabby, tabby cat",
+      "chinese": "花斑猫",
+      "pinyin": "huābān māo",
+      "category": "tabby"
+    },
+    {
+      "english": "tiger beetle",
+      "chinese": "虎甲虫",
+      "pinyin": "hǔ jiǎchóng",
+      "category": "tiger beetle"
+    },
+    {
+      "english": "Persian cat",
+      "chinese": "波斯猫",
+      "pinyin": "Bōsī māo",
+      "category": "Persian cat"
+    },
+    {
+      "english": "Siamese cat, Siamese",
+      "chinese": "暹罗猫",
+      "pinyin": "Xiānluó māo",
+      "category": "Siamese cat"
+    },
+    {
+      "english": "Egyptian cat",
+      "chinese": "埃及猫",
+      "pinyin": "āi jí māo",
+      "category": "Egyptian cat"
+    },
+    {
+      "english": "cougar, puma, catamount, mountain lion, painter, panther, Felis concolor",
+      "chinese": "美洲狮",
+      "pinyin": "měi zhōu shī",
+      "category": "cougar"
+    },
+    {
+      "english": "lynx, catamount",
+      "chinese": "猞猁",
+      "pinyin": "shē lì",
+      "category": "lynx"
+    },
+    {
+      "english": "snow leopard, ounce, Panthera uncia",
+      "chinese": "雪豹",
+      "pinyin": "xuě bào",
+      "category": "snow leopard"
+    },
+    {
+      "english": "snow leopard, ounce, Panthera uncia",
+      "chinese": "雪豹",
+      "pinyin": "xuě bào",
+      "category": "snow leopard"
+    },
+    {
+      "english": "jaguar, panther, Panthera onca, Felis onca",
+      "chinese": "美洲豹",
+      "pinyin": "měi zhōu bào",
+      "category": "jaguar"
+    },
+    {
+      "english": "lionfish",
+      "chinese": "狮子鱼",
+      "pinyin": "shī zi yú",
+      "category": "lionfish"
+    },
+    {
+      "english": "tiger beetle",
+      "chinese": "虎甲虫",
+      "pinyin": "hǔ jiǎchóng",
+      "category": "tiger beetle"
+    },
+    {
+      "english": "cheetah, chetah, Acinonyx jubatus",
+      "chinese": "猎豹",
+      "pinyin": "liè bào",
+      "category": "cheetah"
+    },
+    {
+      "english": "brown bear, bruin, Ursus arctos",
+      "chinese": "棕熊",
+      "pinyin": "zōng xióng",
+      "category": "brown bear"
+    },
+    {
+      "english": "American black bear, black bear, Ursus americanus, Euarctos americanus",
+      "chinese": "美洲黑熊",
+      "pinyin": "měi zhōu hēi xióng",
+      "category": "American black bear"
+    },
+    {
+      "english": "ice bear, polar bear, Ursus Maritimus, Thalarctos maritimus",
+      "chinese": "北极熊",
+      "pinyin": "běi jí xióng",
+      "category": "ice bear"
+    },
+    {
+      "english": "sloth bear, Melursus ursinus, Ursus ursinus",
+      "chinese": "树懒熊",
+      "pinyin": "shù lǎn xióng",
+      "category": "sloth bear"
+    },
+    {
+      "english": "mongoose",
+      "chinese": "獴",
+      "pinyin": "měng",
+      "category": "mongoose"
+    },
+    {
+      "english": "meerkat, mierkat",
+      "chinese": "猫鼬",
+      "pinyin": "māo yòu",
+      "category": "meerkat"
+    },
+    {
+      "english": "tiger beetle",
+      "chinese": "虎甲虫",
+      "pinyin": "hǔ jiǎchóng",
+      "category": "tiger beetle"
+    },
+    {
+      "english": "ladybug, ladybeetle, lady beetle, ladybird, ladybird beetle",
+      "chinese": "瓢虫",
+      "pinyin": "piáochóng",
+      "category": "ladybug"
+    },
+    {
+      "english": "ground beetle, carabid beetle",
+      "chinese": "土龟甲",
+      "pinyin": "tǔ guī jiǎ",
+      "category": "ground beetle"
+    },
+    {
+      "english": "longhorn beetle",
+      "chinese": "天牛",
+      "pinyin": "tiān niú",
+      "category": "longhorn beetle"
+    },
+    {
+      "english": "leaf beetle, chrysomelid",
+      "chinese": "叶甲",
+      "pinyin": "yè jiǎ",
+      "category": "leaf beetle"
+    },
+    {
+      "english": "dung beetle",
+      "chinese": "蜣螂",
+      "pinyin": "qiāng láng",
+      "category": "dung beetle"
+    },
+    {
+      "english": "rhinoceros beetle",
+      "chinese": "犀牛甲",
+      "pinyin": "xīniú jiǎ",
+      "category": "rhinoceros beetle"
+    },
+    {
+      "english": "weevil",
+      "chinese": "象鼻虫",
+      "pinyin": "xiàng bí chóng",
+      "category": "weevil"
+    },
+    {
+      "english": "lycaenid, lycaenid butterfly",
+      "chinese": "灰蝶",
+      "pinyin": "huī dié",
+      "category": "lycaenid"
+    },
+    {
+      "english": "beer glass",
+      "chinese": "啤酒杯",
+      "pinyin": "píjiǔ bēi",
+      "category": "beer glass"
+    },
+    {
+      "english": "restaurant, eating house, eating place, eatery",
+      "chinese": "餐厅",
+      "pinyin": "cān tīng",
+      "category": "restaurant"
+    },
+    {
+      "english": "grasshopper, hopper",
+      "chinese": "蚱蜢",
+      "pinyin": "zhàměng",
+      "category": "grasshopper"
+    },
+    {
+      "english": "cricket",
+      "chinese": "蟋蟀",
+      "pinyin": "xīshuài",
+      "category": "cricket"
+    },
+    {
+      "english": "walking stick, walkingstick, stick insect",
+      "chinese": "步甲",
+      "pinyin": "bù jiǎ",
+      "category": "walking stick"
+    },
+    {
+      "english": "cockroach, roach",
+      "chinese": "蟑螂",
+      "pinyin": "zhāng láng",
+      "category": "cockroach"
+    },
+    {
+      "english": "mantis, mantid",
+      "chinese": "螳螂",
+      "pinyin": "tángláng",
+      "category": "mantis"
+    },
+    {
+      "english": "cicada, cicala",
+      "chinese": "蝉",
+      "pinyin": "chán",
+      "category": "cicada"
+    },
+    {
+      "english": "leafhopper",
+      "chinese": "叶蝉",
+      "pinyin": "yèchán",
+      "category": "leafhopper"
+    },
+    {
+      "english": "lacewing, lacewing fly",
+      "chinese": "草蛉",
+      "pinyin": "cǎolíng",
+      "category": "lacewing"
+    },
+    {
+      "english": "dragonfly, darning needle, devil's darning needle, sewing needle, snake fder, snake doctor, mosquito hawk, skeeter hawk\",",
+      "chinese": "蜻蜓",
+      "pinyin": "qīngtíng",
+      "category": "dragonfly"
+    },
+    {
+      "english": "damselfly",
+      "chinese": "豆娘",
+      "pinyin": "dòuniáng",
+      "category": "damselfly"
+    },
+    {
+      "english": "red wine",
+      "chinese": "红葡萄酒",
+      "pinyin": "hóng pú táo jiǔ",
+      "category": "red wine"
+    },
+    {
+      "english": "ringlet, ringlet butterfly",
+      "chinese": "璎珞蛱蝶",
+      "pinyin": "yīngluò jiádié",
+      "category": "ringlet"
+    },
+    {
+      "english": "monarch, monarch butterfly, milkweed butterfly, Danaus plexippus",
+      "chinese": "帝王蝶",
+      "pinyin": "dìwáng dié",
+      "category": "monarch"
+    },
+    {
+      "english": "small white",
+      "chinese": "小白灰蝶",
+      "pinyin": "xiǎo bái huīdié",
+      "category": "small white"
+    },
+    {
+      "english": "sulphur butterfly, sulfur butterfly",
+      "chinese": "硫黄蝶",
+      "pinyin": "liúhuáng dié",
+      "category": "sulphur butterfly"
+    },
+    {
+      "english": "gossamer-winged butterfly",
+      "chinese": "绢蝶",
+      "pinyin": "juàn dié",
+      "category": "gossamer-winged butterfly"
+    },
+    {
+      "english": "starfish, sea star",
+      "chinese": "海星",
+      "pinyin": "hǎixīng",
+      "category": "starfish"
+    },
+    {
+      "english": "sea cucumber, holothurian",
+      "chinese": "海参",
+      "pinyin": "hǎishēn",
+      "category": "sea cucumber"
+    },
+    {
+      "english": "sea cucumber, holothurian",
+      "chinese": "海参",
+      "pinyin": "hǎishēn",
+      "category": "sea cucumber"
+    },
+    {
+      "english": "wood rabbit, cottontail, cottontail rabbit",
+      "chinese": "野兔",
+      "pinyin": "yětù",
+      "category": "wood rabbit"
+    },
+    {
+      "english": "hare",
+      "chinese": "野兔",
+      "pinyin": "yětù",
+      "category": "hare"
+    },
+    {
+      "english": "Angora, Angora rabbit",
+      "chinese": "安哥拉兔",
+      "pinyin": "āngēlātù",
+      "category": "Angora"
+    },
+    {
+      "english": "hamster",
+      "chinese": "仓鼠",
+      "pinyin": "cāngshǔ",
+      "category": "hamster"
+    },
+    {
+      "english": "porcupine, hedgehog",
+      "chinese": "刺猬",
+      "pinyin": "cìwèi",
+      "category": "porcupine"
+    },
+    {
+      "english": "fox squirrel, eastern fox squirrel, Sciurus niger",
+      "chinese": "松鼠",
+      "pinyin": "sōngshǔ",
+      "category": "fox squirrel"
+    },
+    {
+      "english": "marmot",
+      "chinese": "土拨鼠",
+      "pinyin": "tǔbōshǔ",
+      "category": "marmot"
+    },
+    {
+      "english": "beaver",
+      "chinese": "海狸",
+      "pinyin": "hǎilí",
+      "category": "beaver"
+    },
+    {
+      "english": "guinea pig, Cavia cobaya",
+      "chinese": "天竺鼠",
+      "pinyin": "tiānzhúshǔ",
+      "category": "guinea pig"
+    },
+    {
+      "english": "common iguana, iguana, Iguana iguana",
+      "chinese": "鬣蜥",
+      "pinyin": "liè xī",
+      "category": "common iguana"
+    },
+    {
+      "english": "zebra",
+      "chinese": "斑马",
+      "pinyin": "bānmǎ",
+      "category": "zebra"
+    },
+    {
+      "english": "submarine, pigboat, sub, U-boat",
+      "chinese": "潜艇",
+      "pinyin": "qián tǐng",
+      "category": "submarine"
+    },
+    {
+      "english": "wild boar, boar, Sus scrofa",
+      "chinese": "野猪",
+      "pinyin": "yězhū",
+      "category": "wild boar"
+    },
+    {
+      "english": "warthog",
+      "chinese": "疣猪",
+      "pinyin": "yóuzhū",
+      "category": "warthog"
+    },
+    {
+      "english": "hippopotamus, hippo, river horse, Hippopotamus amphibius",
+      "chinese": "河马",
+      "pinyin": "hémǎ",
+      "category": "hippopotamus"
+    },
+    {
+      "english": "refrigerator, icebox",
       "chinese": "冰箱",
       "pinyin": "bīng xiāng",
-      "category": "appliances"
+      "category": "refrigerator"
     },
     {
-      "english": "oven",
-      "chinese": "烤箱",
-      "pinyin": "kǎo xiāng",
-      "category": "appliances"
+      "english": "water tower",
+      "chinese": "水塔",
+      "pinyin": "shuǐ tǎ",
+      "category": "water tower"
     },
     {
-      "english": "microwave",
-      "chinese": "微波炉",
-      "pinyin": "wēi bō lú",
-      "category": "appliances"
+      "english": "bison",
+      "chinese": "北美野牛",
+      "pinyin": "běi měi yěniú",
+      "category": "bison"
     },
     {
-      "english": "toaster",
-      "chinese": "烤面包机",
-      "pinyin": "kǎo miàn bāo jī",
-      "category": "appliances"
+      "english": "streetcar, tram, tramcar, trolley, trolley car",
+      "chinese": "有轨电车",
+      "pinyin": "yǒu guǐ diàn chē",
+      "category": "streetcar"
     },
     {
-      "english": "sink",
-      "chinese": "水槽",
-      "pinyin": "shuǐ cáo",
-      "category": "home"
+      "english": "bighorn, bighorn sheep, cimarron, Rocky Mountain bighorn, Rocky Mountain eep, Ovis canadensis',",
+      "chinese": "大角羊",
+      "pinyin": "dà jiǎo yáng",
+      "category": "bighorn"
     },
     {
-      "english": "clock",
-      "chinese": "时钟",
-      "pinyin": "shí zhōng",
-      "category": "home"
+      "english": "alpine ibex",
+      "chinese": "高山岩羊",
+      "pinyin": "gāo shān yán yáng",
+      "category": "alpine ibex"
     },
     {
-      "english": "vase",
-      "chinese": "花瓶",
-      "pinyin": "huā píng",
-      "category": "home"
+      "english": "hartebeest",
+      "chinese": "羚羊",
+      "pinyin": "líng yáng",
+      "category": "hartebeest"
     },
     {
-      "english": "scissors",
-      "chinese": "剪刀",
-      "pinyin": "jiǎn dāo",
-      "category": "tools"
+      "english": "impala, Aepyceros melampus",
+      "chinese": "长颈鹿",
+      "pinyin": "cháng jǐng lù",
+      "category": "impala"
     },
     {
-      "english": "teddy bear",
-      "chinese": "泰迪熊",
-      "pinyin": "tài dí xióng",
-      "category": "toys"
+      "english": "gazelle",
+      "chinese": "瞪羚",
+      "pinyin": "dèng líng",
+      "category": "gazelle"
     },
     {
-      "english": "hair drier",
+      "english": "Arabian camel, dromedary, Camelus dromedarius",
+      "chinese": "阿拉伯骆驼",
+      "pinyin": "ā lā bó luò tuó",
+      "category": "Arabian camel"
+    },
+    {
+      "english": "llama",
+      "chinese": "美洲驼",
+      "pinyin": "měi zhōu tuó",
+      "category": "llama"
+    },
+    {
+      "english": "weasel",
+      "chinese": "鼬鼠",
+      "pinyin": "yòu shǔ",
+      "category": "weasel"
+    },
+    {
+      "english": "mink",
+      "chinese": "水貂",
+      "pinyin": "shuǐ diāo",
+      "category": "mink"
+    },
+    {
+      "english": "European gallinule, Porphyrio porphyrio",
+      "chinese": "紫水鸡",
+      "pinyin": "zǐ shuǐ jī",
+      "category": "European gallinule"
+    },
+    {
+      "english": "black-footed ferret, ferret, Mustela nigripes",
+      "chinese": "黑足鼬",
+      "pinyin": "hēi zú yòu",
+      "category": "black-footed ferret"
+    },
+    {
+      "english": "potter's wheel",
+      "chinese": "陶轮",
+      "pinyin": "táo lún",
+      "category": "potter's wheel"
+    },
+    {
+      "english": "skunk, polecat, wood pussy",
+      "chinese": "臭鼬",
+      "pinyin": "chòu yòu",
+      "category": "skunk"
+    },
+    {
+      "english": "badger",
+      "chinese": "獾",
+      "pinyin": "huān",
+      "category": "badger"
+    },
+    {
+      "english": "armadillo",
+      "chinese": "犰狳",
+      "pinyin": "qiú yú",
+      "category": "armadillo"
+    },
+    {
+      "english": "three-toed sloth, ai, Bradypus tridactylus",
+      "chinese": "树懒",
+      "pinyin": "shù lǎn",
+      "category": "three-toed sloth"
+    },
+    {
+      "english": "orangutan, orang, orangutang, Pongo pygmaeus",
+      "chinese": "猩猩",
+      "pinyin": "xīng xing",
+      "category": "orangutan"
+    },
+    {
+      "english": "gorilla, Gorilla gorilla",
+      "chinese": "大猩猩",
+      "pinyin": "dà xīng xing",
+      "category": "gorilla"
+    },
+    {
+      "english": "chimpanzee, chimp, Pan troglodytes",
+      "chinese": "黑猩猩",
+      "pinyin": "hēi xīng xing",
+      "category": "chimpanzee"
+    },
+    {
+      "english": "gibbon, Hylobates lar",
+      "chinese": "长臂猿",
+      "pinyin": "cháng bì yuán",
+      "category": "gibbon"
+    },
+    {
+      "english": "siamang, Hylobates syndactylus, Symphalangus syndactylus",
+      "chinese": "长臂猿",
+      "pinyin": "cháng bì yuán",
+      "category": "siamang"
+    },
+    {
+      "english": "guenon, guenon monkey",
+      "chinese": "猴",
+      "pinyin": "hóu",
+      "category": "guenon"
+    },
+    {
+      "english": "patas, hussar monkey, Erythrocebus patas",
+      "chinese": "猴",
+      "pinyin": "hóu",
+      "category": "patas"
+    },
+    {
+      "english": "baboon",
+      "chinese": "狒狒",
+      "pinyin": "fèi fèi",
+      "category": "baboon"
+    },
+    {
+      "english": "macaque",
+      "chinese": "猕猴",
+      "pinyin": "mí hóu",
+      "category": "macaque"
+    },
+    {
+      "english": "langur",
+      "chinese": "叶猴",
+      "pinyin": "yè hóu",
+      "category": "langur"
+    },
+    {
+      "english": "black-and-white colobus",
+      "chinese": "黑白疣猴",
+      "pinyin": "hēi bái yóu hóu",
+      "category": "black-and-white colobus"
+    },
+    {
+      "english": "proboscis monkey, Nasalis larvatus",
+      "chinese": "长鼻猴",
+      "pinyin": "cháng bí hóu",
+      "category": "proboscis monkey"
+    },
+    {
+      "english": "marmoset",
+      "chinese": "狨猴",
+      "pinyin": "róng hóu",
+      "category": "marmoset"
+    },
+    {
+      "english": "white-headed capuchin",
+      "chinese": "白头卷尾猴",
+      "pinyin": "bái tóu juǎn wěi hóu",
+      "category": "white-headed capuchin"
+    },
+    {
+      "english": "howler monkey, howler",
+      "chinese": "咆哮猴",
+      "pinyin": "páo xiào hóu",
+      "category": "howler monkey"
+    },
+    {
+      "english": "titi, titi monkey",
+      "chinese": "缇缇猴",
+      "pinyin": "tí tí hóu",
+      "category": "titi"
+    },
+    {
+      "english": "geoffroy's spider monkey",
+      "chinese": "杰弗里蜘蛛猴",
+      "pinyin": "jié fú lǐ zhī zhū hóu",
+      "category": "geoffroy's spider monkey"
+    },
+    {
+      "english": "common iguana, iguana, Iguana iguana",
+      "chinese": "鬣蜥",
+      "pinyin": "liè xī",
+      "category": "common iguana"
+    },
+    {
+      "english": "Madagascar cat, ring-tailed lemur, Lemur catta",
+      "chinese": "长尾狐猴",
+      "pinyin": "cháng wěi hú hóu",
+      "category": "Madagascar cat"
+    },
+    {
+      "english": "indri, indris, Indri indri, Indri brevicaudatus",
+      "chinese": "印度狐猴",
+      "pinyin": "yìn dù hú hóu",
+      "category": "indri"
+    },
+    {
+      "english": "asian elephant",
+      "chinese": "亚洲象",
+      "pinyin": "yà zhōu xiàng",
+      "category": "asian elephant"
+    },
+    {
+      "english": "African grey, African gray, Psittacus erithacus",
+      "chinese": "非洲灰鹦鹉",
+      "pinyin": "fēi zhōu huī yīng wǔ",
+      "category": "African grey"
+    },
+    {
+      "english": "red wine",
+      "chinese": "红葡萄酒",
+      "pinyin": "hóng pú táo jiǔ",
+      "category": "red wine"
+    },
+    {
+      "english": "giant panda, panda, panda bear, coon bear, Ailuropoda melanoleuca",
+      "chinese": "大熊猫",
+      "pinyin": "dà xióng māo",
+      "category": "giant panda"
+    },
+    {
+      "english": "barracouta, snoek",
+      "chinese": "鳕鱼",
+      "pinyin": "xuě yú",
+      "category": "barracouta"
+    },
+    {
+      "english": "steel drum",
+      "chinese": "钢鼓",
+      "pinyin": "gāng gǔ",
+      "category": "steel drum"
+    },
+    {
+      "english": "coho, cohoe, coho salmon, blue jack, silver salmon, Oncorhynchus kisutch",
+      "chinese": "银鲑",
+      "pinyin": "yín guī",
+      "category": "coho"
+    },
+    {
+      "english": "rock python, rock snake, Python sebae",
+      "chinese": "岩蟒",
+      "pinyin": "yán máng",
+      "category": "rock python"
+    },
+    {
+      "english": "clownfish",
+      "chinese": "小丑鱼",
+      "pinyin": "xiǎo chǒu yú",
+      "category": "clownfish"
+    },
+    {
+      "english": "sturgeon",
+      "chinese": "鲟鱼",
+      "pinyin": "xún yú",
+      "category": "sturgeon"
+    },
+    {
+      "english": "gar, garfish, garpike, billfish, Lepisosteus osseus",
+      "chinese": "鳄鱼鱼",
+      "pinyin": "è yú",
+      "category": "gar"
+    },
+    {
+      "english": "lionfish",
+      "chinese": "狮子鱼",
+      "pinyin": "shī zi yú",
+      "category": "lionfish"
+    },
+    {
+      "english": "puffer, pufferfish, blowfish, globefish",
+      "chinese": "河豚",
+      "pinyin": "hé tún",
+      "category": "puffer"
+    },
+    {
+      "english": "abacus",
+      "chinese": "算盘",
+      "pinyin": "suàn pán",
+      "category": "abacus"
+    },
+    {
+      "english": "abaya",
+      "chinese": "阿拉伯长袍",
+      "pinyin": "ā lā bó cháng páo",
+      "category": "abaya"
+    },
+    {
+      "english": "academic gown, academic robe, judge's robe",
+      "chinese": "学术袍",
+      "pinyin": "xué shù páo",
+      "category": "academic gown"
+    },
+    {
+      "english": "accordion, piano accordion, squeeze box",
+      "chinese": "手风琴",
+      "pinyin": "shǒu fēng qín",
+      "category": "accordion"
+    },
+    {
+      "english": "acoustic guitar",
+      "chinese": "吉他",
+      "pinyin": "jí tā",
+      "category": "acoustic guitar"
+    },
+    {
+      "english": "aircraft carrier, carrier, flattop, attack aircraft carrier",
+      "chinese": "航空母舰",
+      "pinyin": "háng kōng mǔ jiàn",
+      "category": "aircraft carrier"
+    },
+    {
+      "english": "airliner",
+      "chinese": "客机",
+      "pinyin": "kè jī",
+      "category": "airliner"
+    },
+    {
+      "english": "airship, dirigible",
+      "chinese": "飞艇",
+      "pinyin": "fēitǐng",
+      "category": "airship"
+    },
+    {
+      "english": "altar",
+      "chinese": "祭坛",
+      "pinyin": "jìtán",
+      "category": "altar"
+    },
+    {
+      "english": "ambulance",
+      "chinese": "救护车",
+      "pinyin": "jiùhùchē",
+      "category": "ambulance"
+    },
+    {
+      "english": "amphibian, amphibious vehicle",
+      "chinese": "水陆两栖车",
+      "pinyin": "shuǐlù liǎngqī chē",
+      "category": "amphibian"
+    },
+    {
+      "english": "analog clock",
+      "chinese": "钟表",
+      "pinyin": "zhōngbiǎo",
+      "category": "analog clock"
+    },
+    {
+      "english": "apiary, bee house",
+      "chinese": "蜂房",
+      "pinyin": "fēng fáng",
+      "category": "apiary"
+    },
+    {
+      "english": "apron",
+      "chinese": "围裙",
+      "pinyin": "wéiqún",
+      "category": "apron"
+    },
+    {
+      "english": "waste container",
+      "chinese": "垃圾容器",
+      "pinyin": "lèsè róngqì",
+      "category": "waste container"
+    },
+    {
+      "english": "assault rifle, assault gun",
+      "chinese": "突击步枪",
+      "pinyin": "tūjí bùqiāng",
+      "category": "assault rifle"
+    },
+    {
+      "english": "backpack, back pack, knapsack, packsack, rucksack, haversack",
+      "chinese": "背包",
+      "pinyin": "bēibāo",
+      "category": "backpack"
+    },
+    {
+      "english": "bakery, bakeshop, bakehouse",
+      "chinese": "面包店",
+      "pinyin": "miànbāo diàn",
+      "category": "bakery"
+    },
+    {
+      "english": "balance beam, beam",
+      "chinese": "平衡木",
+      "pinyin": "pínghéng mù",
+      "category": "balance beam"
+    },
+    {
+      "english": "balloon",
+      "chinese": "气球",
+      "pinyin": "qìqiú",
+      "category": "balloon"
+    },
+    {
+      "english": "ballpoint, ballpoint pen, ballpen, Biro",
+      "chinese": "圆珠笔",
+      "pinyin": "yuánzhūbǐ",
+      "category": "ballpoint"
+    },
+    {
+      "english": "band-aid",
+      "chinese": "创可贴",
+      "pinyin": "chuàngkětiē",
+      "category": "band-aid"
+    },
+    {
+      "english": "banjo",
+      "chinese": "班卓琴",
+      "pinyin": "bān zhuó qín",
+      "category": "banjo"
+    },
+    {
+      "english": "bannister, banister, balustrade, balusters, handrail",
+      "chinese": "栏杆",
+      "pinyin": "lán gān",
+      "category": "bannister"
+    },
+    {
+      "english": "barbell",
+      "chinese": "杠铃",
+      "pinyin": "gàng líng",
+      "category": "barbell"
+    },
+    {
+      "english": "barber chair",
+      "chinese": "理发椅",
+      "pinyin": "lǐ fà yǐ",
+      "category": "barber chair"
+    },
+    {
+      "english": "barbershop",
+      "chinese": "理发店",
+      "pinyin": "lǐ fà diàn",
+      "category": "barbershop"
+    },
+    {
+      "english": "barn",
+      "chinese": "谷仓",
+      "pinyin": "gǔ cāng",
+      "category": "barn"
+    },
+    {
+      "english": "barometer",
+      "chinese": "气压计",
+      "pinyin": "qì yā jì",
+      "category": "barometer"
+    },
+    {
+      "english": "rain barrel",
+      "chinese": "雨水桶",
+      "pinyin": "yǔ shuǐ tǒng",
+      "category": "rain barrel"
+    },
+    {
+      "english": "barrow, garden cart, lawn cart, wheelbarrow",
+      "chinese": "手推车",
+      "pinyin": "shǒu tuī chē",
+      "category": "barrow"
+    },
+    {
+      "english": "ballplayer, baseball player",
+      "chinese": "棒球运动员",
+      "pinyin": "bàng qiú yùn dòng yuán",
+      "category": "ballplayer"
+    },
+    {
+      "english": "basketball",
+      "chinese": "篮球",
+      "pinyin": "lán qiú",
+      "category": "basketball"
+    },
+    {
+      "english": "bassinet",
+      "chinese": "摇篮",
+      "pinyin": "yáo lán",
+      "category": "bassinet"
+    },
+    {
+      "english": "bassoon",
+      "chinese": "巴松管",
+      "pinyin": "bā sōng guǎn",
+      "category": "bassoon"
+    },
+    {
+      "english": "swimming trunks, bathing trunks",
+      "chinese": "游泳裤",
+      "pinyin": "yóu yǒng kù",
+      "category": "swimming trunks"
+    },
+    {
+      "english": "bath towel",
+      "chinese": "浴巾",
+      "pinyin": "yù jīn",
+      "category": "bath towel"
+    },
+    {
+      "english": "bathtub, bathing tub, bath, tub",
+      "chinese": "浴缸",
+      "pinyin": "yùgāng",
+      "category": "bathtub"
+    },
+    {
+      "english": "beach wagon, station wagon, wagon, estate car, beach waggon, station wagg, waggon',",
+      "chinese": "旅行车",
+      "pinyin": "lǚxíng chē",
+      "category": "beach wagon"
+    },
+    {
+      "english": "beacon, lighthouse, beacon light, pharos",
+      "chinese": "灯塔",
+      "pinyin": "dēngtǎ",
+      "category": "beacon"
+    },
+    {
+      "english": "beaker",
+      "chinese": "烧杯",
+      "pinyin": "shāobēi",
+      "category": "beaker"
+    },
+    {
+      "english": "military uniform",
+      "chinese": "军服",
+      "pinyin": "jūn fú",
+      "category": "military uniform"
+    },
+    {
+      "english": "beer bottle",
+      "chinese": "啤酒瓶",
+      "pinyin": "píjiǔ píng",
+      "category": "beer bottle"
+    },
+    {
+      "english": "beer glass",
+      "chinese": "啤酒杯",
+      "pinyin": "píjiǔ bēi",
+      "category": "beer glass"
+    },
+    {
+      "english": "bell-cot",
+      "chinese": "钟楼",
+      "pinyin": "zhōnglóu",
+      "category": "bell-cot"
+    },
+    {
+      "english": "bib",
+      "chinese": "围嘴",
+      "pinyin": "wéizuǐ",
+      "category": "bib"
+    },
+    {
+      "english": "bicycle-built-for-two, tandem bicycle, tandem",
+      "chinese": "双人自行车",
+      "pinyin": "shuāngrén zìxíngchē",
+      "category": "bicycle-built-for-two"
+    },
+    {
+      "english": "bikini, two-piece",
+      "chinese": "比基尼",
+      "pinyin": "bǐjīní",
+      "category": "bikini"
+    },
+    {
+      "english": "ring binder",
+      "chinese": "活页夹",
+      "pinyin": "huóyè jiā",
+      "category": "ring binder"
+    },
+    {
+      "english": "binoculars, field glasses, opera glasses",
+      "chinese": "双筒望远镜",
+      "pinyin": "shuāngtǒng wàngyuǎnjìng",
+      "category": "binoculars"
+    },
+    {
+      "english": "birdhouse",
+      "chinese": "鸟屋",
+      "pinyin": "niǎowū",
+      "category": "birdhouse"
+    },
+    {
+      "english": "boathouse",
+      "chinese": "船屋",
+      "pinyin": "chuánwū",
+      "category": "boathouse"
+    },
+    {
+      "english": "bobsled, bobsleigh, bob",
+      "chinese": "雪橇",
+      "pinyin": "xuěqiāo",
+      "category": "bobsled"
+    },
+    {
+      "english": "bolo tie, bolo, bola tie, bola",
+      "chinese": "领结",
+      "pinyin": "lǐng jié",
+      "category": "bolo tie"
+    },
+    {
+      "english": "bonnet, poke bonnet",
+      "chinese": "罩帽",
+      "pinyin": "zhào mào",
+      "category": "bonnet"
+    },
+    {
+      "english": "bookcase",
+      "chinese": "书架",
+      "pinyin": "shū jià",
+      "category": "bookcase"
+    },
+    {
+      "english": "bookshop, bookstore, bookstall",
+      "chinese": "书店",
+      "pinyin": "shū diàn",
+      "category": "bookshop"
+    },
+    {
+      "english": "bottle cap",
+      "chinese": "瓶盖",
+      "pinyin": "píng gài",
+      "category": "bottle cap"
+    },
+    {
+      "english": "washbasin, handbasin, washbowl, lavabo, wash-hand basin",
+      "chinese": "洗手盆",
+      "pinyin": "xǐ shǒu pén",
+      "category": "washbasin"
+    },
+    {
+      "english": "bow tie, bow-tie, bowtie",
+      "chinese": "领结",
+      "pinyin": "lǐng jié",
+      "category": "bow tie"
+    },
+    {
+      "english": "brassiere, bra, bandeau",
+      "chinese": "胸罩",
+      "pinyin": "xiōng zhào",
+      "category": "brassiere"
+    },
+    {
+      "english": "neck brace",
+      "chinese": "颈围",
+      "pinyin": "jǐng wéi",
+      "category": "neck brace"
+    },
+    {
+      "english": "breakwater, groin, groyne, mole, bulwark, seawall, jetty",
+      "chinese": "防波堤",
+      "pinyin": "fáng bō dī",
+      "category": "breakwater"
+    },
+    {
+      "english": "breastplate, aegis, egis",
+      "chinese": "胸甲",
+      "pinyin": "xiōng jiǎ",
+      "category": "breastplate"
+    },
+    {
+      "english": "broom",
+      "chinese": "扫帚",
+      "pinyin": "sǎo zhǒu",
+      "category": "broom"
+    },
+    {
+      "english": "bucket, pail",
+      "chinese": "桶",
+      "pinyin": "tǒng",
+      "category": "bucket"
+    },
+    {
+      "english": "shield, buckler",
+      "chinese": "盾牌",
+      "pinyin": "dùnpái",
+      "category": "shield"
+    },
+    {
+      "english": "bulletproof vest",
+      "chinese": "防弹背心",
+      "pinyin": "fángdàn bèixīn",
+      "category": "bulletproof vest"
+    },
+    {
+      "english": "high-speed train",
+      "chinese": "高速列车",
+      "pinyin": "gāosù lièchē",
+      "category": "high-speed train"
+    },
+    {
+      "english": "butcher shop, meat market",
+      "chinese": "肉铺",
+      "pinyin": "ròupù",
+      "category": "butcher shop"
+    },
+    {
+      "english": "cab, hack, taxi, taxicab",
+      "chinese": "出租车",
+      "pinyin": "chūzūchē",
+      "category": "cab"
+    },
+    {
+      "english": "caldron, cauldron",
+      "chinese": "大锅",
+      "pinyin": "dàguō",
+      "category": "caldron"
+    },
+    {
+      "english": "candle, taper, wax light",
+      "chinese": "蜡烛",
+      "pinyin": "làzhú",
+      "category": "candle"
+    },
+    {
+      "english": "cannon",
+      "chinese": "大炮",
+      "pinyin": "dàpào",
+      "category": "cannon"
+    },
+    {
+      "english": "canoe",
+      "chinese": "独木舟",
+      "pinyin": "dúmùzhōu",
+      "category": "canoe"
+    },
+    {
+      "english": "can opener, tin opener",
+      "chinese": "开罐器",
+      "pinyin": "kāiguànqì",
+      "category": "can opener"
+    },
+    {
+      "english": "cardigan",
+      "chinese": "羊毛衫",
+      "pinyin": "yángmáoshān",
+      "category": "cardigan"
+    },
+    {
+      "english": "car mirror",
+      "chinese": "车镜",
+      "pinyin": "chējìng",
+      "category": "car mirror"
+    },
+    {
+      "english": "carousel, carrousel, merry-go-round, roundabout, whirligig",
+      "chinese": "旋转木马",
+      "pinyin": "xuánzhuàn mùmǎ",
+      "category": "carousel"
+    },
+    {
+      "english": "carpenter's kit, tool kit",
+      "chinese": "木工工具箱",
+      "pinyin": "mùgōng gōngjùxiāng",
+      "category": "carpenter's kit"
+    },
+    {
+      "english": "carton",
+      "chinese": "纸盒",
+      "pinyin": "zhǐhé",
+      "category": "carton"
+    },
+    {
+      "english": "car wheel",
+      "chinese": "汽车车轮",
+      "pinyin": "qìchē chēlún",
+      "category": "car wheel"
+    },
+    {
+      "english": "cash machine, cash dispenser, automated teller machine, automatic teller chine, automated teller, automatic teller, ATM',",
+      "chinese": "自动取款机",
+      "pinyin": "zì dòng qǔ kuǎn jī",
+      "category": "cash machine"
+    },
+    {
+      "english": "cassette player",
+      "chinese": "磁带播放器",
+      "pinyin": "cí dài bō fàng qì",
+      "category": "cassette player"
+    },
+    {
+      "english": "cassette player",
+      "chinese": "磁带播放器",
+      "pinyin": "cí dài bō fàng qì",
+      "category": "cassette player"
+    },
+    {
+      "english": "castle",
+      "chinese": "城堡",
+      "pinyin": "chéng bǎo",
+      "category": "castle"
+    },
+    {
+      "english": "catamaran",
+      "chinese": "双体船",
+      "pinyin": "shuāng tǐ chuán",
+      "category": "catamaran"
+    },
+    {
+      "english": "CD player",
+      "chinese": "CD 播放器",
+      "pinyin": "CD bō fàng qì",
+      "category": "CD player"
+    },
+    {
+      "english": "cello, violoncello",
+      "chinese": "大提琴",
+      "pinyin": "dà tí qín",
+      "category": "cello"
+    },
+    {
+      "english": "mobile home, manufactured home",
+      "chinese": "活动房",
+      "pinyin": "huó dòng fáng",
+      "category": "mobile home"
+    },
+    {
+      "english": "chain saw, chainsaw",
+      "chinese": "电锯",
+      "pinyin": "diàn jù",
+      "category": "chain saw"
+    },
+    {
+      "english": "chain-link fence",
+      "chinese": "链条围栏",
+      "pinyin": "liàn tiáo wéi lán",
+      "category": "chain-link fence"
+    },
+    {
+      "english": "chain mail, ring mail, mail, chain armor, chain armour, ring armor, ring mour',",
+      "chinese": "锁子甲",
+      "pinyin": "suǒ zǐ jiǎ",
+      "category": "chain mail"
+    },
+    {
+      "english": "chain saw, chainsaw",
+      "chinese": "电锯",
+      "pinyin": "diàn jù",
+      "category": "chain saw"
+    },
+    {
+      "english": "buckeye, horse chestnut, conker",
+      "chinese": "七叶树",
+      "pinyin": "qī yè shù",
+      "category": "buckeye"
+    },
+    {
+      "english": "chiffonier, commode",
+      "chinese": "简易衣柜",
+      "pinyin": "jiǎn yì yī guì",
+      "category": "chiffonier"
+    },
+    {
+      "english": "chime, bell, gong",
+      "chinese": "风铃",
+      "pinyin": "fēng líng",
+      "category": "chime"
+    },
+    {
+      "english": "china cabinet, china closet",
+      "chinese": "中国橱柜",
+      "pinyin": "Zhōngguó chúguì",
+      "category": "china cabinet"
+    },
+    {
+      "english": "Christmas stocking",
+      "chinese": "圣诞袜",
+      "pinyin": "shèng dàn wà",
+      "category": "Christmas stocking"
+    },
+    {
+      "english": "church, church building",
+      "chinese": "教堂",
+      "pinyin": "jiào táng",
+      "category": "church"
+    },
+    {
+      "english": "cinema, movie theater, movie theatre, movie house, picture palace",
+      "chinese": "电影院",
+      "pinyin": "diànyǐngyuàn",
+      "category": "cinema"
+    },
+    {
+      "english": "cleaver, meat cleaver, chopper",
+      "chinese": "菜刀",
+      "pinyin": "cài dāo",
+      "category": "cleaver"
+    },
+    {
+      "english": "cliff, drop, drop-off",
+      "chinese": "悬崖",
+      "pinyin": "xuán yá",
+      "category": "cliff"
+    },
+    {
+      "english": "cloak",
+      "chinese": "斗篷",
+      "pinyin": "dòupéng",
+      "category": "cloak"
+    },
+    {
+      "english": "clogs",
+      "chinese": "木屐",
+      "pinyin": "mù jī",
+      "category": "clogs"
+    },
+    {
+      "english": "cocktail shaker",
+      "chinese": "鸡尾酒摇匀器",
+      "pinyin": "jī wěi jiǔ yáo yún qì",
+      "category": "cocktail shaker"
+    },
+    {
+      "english": "coffee mug",
+      "chinese": "咖啡杯",
+      "pinyin": "kāfēi bēi",
+      "category": "coffee mug"
+    },
+    {
+      "english": "coffeemaker",
+      "chinese": "咖啡机",
+      "pinyin": "kāfēi jī",
+      "category": "coffeemaker"
+    },
+    {
+      "english": "coil, spiral, volute, whorl, helix",
+      "chinese": "线圈",
+      "pinyin": "xiànquān",
+      "category": "coil"
+    },
+    {
+      "english": "combination lock",
+      "chinese": "组合锁",
+      "pinyin": "zǔhé suǒ",
+      "category": "combination lock"
+    },
+    {
+      "english": "computer keyboard, keypad",
+      "chinese": "键盘",
+      "pinyin": "jiān pán",
+      "category": "computer keyboard"
+    },
+    {
+      "english": "confectionery, confectionary, candy store",
+      "chinese": "糖果店",
+      "pinyin": "táng guǒ diàn",
+      "category": "confectionery"
+    },
+    {
+      "english": "container ship, containership, container vessel",
+      "chinese": "集装箱船",
+      "pinyin": "jí zhuāng xiāng chuán",
+      "category": "container ship"
+    },
+    {
+      "english": "convertible",
+      "chinese": "敞篷车",
+      "pinyin": "chǎng péng chē",
+      "category": "convertible"
+    },
+    {
+      "english": "corkscrew, bottle screw",
+      "chinese": "开瓶器",
+      "pinyin": "kāi píng qì",
+      "category": "corkscrew"
+    },
+    {
+      "english": "cornet, horn, trumpet, trump",
+      "chinese": "小号",
+      "pinyin": "xiǎo hào",
+      "category": "cornet"
+    },
+    {
+      "english": "cowboy hat, ten-gallon hat",
+      "chinese": "十加仑帽",
+      "pinyin": "shí jiā lún mào",
+      "category": "cowboy hat"
+    },
+    {
+      "english": "cowboy hat, ten-gallon hat",
+      "chinese": "十加仑帽",
+      "pinyin": "shí jiā lún mào",
+      "category": "cowboy hat"
+    },
+    {
+      "english": "cradle",
+      "chinese": "摇篮",
+      "pinyin": "yáo lán",
+      "category": "cradle"
+    },
+    {
+      "english": "crane",
+      "chinese": "起重机",
+      "pinyin": "qǐ zhòng jī",
+      "category": "crane"
+    },
+    {
+      "english": "crash helmet",
+      "chinese": "安全头盔",
+      "pinyin": "ān quán tóu kuī",
+      "category": "crash helmet"
+    },
+    {
+      "english": "crate",
+      "chinese": "木箱",
+      "pinyin": "mù xiāng",
+      "category": "crate"
+    },
+    {
+      "english": "infant bed",
+      "chinese": "婴儿床",
+      "pinyin": "yīng ér chuáng",
+      "category": "infant bed"
+    },
+    {
+      "english": "Crock Pot",
+      "chinese": "慢炖锅",
+      "pinyin": "màn dùn guō",
+      "category": "Crock Pot"
+    },
+    {
+      "english": "croquet ball",
+      "chinese": "槌球",
+      "pinyin": "chuí qiú",
+      "category": "croquet ball"
+    },
+    {
+      "english": "crutch",
+      "chinese": "拐杖",
+      "pinyin": "guǎi zhàng",
+      "category": "crutch"
+    },
+    {
+      "english": "cuirass",
+      "chinese": "胸甲",
+      "pinyin": "xiōng jiǎ",
+      "category": "cuirass"
+    },
+    {
+      "english": "dam, dike, dyke",
+      "chinese": "水坝",
+      "pinyin": "shuǐbà",
+      "category": "dam"
+    },
+    {
+      "english": "desktop computer",
+      "chinese": "台式电脑",
+      "pinyin": "táishì diànnǎo",
+      "category": "desktop computer"
+    },
+    {
+      "english": "desktop computer",
+      "chinese": "台式电脑",
+      "pinyin": "táishì diànnǎo",
+      "category": "desktop computer"
+    },
+    {
+      "english": "rotary dial telephone",
+      "chinese": "旋转拨号电话",
+      "pinyin": "xuánzhuǎn bōhào diànhuà",
+      "category": "rotary dial telephone"
+    },
+    {
+      "english": "diaper, nappy, napkin",
+      "chinese": "尿布",
+      "pinyin": "niàobù",
+      "category": "diaper"
+    },
+    {
+      "english": "digital watch",
+      "chinese": "数字手表",
+      "pinyin": "shùzì shǒubiǎo",
+      "category": "digital watch"
+    },
+    {
+      "english": "digital watch",
+      "chinese": "数字手表",
+      "pinyin": "shùzì shǒubiǎo",
+      "category": "digital watch"
+    },
+    {
+      "english": "dining table, board",
+      "chinese": "餐桌",
+      "pinyin": "cānzhuō",
+      "category": "dining table"
+    },
+    {
+      "english": "dishrag, dishcloth",
+      "chinese": "抹布",
+      "pinyin": "mābù",
+      "category": "dishrag"
+    },
+    {
+      "english": "dishwasher, dish washer, dishwashing machine",
+      "chinese": "洗碗机",
+      "pinyin": "xǐwǎnjī",
+      "category": "dishwasher"
+    },
+    {
+      "english": "disk brake, disc brake",
+      "chinese": "盘式刹车",
+      "pinyin": "pánshì shāchē",
+      "category": "disk brake"
+    },
+    {
+      "english": "dock, dockage, docking facility",
+      "chinese": "码头",
+      "pinyin": "mǎtóu",
+      "category": "dock"
+    },
+    {
+      "english": "dogsled, dog sled, dog sleigh",
+      "chinese": "狗拉雪橇",
+      "pinyin": "gǒu lā xuěqiāo",
+      "category": "dogsled"
+    },
+    {
+      "english": "odometer, hodometer, mileometer, milometer",
+      "chinese": "里程表",
+      "pinyin": "lǐ chéng biǎo",
+      "category": "odometer"
+    },
+    {
+      "english": "doormat, welcome mat",
+      "chinese": "门垫",
+      "pinyin": "méndiàn",
+      "category": "doormat"
+    },
+    {
+      "english": "drilling platform, offshore rig",
+      "chinese": "钻井平台, 近海钻井平台",
+      "pinyin": "zuàn jǐng píng tái, jìn hǎi zuàn jǐng píng tái",
+      "category": "drilling platform"
+    },
+    {
+      "english": "drum, membranophone, tympan",
+      "chinese": "鼓槌",
+      "pinyin": "gǔ chuí",
+      "category": "drum"
+    },
+    {
+      "english": "drumstick",
+      "chinese": "鸡腿",
+      "pinyin": "jītuǐ",
+      "category": "drumstick"
+    },
+    {
+      "english": "dumbbell",
+      "chinese": "哑铃",
+      "pinyin": "yǎ líng",
+      "category": "dumbbell"
+    },
+    {
+      "english": "Dutch oven",
+      "chinese": "荷兰锅",
+      "pinyin": "hé lán guō",
+      "category": "Dutch oven"
+    },
+    {
+      "english": "electric locomotive",
+      "chinese": "电力机车",
+      "pinyin": "diàn lì jī chē",
+      "category": "electric locomotive"
+    },
+    {
+      "english": "electric locomotive",
+      "chinese": "电力机车",
+      "pinyin": "diàn lì jī chē",
+      "category": "electric locomotive"
+    },
+    {
+      "english": "electric locomotive",
+      "chinese": "电力机车",
+      "pinyin": "diàn lì jī chē",
+      "category": "electric locomotive"
+    },
+    {
+      "english": "entertainment center",
+      "chinese": "娱乐中心",
+      "pinyin": "yú lè zhōng xīn",
+      "category": "entertainment center"
+    },
+    {
+      "english": "envelope",
+      "chinese": "信封",
+      "pinyin": "xìn fēng",
+      "category": "envelope"
+    },
+    {
+      "english": "espresso",
+      "chinese": "浓缩咖啡",
+      "pinyin": "nóng suō kā fēi",
+      "category": "espresso"
+    },
+    {
+      "english": "face powder",
+      "chinese": "散粉",
+      "pinyin": "sàn fěn",
+      "category": "face powder"
+    },
+    {
+      "english": "feather boa, boa",
+      "chinese": "羽毛围巾, 蟒蛇",
+      "pinyin": "yǔ máo wéi jīn, máng shé",
+      "category": "feather boa"
+    },
+    {
+      "english": "file, file cabinet, filing cabinet",
+      "chinese": "文件, 文件柜, 文件柜",
+      "pinyin": "wén jiàn, wén jiàn guì, wén jiàn guì",
+      "category": "file"
+    },
+    {
+      "english": "fireboat",
+      "chinese": "消防船",
+      "pinyin": "xiāo fáng chuán",
+      "category": "fireboat"
+    },
+    {
+      "english": "fire screen, fireguard",
+      "chinese": "防火屏",
+      "pinyin": "fáng huǒ píng",
+      "category": "fire screen"
+    },
+    {
+      "english": "fire screen, fireguard",
+      "chinese": "防火屏",
+      "pinyin": "fáng huǒ píng",
+      "category": "fire screen"
+    },
+    {
+      "english": "flagpole, flagstaff",
+      "chinese": "旗杆",
+      "pinyin": "qí gān",
+      "category": "flagpole"
+    },
+    {
+      "english": "flute, transverse flute",
+      "chinese": "长笛",
+      "pinyin": "cháng dí",
+      "category": "flute"
+    },
+    {
+      "english": "folding chair",
+      "chinese": "折叠椅",
+      "pinyin": "zhé dié yǐ",
+      "category": "folding chair"
+    },
+    {
+      "english": "football helmet",
+      "chinese": "橄榄球头盔",
+      "pinyin": "gǎn lǎn qiú tóu kuī",
+      "category": "football helmet"
+    },
+    {
+      "english": "forklift",
+      "chinese": "叉车",
+      "pinyin": "chā chē",
+      "category": "forklift"
+    },
+    {
+      "english": "fountain pen",
+      "chinese": "钢笔",
+      "pinyin": "gāng bǐ",
+      "category": "fountain pen"
+    },
+    {
+      "english": "fountain pen",
+      "chinese": "钢笔",
+      "pinyin": "gāng bǐ",
+      "category": "fountain pen"
+    },
+    {
+      "english": "four-poster",
+      "chinese": "四柱床",
+      "pinyin": "sì zhù chuáng",
+      "category": "four-poster"
+    },
+    {
+      "english": "freight car",
+      "chinese": "货车",
+      "pinyin": "huò chē",
+      "category": "freight car"
+    },
+    {
+      "english": "French loaf",
+      "chinese": "法式面包",
+      "pinyin": "fǎ shì miàn bāo",
+      "category": "French loaf"
+    },
+    {
+      "english": "frying pan, frypan, skillet",
+      "chinese": "煎锅",
+      "pinyin": "jiān guō",
+      "category": "frying pan"
+    },
+    {
+      "english": "fur coat",
+      "chinese": "毛皮大衣",
+      "pinyin": "máo pí dà yī",
+      "category": "fur coat"
+    },
+    {
+      "english": "garbage truck, dustcart",
+      "chinese": "垃圾车",
+      "pinyin": "lā jī chē",
+      "category": "garbage truck"
+    },
+    {
+      "english": "gas pump, gasoline pump, petrol pump, island dispenser",
+      "chinese": "加油站",
+      "pinyin": "jiā yóu zhàn",
+      "category": "gas pump"
+    },
+    {
+      "english": "gas pump, gasoline pump, petrol pump, island dispenser",
+      "chinese": "加油站",
+      "pinyin": "jiā yóu zhàn",
+      "category": "gas pump"
+    },
+    {
+      "english": "goblet",
+      "chinese": "高脚杯",
+      "pinyin": "gāo jiǎo bēi",
+      "category": "goblet"
+    },
+    {
+      "english": "go-kart",
+      "chinese": "卡丁车",
+      "pinyin": "kǎ dīn chē",
+      "category": "go-kart"
+    },
+    {
+      "english": "golf ball",
+      "chinese": "高尔夫球",
+      "pinyin": "gāo'ěrfū qiú",
+      "category": "golf ball"
+    },
+    {
+      "english": "golfcart, golf cart",
+      "chinese": "高尔夫球车",
+      "pinyin": "gāo'ěrfū qiúchē",
+      "category": "golfcart"
+    },
+    {
+      "english": "gondola",
+      "chinese": "高山缆车",
+      "pinyin": "gāo shān lǎn chē",
+      "category": "gondola"
+    },
+    {
+      "english": "gong, tam-tam",
+      "chinese": "工",
+      "pinyin": "gōng",
+      "category": "gong"
+    },
+    {
+      "english": "gown",
+      "chinese": "长袍",
+      "pinyin": "chángpáo",
+      "category": "gown"
+    },
+    {
+      "english": "grand piano, grand",
+      "chinese": "大钢琴",
+      "pinyin": "dà gāngqín",
+      "category": "grand piano"
+    },
+    {
+      "english": "greenhouse, nursery, glasshouse",
+      "chinese": "温室",
+      "pinyin": "wēnshì",
+      "category": "greenhouse"
+    },
+    {
+      "english": "grille, radiator grille",
+      "chinese": "格栅",
+      "pinyin": "gé shān",
+      "category": "grille"
+    },
+    {
+      "english": "grocery store, grocery, food market, market",
+      "chinese": "杂货店",
+      "pinyin": "záhuò diàn",
+      "category": "grocery store"
+    },
+    {
+      "english": "guillotine",
+      "chinese": "断头台",
+      "pinyin": "duàntóutái",
+      "category": "guillotine"
+    },
+    {
+      "english": "barrette",
+      "chinese": "发夹",
+      "pinyin": "fā jiā",
+      "category": "barrette"
+    },
+    {
+      "english": "hair spray",
+      "chinese": "喷发胶",
+      "pinyin": "pēn fā jiāo",
+      "category": "hair spray"
+    },
+    {
+      "english": "half-track",
+      "chinese": "半履带车",
+      "pinyin": "bàn lǚ dài chē",
+      "category": "half-track"
+    },
+    {
+      "english": "hammer",
+      "chinese": "锤子",
+      "pinyin": "chuí zi",
+      "category": "hammer"
+    },
+    {
+      "english": "hamper",
+      "chinese": "阻碍",
+      "pinyin": "zǔ ài",
+      "category": "hamper"
+    },
+    {
+      "english": "hand blower, blow dryer, blow drier, hair dryer, hair drier",
       "chinese": "吹风机",
       "pinyin": "chuī fēng jī",
-      "category": "appliances"
+      "category": "hand blower"
     },
     {
-      "english": "toothbrush",
-      "chinese": "牙刷",
-      "pinyin": "yá shuā",
-      "category": "bathroom"
+      "english": "hand-held computer, hand-held microcomputer",
+      "chinese": "手持电脑",
+      "pinyin": "shǒu chí diàn nǎo",
+      "category": "hand-held computer"
     },
     {
-      "english": "train",
-      "chinese": "火车",
-      "pinyin": "huǒ chē",
-      "category": "transportation"
+      "english": "handkerchief, hankie, hanky, hankey",
+      "chinese": "手帕",
+      "pinyin": "shǒu pà",
+      "category": "handkerchief"
     },
     {
-      "english": "bus",
-      "chinese": "公共汽车",
-      "pinyin": "gōng gòng qì chē",
-      "category": "transportation"
+      "english": "hard disc, hard disk, fixed disk",
+      "chinese": "硬盘",
+      "pinyin": "yìng pán",
+      "category": "hard disc"
     },
     {
-      "english": "airplane",
-      "chinese": "飞机",
-      "pinyin": "fēi jī",
-      "category": "transportation"
+      "english": "harmonica, mouth organ, harp, mouth harp",
+      "chinese": "口琴",
+      "pinyin": "kǒu qín",
+      "category": "harmonica"
     },
     {
-      "english": "boat",
-      "chinese": "船",
-      "pinyin": "chuán",
-      "category": "transportation"
+      "english": "pencil sharpener",
+      "chinese": "铅笔刀",
+      "pinyin": "qiānbǐ dāo",
+      "category": "pencil sharpener"
     },
     {
-      "english": "fork",
-      "chinese": "叉子",
-      "pinyin": "chā zi",
-      "category": "kitchenware"
+      "english": "harvester, reaper",
+      "chinese": "收割机",
+      "pinyin": "shōu gē jī",
+      "category": "harvester"
     },
     {
-      "english": "knife",
-      "chinese": "刀",
-      "pinyin": "dāo",
-      "category": "kitchenware"
+      "english": "hatchet",
+      "chinese": "斧头",
+      "pinyin": "fǔ tóu",
+      "category": "hatchet"
     },
     {
-      "english": "spoon",
-      "chinese": "勺子",
-      "pinyin": "sháo zi",
-      "category": "kitchenware"
+      "english": "holster",
+      "chinese": "手枪套",
+      "pinyin": "shǒu qiāng tào",
+      "category": "holster"
     },
     {
-      "english": "bowl",
-      "chinese": "碗",
-      "pinyin": "wǎn",
-      "category": "kitchenware"
+      "english": "home theater, home theatre",
+      "chinese": "家庭影院",
+      "pinyin": "jiā tíng yǐng yuàn",
+      "category": "home theater"
     },
     {
-      "english": "banana",
-      "chinese": "香蕉",
-      "pinyin": "xiāng jiāo",
-      "category": "food"
+      "english": "honeycomb",
+      "chinese": "蜂窝",
+      "pinyin": "fēng wō",
+      "category": "honeycomb"
     },
     {
-      "english": "sandwich",
-      "chinese": "三明治",
-      "pinyin": "sān míng zhì",
-      "category": "food"
+      "english": "hook, claw",
+      "chinese": "钩子",
+      "pinyin": "gōu zi",
+      "category": "hook"
     },
     {
-      "english": "orange",
-      "chinese": "橙子",
-      "pinyin": "chéng zi",
-      "category": "food"
+      "english": "hoop skirt",
+      "chinese": "筒裙",
+      "pinyin": "tǒng qún",
+      "category": "hoop skirt"
     },
     {
-      "english": "broccoli",
-      "chinese": "西兰花",
-      "pinyin": "xī lán huā",
-      "category": "food"
+      "english": "horizontal bar, high bar",
+      "chinese": "单杠",
+      "pinyin": "dān gàng",
+      "category": "horizontal bar"
     },
     {
-      "english": "carrot",
-      "chinese": "胡萝卜",
-      "pinyin": "hú luó bo",
-      "category": "food"
+      "english": "horse-drawn vehicle",
+      "chinese": "马车",
+      "pinyin": "mǎ chē",
+      "category": "horse-drawn vehicle"
     },
     {
-      "english": "hot dog",
-      "chinese": "热狗",
-      "pinyin": "rè gǒu",
-      "category": "food"
+      "english": "hourglass",
+      "chinese": "沙漏",
+      "pinyin": "shā lòu",
+      "category": "hourglass"
     },
     {
-      "english": "pizza",
-      "chinese": "披萨",
-      "pinyin": "pī sà",
-      "category": "food"
+      "english": "tripod",
+      "chinese": "三脚架",
+      "pinyin": "sān jiǎo jià",
+      "category": "tripod"
     },
     {
-      "english": "donut",
-      "chinese": "甜甜圈",
-      "pinyin": "tián tián quān",
-      "category": "food"
+      "english": "clothes iron",
+      "chinese": "熨斗",
+      "pinyin": "yùn dǒu",
+      "category": "clothes iron"
     },
     {
-      "english": "cake",
-      "chinese": "蛋糕",
-      "pinyin": "dàn gāo",
-      "category": "food"
+      "english": "jack-o'-lantern",
+      "chinese": "南瓜灯",
+      "pinyin": "nán guā dēng",
+      "category": "jack-o'-lantern"
     },
     {
-      "english": "computer",
-      "chinese": "电脑",
-      "pinyin": "diàn nǎo",
-      "category": "electronics"
+      "english": "jeans",
+      "chinese": "牛仔裤",
+      "pinyin": "niú zǎi kù",
+      "category": "jeans"
+    },
+    {
+      "english": "jeep, landrover",
+      "chinese": "吉普车",
+      "pinyin": "jí pǔ chē",
+      "category": "jeep"
+    },
+    {
+      "english": "jersey, T-shirt, tee shirt",
+      "chinese": "运动衫",
+      "pinyin": "yùn dòng shān",
+      "category": "jersey"
+    },
+    {
+      "english": "jigsaw puzzle",
+      "chinese": "拼图游戏",
+      "pinyin": "pīn tú yóu xì",
+      "category": "jigsaw puzzle"
+    },
+    {
+      "english": "pulled rickshaw",
+      "chinese": "黄包车",
+      "pinyin": "huáng bāo chē",
+      "category": "pulled rickshaw"
+    },
+    {
+      "english": "joystick",
+      "chinese": "操纵杆",
+      "pinyin": "cāo zòng gǎn",
+      "category": "joystick"
+    },
+    {
+      "english": "kimono",
+      "chinese": "和服",
+      "pinyin": "hé fú",
+      "category": "kimono"
+    },
+    {
+      "english": "knee pad",
+      "chinese": "护膝",
+      "pinyin": "hù xī",
+      "category": "knee pad"
+    },
+    {
+      "english": "knot",
+      "chinese": "结",
+      "pinyin": "jié",
+      "category": "knot"
+    },
+    {
+      "english": "lab coat, laboratory coat",
+      "chinese": "实验服",
+      "pinyin": "shíyàn fú",
+      "category": "lab coat"
+    },
+    {
+      "english": "ladle",
+      "chinese": "杓",
+      "pinyin": "sháo",
+      "category": "ladle"
+    },
+    {
+      "english": "lampshade, lamp shade",
+      "chinese": "灯罩",
+      "pinyin": "dēngzhào",
+      "category": "lampshade"
+    },
+    {
+      "english": "laptop, laptop computer",
+      "chinese": "笔记本电脑",
+      "pinyin": "bǐjìběn diànnǎo",
+      "category": "laptop"
+    },
+    {
+      "english": "lawn mower, mower",
+      "chinese": "割草机",
+      "pinyin": "gēcǎojī",
+      "category": "lawn mower"
+    },
+    {
+      "english": "lens cap, lens cover",
+      "chinese": "镜头盖",
+      "pinyin": "jìngtóu gài",
+      "category": "lens cap"
+    },
+    {
+      "english": "paper towel",
+      "chinese": "纸巾",
+      "pinyin": "zhǐ jīn",
+      "category": "paper towel"
+    },
+    {
+      "english": "library",
+      "chinese": "图书馆",
+      "pinyin": "túshūguǎn",
+      "category": "library"
+    },
+    {
+      "english": "lifeboat",
+      "chinese": "救生艇",
+      "pinyin": "jiùshēngtǐng",
+      "category": "lifeboat"
+    },
+    {
+      "english": "lighter, light, igniter, ignitor",
+      "chinese": "打火机",
+      "pinyin": "dǎhuǒjī",
+      "category": "lighter"
+    },
+    {
+      "english": "limousine, limo",
+      "chinese": "豪华轿车",
+      "pinyin": "háohuá jiàochē",
+      "category": "limousine"
+    },
+    {
+      "english": "liner, ocean liner",
+      "chinese": "邮轮",
+      "pinyin": "yóulún",
+      "category": "liner"
+    },
+    {
+      "english": "lipstick, lip rouge",
+      "chinese": "口红",
+      "pinyin": "kǒuhóng",
+      "category": "lipstick"
+    },
+    {
+      "english": "slip-on shoe",
+      "chinese": "懒人鞋",
+      "pinyin": "lǎn rén xié",
+      "category": "slip-on shoe"
+    },
+    {
+      "english": "lotion",
+      "chinese": "乳液",
+      "pinyin": "rǔ yè",
+      "category": "lotion"
+    },
+    {
+      "english": "loudspeaker, speaker, speaker unit, loudspeaker system, speaker system",
+      "chinese": "扬声器",
+      "pinyin": "yáng shēng qì",
+      "category": "loudspeaker"
+    },
+    {
+      "english": "loupe, jeweler's loupe",
+      "chinese": "放大镜",
+      "pinyin": "fàng dà jìng",
+      "category": "loupe"
+    },
+    {
+      "english": "lumbermill, sawmill",
+      "chinese": "木材加工厂",
+      "pinyin": "mù cái jiā gōng chǎng",
+      "category": "lumbermill"
+    },
+    {
+      "english": "magnetic compass",
+      "chinese": "磁罗盘",
+      "pinyin": "cí luó pán",
+      "category": "magnetic compass"
+    },
+    {
+      "english": "mail bag",
+      "chinese": "邮袋",
+      "pinyin": "yóu dài",
+      "category": "mail bag"
+    },
+    {
+      "english": "mailbox, letter box",
+      "chinese": "邮筒",
+      "pinyin": "yóu tǒng",
+      "category": "mailbox"
+    },
+    {
+      "english": "tights",
+      "chinese": "连裤袜",
+      "pinyin": "lián kù wà",
+      "category": "tights"
+    },
+    {
+      "english": "tank, army tank, armored combat vehicle, armoured combat vehicle",
+      "chinese": "坦克",
+      "pinyin": "tǎn kè",
+      "category": "tank"
+    },
+    {
+      "english": "manhole cover",
+      "chinese": "井盖",
+      "pinyin": "jǐng gài",
+      "category": "manhole cover"
+    },
+    {
+      "english": "maraca",
+      "chinese": "沙锤",
+      "pinyin": "shā chuí",
+      "category": "maraca"
+    },
+    {
+      "english": "marimba, xylophone",
+      "chinese": "马林巴琴",
+      "pinyin": "mǎ lín bā qín",
+      "category": "marimba"
+    },
+    {
+      "english": "ski mask",
+      "chinese": "滑雪面罩",
+      "pinyin": "huá xuě miàn zhào",
+      "category": "ski mask"
+    },
+    {
+      "english": "matchstick",
+      "chinese": "火柴",
+      "pinyin": "huǒ chái",
+      "category": "matchstick"
+    },
+    {
+      "english": "maypole",
+      "chinese": "五月柱",
+      "pinyin": "wǔ yuè zhù",
+      "category": "maypole"
+    },
+    {
+      "english": "maze, labyrinth",
+      "chinese": "迷宫",
+      "pinyin": "mí gōng",
+      "category": "maze"
+    },
+    {
+      "english": "measuring cup",
+      "chinese": "量杯",
+      "pinyin": "liáng bēi",
+      "category": "measuring cup"
+    },
+    {
+      "english": "medicine chest, medicine cabinet",
+      "chinese": "药柜",
+      "pinyin": "yào guì",
+      "category": "medicine chest"
+    },
+    {
+      "english": "megalith, megalithic structure",
+      "chinese": "巨石",
+      "pinyin": "jù shí",
+      "category": "megalith"
+    },
+    {
+      "english": "microphone, mike",
+      "chinese": "麦克风",
+      "pinyin": "mài kè fēng",
+      "category": "microphone"
+    },
+    {
+      "english": "microwave, microwave oven",
+      "chinese": "微波炉",
+      "pinyin": "wēi bō lú",
+      "category": "microwave"
+    },
+    {
+      "english": "military uniform",
+      "chinese": "军服",
+      "pinyin": "jūn fú",
+      "category": "military uniform"
+    },
+    {
+      "english": "milk can",
+      "chinese": "奶罐",
+      "pinyin": "nǎi guàn",
+      "category": "milk can"
+    },
+    {
+      "english": "minibus",
+      "chinese": "小巴",
+      "pinyin": "xiǎo bā",
+      "category": "minibus"
+    },
+    {
+      "english": "miniskirt, mini",
+      "chinese": "迷你裙",
+      "pinyin": "mí nǐ qún",
+      "category": "miniskirt"
+    },
+    {
+      "english": "minivan",
+      "chinese": "迷你货车",
+      "pinyin": "mí nǐ huò chē",
+      "category": "minivan"
+    },
+    {
+      "english": "projectile, missile",
+      "chinese": "弹丸",
+      "pinyin": "dàn wán",
+      "category": "projectile"
+    },
+    {
+      "english": "mitten",
+      "chinese": "棉手套",
+      "pinyin": "mián shǒu tào",
+      "category": "mitten"
+    },
+    {
+      "english": "mixing bowl",
+      "chinese": "搅拌钵",
+      "pinyin": "jiǎo bàn bō",
+      "category": "mixing bowl"
+    },
+    {
+      "english": "mobile home, manufactured home",
+      "chinese": "活动房",
+      "pinyin": "huó dòng fáng",
+      "category": "mobile home"
+    },
+    {
+      "english": "Model T",
+      "chinese": "T型车",
+      "pinyin": "T xíng chē",
+      "category": "Model T"
+    },
+    {
+      "english": "modem",
+      "chinese": "调制解调器",
+      "pinyin": "diào zhì jiě tiáo qì",
+      "category": "modem"
+    },
+    {
+      "english": "monastery",
+      "chinese": "修道院",
+      "pinyin": "xiū dào yuàn",
+      "category": "monastery"
     },
     {
       "english": "monitor",
       "chinese": "显示器",
       "pinyin": "xiǎn shì qì",
-      "category": "electronics"
+      "category": "monitor"
     },
     {
-      "english": "desk",
-      "chinese": "桌子",
-      "pinyin": "zhuō zi",
-      "category": "furniture"
+      "english": "moped",
+      "chinese": "摩托车",
+      "pinyin": "mó tuō chē",
+      "category": "moped"
     },
     {
-      "english": "lamp",
-      "chinese": "灯",
-      "pinyin": "dēng",
-      "category": "home"
+      "english": "mortarboard",
+      "chinese": "学位帽",
+      "pinyin": "xué wèi mào",
+      "category": "mortarboard"
     },
     {
-      "english": "wall",
-      "chinese": "墙",
-      "pinyin": "qiáng",
-      "category": "home"
+      "english": "square academic cap",
+      "chinese": "学士帽",
+      "pinyin": "xué shì mào",
+      "category": "square academic cap"
     },
     {
-      "english": "floor",
-      "chinese": "地板",
-      "pinyin": "dì bǎn",
-      "category": "home"
+      "english": "mosque",
+      "chinese": "清真寺",
+      "pinyin": "qīng zhēn sì",
+      "category": "mosque"
     },
     {
-      "english": "ceiling",
-      "chinese": "天花板",
-      "pinyin": "tiān huā bǎn",
-      "category": "home"
+      "english": "mosquito net",
+      "chinese": "蚊帐",
+      "pinyin": "wén zhàng",
+      "category": "mosquito net"
     },
     {
-      "english": "shoe",
-      "chinese": "鞋",
-      "pinyin": "xié",
-      "category": "clothing"
+      "english": "motor scooter, scooter",
+      "chinese": "摩托车",
+      "pinyin": "mó tuō chē",
+      "category": "motor scooter"
     },
     {
-      "english": "hat",
-      "chinese": "帽子",
-      "pinyin": "mào zi",
-      "category": "clothing"
+      "english": "mountain tent",
+      "chinese": "山地帐篷",
+      "pinyin": "shān dì zhàng péng",
+      "category": "mountain tent"
     },
     {
-      "english": "shirt",
-      "chinese": "衬衫",
-      "pinyin": "chèn shān",
-      "category": "clothing"
+      "english": "mountain tent",
+      "chinese": "山地帐篷",
+      "pinyin": "shān dì zhàng péng",
+      "category": "mountain tent"
     },
     {
-      "english": "pants",
-      "chinese": "裤子",
-      "pinyin": "kù zi",
-      "category": "clothing"
+      "english": "mouse, computer mouse",
+      "chinese": "鼠标",
+      "pinyin": "shǔ biāo",
+      "category": "mouse"
     },
     {
-      "english": "jacket",
-      "chinese": "夹克",
-      "pinyin": "jiá kè",
-      "category": "clothing"
+      "english": "mousetrap",
+      "chinese": "捕鼠器",
+      "pinyin": "bǔ shǔ qì",
+      "category": "mousetrap"
     },
     {
-      "english": "coat",
-      "chinese": "外套",
-      "pinyin": "wài tào",
-      "category": "clothing"
+      "english": "moving van",
+      "chinese": "搬运货车",
+      "pinyin": "bān yùn huò chē",
+      "category": "moving van"
+    },
+    {
+      "english": "muzzle",
+      "chinese": "口套",
+      "pinyin": "kǒu tào",
+      "category": "muzzle"
+    },
+    {
+      "english": "nail",
+      "chinese": "钉子",
+      "pinyin": "dīng zi",
+      "category": "nail"
+    },
+    {
+      "english": "neck brace",
+      "chinese": "颈围",
+      "pinyin": "jǐng wéi",
+      "category": "neck brace"
+    },
+    {
+      "english": "necklace",
+      "chinese": "项链",
+      "pinyin": "xiàng liàn",
+      "category": "necklace"
+    },
+    {
+      "english": "nipple",
+      "chinese": "乳头",
+      "pinyin": "rǔ tóu",
+      "category": "nipple"
+    },
+    {
+      "english": "notebook, notebook computer",
+      "chinese": "笔记本电脑",
+      "pinyin": "bǐ jì běn diàn nǎo",
+      "category": "notebook"
+    },
+    {
+      "english": "obelisk",
+      "chinese": "方尖碑",
+      "pinyin": "fāng jiān bēi",
+      "category": "obelisk"
+    },
+    {
+      "english": "oboe, hautboy, hautbois",
+      "chinese": "双簧管",
+      "pinyin": "shuāng huáng guǎn",
+      "category": "oboe"
+    },
+    {
+      "english": "ocarina, sweet potato",
+      "chinese": "陶笛",
+      "pinyin": "táo dí",
+      "category": "ocarina"
+    },
+    {
+      "english": "odometer, hodometer, mileometer, milometer",
+      "chinese": "里程表",
+      "pinyin": "lǐ chéng biǎo",
+      "category": "odometer"
+    },
+    {
+      "english": "oil filter",
+      "chinese": "机油滤清器",
+      "pinyin": "jī yóu lǜ qīng qì",
+      "category": "oil filter"
+    },
+    {
+      "english": "organ, pipe organ",
+      "chinese": "风琴",
+      "pinyin": "fēng qín",
+      "category": "organ"
+    },
+    {
+      "english": "oscilloscope, scope, cathode-ray oscilloscope, CRO",
+      "chinese": "示波器",
+      "pinyin": "shì bō qì",
+      "category": "oscilloscope"
+    },
+    {
+      "english": "overskirt",
+      "chinese": "外裙",
+      "pinyin": "wài qún",
+      "category": "overskirt"
+    },
+    {
+      "english": "bullock cart",
+      "chinese": "牛车",
+      "pinyin": "niú chē",
+      "category": "bullock cart"
+    },
+    {
+      "english": "oxygen mask",
+      "chinese": "氧气面罩",
+      "pinyin": "yǎng qì miàn zhào",
+      "category": "oxygen mask"
+    },
+    {
+      "english": "packet",
+      "chinese": "小包裹",
+      "pinyin": "xiǎo bāo guǒ",
+      "category": "packet"
+    },
+    {
+      "english": "paddle, boat paddle",
+      "chinese": "水车轮",
+      "pinyin": "shuǐ chē lún",
+      "category": "paddle"
+    },
+    {
+      "english": "paddlewheel, paddle wheel",
+      "chinese": "桨轮",
+      "pinyin": "jiǎnglún",
+      "category": "paddlewheel"
+    },
+    {
+      "english": "padlock",
+      "chinese": "挂锁",
+      "pinyin": "guà suǒ",
+      "category": "padlock"
+    },
+    {
+      "english": "paintbrush",
+      "chinese": "画笔",
+      "pinyin": "huà bǐ",
+      "category": "paintbrush"
+    },
+    {
+      "english": "pajamas",
+      "chinese": "睡衣",
+      "pinyin": "shuì yī",
+      "category": "pajamas"
+    },
+    {
+      "english": "palace",
+      "chinese": "宫殿",
+      "pinyin": "gōng diàn",
+      "category": "palace"
+    },
+    {
+      "english": "pan flute",
+      "chinese": "排箫",
+      "pinyin": "pái xiāo",
+      "category": "pan flute"
+    },
+    {
+      "english": "paper towel",
+      "chinese": "纸巾",
+      "pinyin": "zhǐ jīn",
+      "category": "paper towel"
+    },
+    {
+      "english": "parachute, chute",
+      "chinese": "降落伞",
+      "pinyin": "jiàng luò sǎn",
+      "category": "parachute"
+    },
+    {
+      "english": "parallel bars, bars",
+      "chinese": "双杠",
+      "pinyin": "shuāng gàng",
+      "category": "parallel bars"
+    },
+    {
+      "english": "park bench",
+      "chinese": "公园长椅",
+      "pinyin": "gōng yuán cháng yǐ",
+      "category": "park bench"
+    },
+    {
+      "english": "parking meter",
+      "chinese": "停车计时器",
+      "pinyin": "tíng chē jì shí qì",
+      "category": "parking meter"
+    },
+    {
+      "english": "passenger car, coach, carriage",
+      "chinese": "乘用车",
+      "pinyin": "chéngyòngchē",
+      "category": "passenger car"
+    },
+    {
+      "english": "patio, terrace",
+      "chinese": "露台",
+      "pinyin": "lùtái",
+      "category": "patio"
+    },
+    {
+      "english": "payphone",
+      "chinese": "公用电话",
+      "pinyin": "gōngyòng diànhuà",
+      "category": "payphone"
+    },
+    {
+      "english": "pedestal, plinth, footstall",
+      "chinese": "底座",
+      "pinyin": "dǐzuò",
+      "category": "pedestal"
+    },
+    {
+      "english": "pencil box, pencil case",
+      "chinese": "铅笔盒",
+      "pinyin": "qiānbǐhé",
+      "category": "pencil box"
+    },
+    {
+      "english": "pencil sharpener",
+      "chinese": "铅笔刀",
+      "pinyin": "qiānbǐ dāo",
+      "category": "pencil sharpener"
+    },
+    {
+      "english": "perfume, essence",
+      "chinese": "香水",
+      "pinyin": "xiāngshuǐ",
+      "category": "perfume"
+    },
+    {
+      "english": "Petri dish",
+      "chinese": "培养皿",
+      "pinyin": "péiyǎng mǐn",
+      "category": "Petri dish"
+    },
+    {
+      "english": "photocopier",
+      "chinese": "码头",
+      "pinyin": "mǎtóu",
+      "category": "photocopier"
+    },
+    {
+      "english": "pick, plectrum, plectron",
+      "chinese": "皮卡车",
+      "pinyin": "píkǎ chē",
+      "category": "pick"
+    },
+    {
+      "english": "pickelhaube",
+      "chinese": "钢盔帽",
+      "pinyin": "gāng kuī mào",
+      "category": "pickelhaube"
+    },
+    {
+      "english": "picket fence, paling",
+      "chinese": "栅栏",
+      "pinyin": "zhàlán",
+      "category": "picket fence"
+    },
+    {
+      "english": "pickup, pickup truck",
+      "chinese": "接送",
+      "pinyin": "jiēsòng",
+      "category": "pickup"
+    },
+    {
+      "english": "pier",
+      "chinese": "码头",
+      "pinyin": "mǎtóu",
+      "category": "pier"
+    },
+    {
+      "english": "piggy bank, penny bank",
+      "chinese": "存钱罐",
+      "pinyin": "cúnqián guàn",
+      "category": "piggy bank"
+    },
+    {
+      "english": "pill bottle",
+      "chinese": "药瓶",
+      "pinyin": "yào píng",
+      "category": "pill bottle"
+    },
+    {
+      "english": "pillow",
+      "chinese": "枕头",
+      "pinyin": "zhěn tóu",
+      "category": "pillow"
+    },
+    {
+      "english": "ping-pong ball",
+      "chinese": "乒乓球",
+      "pinyin": "pīng pāng qiú",
+      "category": "ping-pong ball"
+    },
+    {
+      "english": "pinwheel",
+      "chinese": "风车",
+      "pinyin": "fēng chē",
+      "category": "pinwheel"
+    },
+    {
+      "english": "pirate, pirate ship",
+      "chinese": "海盗船",
+      "pinyin": "hǎi dào chuán",
+      "category": "pirate"
+    },
+    {
+      "english": "pitcher, ewer",
+      "chinese": "水罐",
+      "pinyin": "shuǐ guàn",
+      "category": "pitcher"
+    },
+    {
+      "english": "hand plane",
+      "chinese": "手推刨",
+      "pinyin": "shǒu tuī bào",
+      "category": "hand plane"
+    },
+    {
+      "english": "planetarium",
+      "chinese": "天文馆",
+      "pinyin": "tiān wén guǎn",
+      "category": "planetarium"
+    },
+    {
+      "english": "plastic bag",
+      "chinese": "塑料袋",
+      "pinyin": "sù liào dài",
+      "category": "plastic bag"
+    },
+    {
+      "english": "plate",
+      "chinese": "盘子",
+      "pinyin": "pánzi",
+      "category": "plate"
+    },
+    {
+      "english": "snowplow, snowplough",
+      "chinese": "扫雪机",
+      "pinyin": "sǎo xuě jī",
+      "category": "snowplow"
+    },
+    {
+      "english": "plunger, plumber's helper",
+      "chinese": "下水道疏通器",
+      "pinyin": "xià shuǐ dào shū tōng qì",
+      "category": "plunger"
+    },
+    {
+      "english": "Polaroid camera, Polaroid Land camera",
+      "chinese": "拍立得相机",
+      "pinyin": "pāi lì dé xiàng jī",
+      "category": "Polaroid camera"
+    },
+    {
+      "english": "totem pole",
+      "chinese": "图腾柱",
+      "pinyin": "túténg zhù",
+      "category": "totem pole"
+    },
+    {
+      "english": "police van, police wagon, paddy wagon, patrol wagon, wagon, black Maria",
+      "chinese": "警车",
+      "pinyin": "jǐng chē",
+      "category": "police van"
+    },
+    {
+      "english": "poncho",
+      "chinese": "雨披",
+      "pinyin": "yǔ pī",
+      "category": "poncho"
+    },
+    {
+      "english": "pool table, billiard table, snooker table",
+      "chinese": "台球桌",
+      "pinyin": "tái qiú zhuō",
+      "category": "pool table"
+    },
+    {
+      "english": "pop bottle, soda bottle",
+      "chinese": "汽水瓶",
+      "pinyin": "qì shuǐ píng",
+      "category": "pop bottle"
+    },
+    {
+      "english": "potpie",
+      "chinese": "罐头馅饼",
+      "pinyin": "guàn tóu xiàn bǐng",
+      "category": "potpie"
+    },
+    {
+      "english": "potter's wheel",
+      "chinese": "陶轮",
+      "pinyin": "táo lún",
+      "category": "potter's wheel"
+    },
+    {
+      "english": "power drill",
+      "chinese": "电钻",
+      "pinyin": "diàn zuàn",
+      "category": "power drill"
+    },
+    {
+      "english": "prayer rug, prayer mat",
+      "chinese": "祈祷垫",
+      "pinyin": "qí dǎo diàn",
+      "category": "prayer rug"
+    },
+    {
+      "english": "printer",
+      "chinese": "打印机",
+      "pinyin": "dǎ yìn jī",
+      "category": "printer"
+    },
+    {
+      "english": "prison, prison house",
+      "chinese": "监狱",
+      "pinyin": "jiān yù",
+      "category": "prison"
+    },
+    {
+      "english": "projectile, missile",
+      "chinese": "弹丸",
+      "pinyin": "dàn wán",
+      "category": "projectile"
+    },
+    {
+      "english": "projector",
+      "chinese": "投影仪",
+      "pinyin": "tóu yǐng yí",
+      "category": "projector"
+    },
+    {
+      "english": "puck, hockey puck",
+      "chinese": "冰球",
+      "pinyin": "bīng qiú",
+      "category": "puck"
+    },
+    {
+      "english": "punching bag, punch bag, punching ball, punchball",
+      "chinese": "拳击沙袋",
+      "pinyin": "quán jī shā dài",
+      "category": "punching bag"
+    },
+    {
+      "english": "purse",
+      "chinese": "钱包",
+      "pinyin": "qián bāo",
+      "category": "purse"
+    },
+    {
+      "english": "quill, quill pen",
+      "chinese": "羽毛笔",
+      "pinyin": "yǔ máo bǐ",
+      "category": "quill"
+    },
+    {
+      "english": "quilt, comforter, comfort, puff",
+      "chinese": "被子",
+      "pinyin": "bèi zi",
+      "category": "quilt"
+    },
+    {
+      "english": "racer, race car, racing car",
+      "chinese": "赛车",
+      "pinyin": "sài chē",
+      "category": "racer"
+    },
+    {
+      "english": "racket, racquet",
+      "chinese": "球拍",
+      "pinyin": "qiú pāi",
+      "category": "racket"
+    },
+    {
+      "english": "radiator",
+      "chinese": "散热器",
+      "pinyin": "sàn rè qì",
+      "category": "radiator"
+    },
+    {
+      "english": "radio telescope, radio reflector",
+      "chinese": "射电反射器",
+      "pinyin": "shè diàn fǎn shè qì",
+      "category": "radio telescope"
+    },
+    {
+      "english": "radio telescope, radio reflector",
+      "chinese": "射电反射器",
+      "pinyin": "shè diàn fǎn shè qì",
+      "category": "radio telescope"
+    },
+    {
+      "english": "rain barrel",
+      "chinese": "雨水桶",
+      "pinyin": "yǔ shuǐ tǒng",
+      "category": "rain barrel"
+    },
+    {
+      "english": "recreational vehicle, RV, R.V.",
+      "chinese": "房车",
+      "pinyin": "fáng chē",
+      "category": "recreational vehicle"
+    },
+    {
+      "english": "reel",
+      "chinese": "卷轴",
+      "pinyin": "juàn zhóu",
+      "category": "reel"
+    },
+    {
+      "english": "reflex camera",
+      "chinese": "单反相机",
+      "pinyin": "dān fǎn xiàng jī",
+      "category": "reflex camera"
+    },
+    {
+      "english": "refrigerator, icebox",
+      "chinese": "冰箱",
+      "pinyin": "bīng xiāng",
+      "category": "refrigerator"
+    },
+    {
+      "english": "remote control, remote",
+      "chinese": "遥控",
+      "pinyin": "yáo kòng",
+      "category": "remote control"
+    },
+    {
+      "english": "restaurant, eating house, eating place, eatery",
+      "chinese": "餐厅",
+      "pinyin": "cān tīng",
+      "category": "restaurant"
+    },
+    {
+      "english": "revolver, six-gun, six-shooter",
+      "chinese": "左轮手枪",
+      "pinyin": "zuǒ lún shǒu qiāng",
+      "category": "revolver"
+    },
+    {
+      "english": "trifle",
+      "chinese": "甜点杯",
+      "pinyin": "tiándiǎn bēi",
+      "category": "trifle"
+    },
+    {
+      "english": "rocking chair, rocker",
+      "chinese": "摇椅",
+      "pinyin": "yáo yǐ",
+      "category": "rocking chair"
+    },
+    {
+      "english": "rotisserie",
+      "chinese": "烤肉架",
+      "pinyin": "kǎo ròu jià",
+      "category": "rotisserie"
+    },
+    {
+      "english": "rubber eraser, rubber, pencil eraser",
+      "chinese": "橡皮擦",
+      "pinyin": "xiàng pí cā",
+      "category": "rubber eraser"
+    },
+    {
+      "english": "rugby ball",
+      "chinese": "橄榄球",
+      "pinyin": "gǎn lǎn qiú",
+      "category": "rugby ball"
+    },
+    {
+      "english": "rule, ruler",
+      "chinese": "尺",
+      "pinyin": "chǐ",
+      "category": "rule"
+    },
+    {
+      "english": "running shoe",
+      "chinese": "跑鞋",
+      "pinyin": "pǎo xié",
+      "category": "running shoe"
+    },
+    {
+      "english": "safety pin",
+      "chinese": "安全别针",
+      "pinyin": "ān quán bié zhēn",
+      "category": "safety pin"
+    },
+    {
+      "english": "safety pin",
+      "chinese": "安全别针",
+      "pinyin": "ān quán bié zhēn",
+      "category": "safety pin"
+    },
+    {
+      "english": "saltshaker, salt shaker",
+      "chinese": "调味瓶",
+      "pinyin": "tiáo wèi píng",
+      "category": "saltshaker"
+    },
+    {
+      "english": "sandal",
+      "chinese": "凉鞋",
+      "pinyin": "liáng xié",
+      "category": "sandal"
+    },
+    {
+      "english": "sarong",
+      "chinese": "围裙",
+      "pinyin": "wéi qún",
+      "category": "sarong"
+    },
+    {
+      "english": "sax, saxophone",
+      "chinese": "萨克斯风",
+      "pinyin": "sà kè sī fēng",
+      "category": "sax"
+    },
+    {
+      "english": "scabbard",
+      "chinese": "剑鞘",
+      "pinyin": "jiàn qiào",
+      "category": "scabbard"
+    },
+    {
+      "english": "weighing scale",
+      "chinese": "秤",
+      "pinyin": "chèng",
+      "category": "weighing scale"
+    },
+    {
+      "english": "school bus",
+      "chinese": "校车",
+      "pinyin": "xiào chē",
+      "category": "school bus"
+    },
+    {
+      "english": "schooner",
+      "chinese": "帆船",
+      "pinyin": "fānchuán",
+      "category": "schooner"
+    },
+    {
+      "english": "scoreboard",
+      "chinese": "记分牌",
+      "pinyin": "jìfēn pái",
+      "category": "scoreboard"
+    },
+    {
+      "english": "screen, CRT screen",
+      "chinese": "屏幕",
+      "pinyin": "píngmù",
+      "category": "screen"
+    },
+    {
+      "english": "screwdriver",
+      "chinese": "螺丝起子",
+      "pinyin": "luósī qǐzi",
+      "category": "screwdriver"
+    },
+    {
+      "english": "screwdriver",
+      "chinese": "螺丝起子",
+      "pinyin": "luósī qǐzi",
+      "category": "screwdriver"
+    },
+    {
+      "english": "seat belt, seatbelt",
+      "chinese": "安全带",
+      "pinyin": "ānquán dài",
+      "category": "seat belt"
+    },
+    {
+      "english": "sewing machine",
+      "chinese": "缝纫机",
+      "pinyin": "féngrén jī",
+      "category": "sewing machine"
+    },
+    {
+      "english": "shield, buckler",
+      "chinese": "盾牌",
+      "pinyin": "dùnpái",
+      "category": "shield"
+    },
+    {
+      "english": "shoe shop, shoe-shop, shoe store",
+      "chinese": "鞋店",
+      "pinyin": "xié diàn",
+      "category": "shoe shop"
+    },
+    {
+      "english": "shoji",
+      "chinese": "障子",
+      "pinyin": "zhàngzi",
+      "category": "shoji"
+    },
+    {
+      "english": "shopping cart",
+      "chinese": "购物车",
+      "pinyin": "gòuwù chē",
+      "category": "shopping cart"
+    },
+    {
+      "english": "shopping cart",
+      "chinese": "购物车",
+      "pinyin": "gòuwù chē",
+      "category": "shopping cart"
+    },
+    {
+      "english": "shovel",
+      "chinese": "铲子",
+      "pinyin": "chǎnzi",
+      "category": "shovel"
+    },
+    {
+      "english": "shower curtain",
+      "chinese": "淋浴帘",
+      "pinyin": "línyù lián",
+      "category": "shower curtain"
+    },
+    {
+      "english": "shower curtain",
+      "chinese": "淋浴帘",
+      "pinyin": "línyù lián",
+      "category": "shower curtain"
+    },
+    {
+      "english": "ski",
+      "chinese": "滑雪面罩",
+      "pinyin": "huá xuě miàn zhào",
+      "category": "ski"
+    },
+    {
+      "english": "ski mask",
+      "chinese": "滑雪面罩",
+      "pinyin": "huá xuě miàn zhào",
+      "category": "ski mask"
+    },
+    {
+      "english": "sleeping bag",
+      "chinese": "睡袋",
+      "pinyin": "shuì dài",
+      "category": "sleeping bag"
+    },
+    {
+      "english": "slide rule, slipstick",
+      "chinese": "滑尺",
+      "pinyin": "huá chǐ",
+      "category": "slide rule"
+    },
+    {
+      "english": "sliding door",
+      "chinese": "推拉门",
+      "pinyin": "tuī lā mén",
+      "category": "sliding door"
+    },
+    {
+      "english": "slot, one-armed bandit",
+      "chinese": "老虎机",
+      "pinyin": "lǎo hǔ jī",
+      "category": "slot"
+    },
+    {
+      "english": "snorkel",
+      "chinese": "呼吸管",
+      "pinyin": "hū xī guǎn",
+      "category": "snorkel"
+    },
+    {
+      "english": "snowmobile",
+      "chinese": "雪地摩托车",
+      "pinyin": "xuě dì mó tuō chē",
+      "category": "snowmobile"
+    },
+    {
+      "english": "snowplow, snowplough",
+      "chinese": "扫雪机",
+      "pinyin": "sǎo xuě jī",
+      "category": "snowplow"
+    },
+    {
+      "english": "soap dispenser",
+      "chinese": "肥皂液分配器",
+      "pinyin": "féi zào yè fēn pèi qì",
+      "category": "soap dispenser"
+    },
+    {
+      "english": "soccer ball",
+      "chinese": "足球",
+      "pinyin": "zú qiú",
+      "category": "soccer ball"
+    },
+    {
+      "english": "sock",
+      "chinese": "袜子",
+      "pinyin": "wà zi",
+      "category": "sock"
+    },
+    {
+      "english": "solar dish, solar collector, solar furnace",
+      "chinese": "太阳能反射器",
+      "pinyin": "tài yáng néng fǎn shè qì",
+      "category": "solar dish"
+    },
+    {
+      "english": "sombrero",
+      "chinese": "墨西哥帽",
+      "pinyin": "mò xī gē mào",
+      "category": "sombrero"
+    },
+    {
+      "english": "soup bowl",
+      "chinese": "汤碗",
+      "pinyin": "tāng wǎn",
+      "category": "soup bowl"
+    },
+    {
+      "english": "space shuttle",
+      "chinese": "航天飞机",
+      "pinyin": "háng tiān fēi jī",
+      "category": "space shuttle"
+    },
+    {
+      "english": "space shuttle",
+      "chinese": "航天飞机",
+      "pinyin": "háng tiān fēi jī",
+      "category": "space shuttle"
+    },
+    {
+      "english": "space shuttle",
+      "chinese": "航天飞机",
+      "pinyin": "háng tiān fēi jī",
+      "category": "space shuttle"
+    },
+    {
+      "english": "spatula",
+      "chinese": "铲子",
+      "pinyin": "chǎn zi",
+      "category": "spatula"
+    },
+    {
+      "english": "motorboat",
+      "chinese": "摩托艇",
+      "pinyin": "mó tuō tǐng",
+      "category": "motorboat"
+    },
+    {
+      "english": "spider web, spider's web",
+      "chinese": "蜘蛛网",
+      "pinyin": "zhī zhū wǎng",
+      "category": "spider web"
+    },
+    {
+      "english": "spindle",
+      "chinese": "纺锤",
+      "pinyin": "fǎng chuí",
+      "category": "spindle"
+    },
+    {
+      "english": "sports car, sport car",
+      "chinese": "跑车",
+      "pinyin": "pǎo chē",
+      "category": "sports car"
+    },
+    {
+      "english": "spotlight, spot",
+      "chinese": "聚光灯",
+      "pinyin": "jù guāng dēng",
+      "category": "spotlight"
+    },
+    {
+      "english": "stage",
+      "chinese": "舞台",
+      "pinyin": "wǔ tái",
+      "category": "stage"
+    },
+    {
+      "english": "steam locomotive",
+      "chinese": "蒸汽机车",
+      "pinyin": "zhēng qì jī chē",
+      "category": "steam locomotive"
+    },
+    {
+      "english": "through arch bridge",
+      "chinese": "拱桥",
+      "pinyin": "gǒng qiáo",
+      "category": "through arch bridge"
+    },
+    {
+      "english": "steel drum",
+      "chinese": "钢鼓",
+      "pinyin": "gāng gǔ",
+      "category": "steel drum"
+    },
+    {
+      "english": "stethoscope",
+      "chinese": "听诊器",
+      "pinyin": "tīng zhěn qì",
+      "category": "stethoscope"
+    },
+    {
+      "english": "scarf",
+      "chinese": "围巾",
+      "pinyin": "wéi jīn",
+      "category": "scarf"
+    },
+    {
+      "english": "stone wall",
+      "chinese": "石墙",
+      "pinyin": "shí qiáng",
+      "category": "stone wall"
+    },
+    {
+      "english": "stopwatch, stop watch",
+      "chinese": "秒表",
+      "pinyin": "miǎo biǎo",
+      "category": "stopwatch"
+    },
+    {
+      "english": "stove",
+      "chinese": "炉灶",
+      "pinyin": "lú zào",
+      "category": "stove"
+    },
+    {
+      "english": "strainer",
+      "chinese": "滤网",
+      "pinyin": "lǜ wǎng",
+      "category": "strainer"
+    },
+    {
+      "english": "streetcar, tram, tramcar, trolley, trolley car",
+      "chinese": "有轨电车",
+      "pinyin": "yǒu guǐ diàn chē",
+      "category": "streetcar"
+    },
+    {
+      "english": "stretcher",
+      "chinese": "担架",
+      "pinyin": "dān jià",
+      "category": "stretcher"
+    },
+    {
+      "english": "studio couch, day bed",
+      "chinese": "卧榻",
+      "pinyin": "wò tà",
+      "category": "studio couch"
+    },
+    {
+      "english": "stupa, tope",
+      "chinese": "佛塔",
+      "pinyin": "fó tǎ",
+      "category": "stupa"
+    },
+    {
+      "english": "submarine, pigboat, sub, U-boat",
+      "chinese": "潜艇",
+      "pinyin": "qián tǐng",
+      "category": "submarine"
+    },
+    {
+      "english": "suit, suit of clothes",
+      "chinese": "套装",
+      "pinyin": "tào zhuāng",
+      "category": "suit"
+    },
+    {
+      "english": "sundial",
+      "chinese": "日晷",
+      "pinyin": "rì guǐ",
+      "category": "sundial"
+    },
+    {
+      "english": "sunglasses, dark glasses, shades",
+      "chinese": "墨镜",
+      "pinyin": "mò jìng",
+      "category": "sunglasses"
+    },
+    {
+      "english": "sunglasses, dark glasses, shades",
+      "chinese": "墨镜",
+      "pinyin": "mò jìng",
+      "category": "sunglasses"
+    },
+    {
+      "english": "sunscreen, sunblock, sun blocker",
+      "chinese": "防晒霜",
+      "pinyin": "fáng shài shuāng",
+      "category": "sunscreen"
+    },
+    {
+      "english": "suspension bridge",
+      "chinese": "吊桥",
+      "pinyin": "diào qiáo",
+      "category": "suspension bridge"
+    },
+    {
+      "english": "swab, swob, mop",
+      "chinese": "拖把",
+      "pinyin": "tuō bǎ",
+      "category": "swab"
+    },
+    {
+      "english": "sweatshirt",
+      "chinese": "运动衫",
+      "pinyin": "yùn dòng shān",
+      "category": "sweatshirt"
+    },
+    {
+      "english": "swimsuit",
+      "chinese": "泳衣",
+      "pinyin": "yǒng yī",
+      "category": "swimsuit"
+    },
+    {
+      "english": "swing",
+      "chinese": "秋千",
+      "pinyin": "qiū qiān",
+      "category": "swing"
+    },
+    {
+      "english": "switch, electric switch, electrical switch",
+      "chinese": "开关",
+      "pinyin": "kāi guān",
+      "category": "switch"
+    },
+    {
+      "english": "syringe",
+      "chinese": "注射器",
+      "pinyin": "zhù shè qì",
+      "category": "syringe"
+    },
+    {
+      "english": "table lamp",
+      "chinese": "台灯",
+      "pinyin": "tái dēng",
+      "category": "table lamp"
+    },
+    {
+      "english": "tank, army tank, armored combat vehicle, armoured combat vehicle",
+      "chinese": "坦克",
+      "pinyin": "tǎn kè",
+      "category": "tank"
+    },
+    {
+      "english": "tape player",
+      "chinese": "磁带播放器",
+      "pinyin": "cí dài bō fàng qì",
+      "category": "tape player"
+    },
+    {
+      "english": "teapot",
+      "chinese": "茶壶",
+      "pinyin": "chá hú",
+      "category": "teapot"
+    },
+    {
+      "english": "teddy, teddy bear",
+      "chinese": "泰迪熊",
+      "pinyin": "tài dí xióng",
+      "category": "teddy"
+    },
+    {
+      "english": "television, television system",
+      "chinese": "电视",
+      "pinyin": "diàn shì",
+      "category": "television"
+    },
+    {
+      "english": "tennis ball",
+      "chinese": "网球",
+      "pinyin": "wǎng qiú",
+      "category": "tennis ball"
+    },
+    {
+      "english": "thatch, thatched roof",
+      "chinese": "茅草屋顶",
+      "pinyin": "máo cǎo wū dǐng",
+      "category": "thatch"
+    },
+    {
+      "english": "front curtain",
+      "chinese": "前幕",
+      "pinyin": "qián mù",
+      "category": "front curtain"
+    },
+    {
+      "english": "thimble",
+      "chinese": "手指套",
+      "pinyin": "shǒuzhǐ tào",
+      "category": "thimble"
+    },
+    {
+      "english": "thresher, thrasher, threshing machine",
+      "chinese": "打谷机",
+      "pinyin": "dǎgǔ jī",
+      "category": "thresher"
+    },
+    {
+      "english": "throne",
+      "chinese": "宝座",
+      "pinyin": "bǎozuò",
+      "category": "throne"
+    },
+    {
+      "english": "tile roof",
+      "chinese": "瓦顶",
+      "pinyin": "wǎ dǐng",
+      "category": "tile roof"
+    },
+    {
+      "english": "toaster",
+      "chinese": "烤面包机",
+      "pinyin": "kǎo miànbāo jī",
+      "category": "toaster"
+    },
+    {
+      "english": "tobacco shop, tobacconist shop, tobacconist",
+      "chinese": "烟草店",
+      "pinyin": "yāncǎo diàn",
+      "category": "tobacco shop"
+    },
+    {
+      "english": "toilet tissue, toilet paper, bathroom tissue",
+      "chinese": "卫生纸",
+      "pinyin": "wèi shēng zhǐ",
+      "category": "toilet tissue"
+    },
+    {
+      "english": "torch",
+      "chinese": "火炬",
+      "pinyin": "huǒjù",
+      "category": "torch"
+    },
+    {
+      "english": "totem pole",
+      "chinese": "图腾柱",
+      "pinyin": "túténg zhù",
+      "category": "totem pole"
+    },
+    {
+      "english": "tow truck, tow car, wrecker",
+      "chinese": "拖车",
+      "pinyin": "tuōchē",
+      "category": "tow truck"
+    },
+    {
+      "english": "toy store",
+      "chinese": "玩具店",
+      "pinyin": "wánjù diàn",
+      "category": "toy store"
+    },
+    {
+      "english": "trailer truck, tractor trailer, trucking rig, rig, articulated lorry, sem,",
+      "chinese": "半挂车",
+      "pinyin": "bàn guà chē",
+      "category": "trailer truck"
+    },
+    {
+      "english": "semi-trailer truck",
+      "chinese": "半挂卡车",
+      "pinyin": "bàn guà kǎ chē",
+      "category": "semi-trailer truck"
+    },
+    {
+      "english": "tray",
+      "chinese": "托盘",
+      "pinyin": "tuōpán",
+      "category": "tray"
+    },
+    {
+      "english": "trench coat",
+      "chinese": "风衣",
+      "pinyin": "fēngyī",
+      "category": "trench coat"
+    },
+    {
+      "english": "tricycle, trike, velocipede",
+      "chinese": "三轮车",
+      "pinyin": "sān lún chē",
+      "category": "tricycle"
+    },
+    {
+      "english": "trimaran",
+      "chinese": "三体船",
+      "pinyin": "sān tǐ chuán",
+      "category": "trimaran"
+    },
+    {
+      "english": "tripod",
+      "chinese": "三脚架",
+      "pinyin": "sān jiǎo jià",
+      "category": "tripod"
+    },
+    {
+      "english": "triumphal arch",
+      "chinese": "凯旋门",
+      "pinyin": "kǎi xuán mén",
+      "category": "triumphal arch"
+    },
+    {
+      "english": "trolleybus, trolley coach, trackless trolley",
+      "chinese": "无轨电车",
+      "pinyin": "wú guǐ diàn chē",
+      "category": "trolleybus"
+    },
+    {
+      "english": "trombone",
+      "chinese": "长号",
+      "pinyin": "cháng hào",
+      "category": "trombone"
+    },
+    {
+      "english": "tub, vat",
+      "chinese": "桶",
+      "pinyin": "tǒng",
+      "category": "tub"
+    },
+    {
+      "english": "turnstile",
+      "chinese": "转门",
+      "pinyin": "zhuàn mén",
+      "category": "turnstile"
+    },
+    {
+      "english": "typewriter keyboard",
+      "chinese": "打字机键盘",
+      "pinyin": "dǎ zì jī jiàn pán",
+      "category": "typewriter keyboard"
+    },
+    {
+      "english": "umbrella",
+      "chinese": "雨伞",
+      "pinyin": "yǔ sǎn",
+      "category": "umbrella"
+    },
+    {
+      "english": "unicycle, monocycle",
+      "chinese": "独轮车",
+      "pinyin": "dú lún chē",
+      "category": "unicycle"
+    },
+    {
+      "english": "upright, upright piano",
+      "chinese": "竖琴",
+      "pinyin": "shù qín",
+      "category": "upright"
+    },
+    {
+      "english": "vacuum, vacuum cleaner",
+      "chinese": "吸尘器",
+      "pinyin": "xī chén qì",
+      "category": "vacuum"
+    },
+    {
+      "english": "vase",
+      "chinese": "花瓶",
+      "pinyin": "huā píng",
+      "category": "vase"
+    },
+    {
+      "english": "vault",
+      "chinese": "拱顶",
+      "pinyin": "gǒng dǐng",
+      "category": "vault"
+    },
+    {
+      "english": "velvet",
+      "chinese": "天鵝絨",
+      "pinyin": "tiān'é róng",
+      "category": "velvet"
+    },
+    {
+      "english": "vending machine",
+      "chinese": "自動售貨機",
+      "pinyin": "zìdòng shòuhuòjī",
+      "category": "vending machine"
+    },
+    {
+      "english": "vestment",
+      "chinese": "聖衣",
+      "pinyin": "shèng yī",
+      "category": "vestment"
+    },
+    {
+      "english": "viaduct",
+      "chinese": "高架橋",
+      "pinyin": "gāojià qiáo",
+      "category": "viaduct"
+    },
+    {
+      "english": "violin, fiddle",
+      "chinese": "小提琴",
+      "pinyin": "xiǎo tíqín",
+      "category": "violin"
+    },
+    {
+      "english": "volleyball",
+      "chinese": "排球",
+      "pinyin": "páiqiú",
+      "category": "volleyball"
+    },
+    {
+      "english": "waffle iron",
+      "chinese": "華夫餅燙鐵",
+      "pinyin": "huá fū bǐng tàng tiě",
+      "category": "waffle iron"
+    },
+    {
+      "english": "wall clock",
+      "chinese": "掛鐘",
+      "pinyin": "guà zhōng",
+      "category": "wall clock"
+    },
+    {
+      "english": "wallet, billfold, notecase, pocketbook",
+      "chinese": "錢包",
+      "pinyin": "qiánbāo",
+      "category": "wallet"
+    },
+    {
+      "english": "wardrobe, closet, press",
+      "chinese": "衣櫥",
+      "pinyin": "yī chú",
+      "category": "wardrobe"
+    },
+    {
+      "english": "military aircraft",
+      "chinese": "軍用飛機",
+      "pinyin": "jūnyòng fēijī",
+      "category": "military aircraft"
+    },
+    {
+      "english": "sink",
+      "chinese": "水槽",
+      "pinyin": "shuǐ cáo",
+      "category": "sink"
+    },
+    {
+      "english": "washer, automatic washer, washing machine",
+      "chinese": "洗衣機",
+      "pinyin": "xǐyījī",
+      "category": "washer"
+    },
+    {
+      "english": "water tower",
+      "chinese": "水塔",
+      "pinyin": "shuǐ tǎ",
+      "category": "water tower"
+    },
+    {
+      "english": "water tower",
+      "chinese": "水塔",
+      "pinyin": "shuǐ tǎ",
+      "category": "water tower"
+    },
+    {
+      "english": "water tower",
+      "chinese": "水塔",
+      "pinyin": "shuǐ tǎ",
+      "category": "water tower"
+    },
+    {
+      "english": "whiskey jug",
+      "chinese": "威士忌壶",
+      "pinyin": "wēi shì jì hú",
+      "category": "whiskey jug"
+    },
+    {
+      "english": "whistle",
+      "chinese": "哨子",
+      "pinyin": "shào zi",
+      "category": "whistle"
+    },
+    {
+      "english": "wig",
+      "chinese": "假发",
+      "pinyin": "jiǎ fà",
+      "category": "wig"
+    },
+    {
+      "english": "window shade",
+      "chinese": "窗帘",
+      "pinyin": "chuāng lián",
+      "category": "window shade"
+    },
+    {
+      "english": "window shade",
+      "chinese": "窗帘",
+      "pinyin": "chuāng lián",
+      "category": "window shade"
+    },
+    {
+      "english": "Windsor tie",
+      "chinese": "温莎领带",
+      "pinyin": "wēn shā lǐng dài",
+      "category": "Windsor tie"
+    },
+    {
+      "english": "wine bottle",
+      "chinese": "酒瓶",
+      "pinyin": "jiǔ píng",
+      "category": "wine bottle"
+    },
+    {
+      "english": "wing",
+      "chinese": "翅膀",
+      "pinyin": "chì bǎng",
+      "category": "wing"
+    },
+    {
+      "english": "wok",
+      "chinese": "炒锅",
+      "pinyin": "chǎo guō",
+      "category": "wok"
+    },
+    {
+      "english": "wooden spoon",
+      "chinese": "木勺",
+      "pinyin": "mù sháo",
+      "category": "wooden spoon"
+    },
+    {
+      "english": "wool, woolen, woollen",
+      "chinese": "羊毛",
+      "pinyin": "yáng máo",
+      "category": "wool"
+    },
+    {
+      "english": "split-rail fence",
+      "chinese": "分栏围栏",
+      "pinyin": "fēn lán wéi lán",
+      "category": "split-rail fence"
+    },
+    {
+      "english": "shipwreck",
+      "chinese": "沉船",
+      "pinyin": "chén chuán",
+      "category": "shipwreck"
+    },
+    {
+      "english": "yawl",
+      "chinese": "独桅双桅小帆船",
+      "pinyin": "dú wéi shuāng wéi xiǎo fān chuán",
+      "category": "yawl"
+    },
+    {
+      "english": "yurt",
+      "chinese": "蒙古包",
+      "pinyin": "ménggǔ bāo",
+      "category": "yurt"
+    },
+    {
+      "english": "web site, website, internet site, site",
+      "chinese": "网站",
+      "pinyin": "wǎngzhàn",
+      "category": "web site"
+    },
+    {
+      "english": "comic book",
+      "chinese": "漫画书",
+      "pinyin": "mànhuà shū",
+      "category": "comic book"
+    },
+    {
+      "english": "crossword puzzle, crossword",
+      "chinese": "纵横字谜",
+      "pinyin": "zònghéng zìmí",
+      "category": "crossword puzzle"
+    },
+    {
+      "english": "traffic light, traffic signal, stoplight",
+      "chinese": "交通信号灯",
+      "pinyin": "jiāotōng xìnhào dēng",
+      "category": "traffic light"
+    },
+    {
+      "english": "traffic light, traffic signal, stoplight",
+      "chinese": "交通信号灯",
+      "pinyin": "jiāotōng xìnhào dēng",
+      "category": "traffic light"
+    },
+    {
+      "english": "book jacket, dust cover, dust jacket, dust wrapper",
+      "chinese": "封面",
+      "pinyin": "fēngmiàn",
+      "category": "book jacket"
+    },
+    {
+      "english": "menu",
+      "chinese": "菜单",
+      "pinyin": "càidān",
+      "category": "menu"
+    },
+    {
+      "english": "plate",
+      "chinese": "盘子",
+      "pinyin": "pánzi",
+      "category": "plate"
+    },
+    {
+      "english": "guacamole",
+      "chinese": "鳄梨酱",
+      "pinyin": "èlí jiàng",
+      "category": "guacamole"
+    },
+    {
+      "english": "consomme",
+      "chinese": "清汤",
+      "pinyin": "qīngtāng",
+      "category": "consomme"
+    },
+    {
+      "english": "hot pot, hotpot",
+      "chinese": "火锅",
+      "pinyin": "huǒguō",
+      "category": "hot pot"
+    },
+    {
+      "english": "trifle",
+      "chinese": "甜点杯",
+      "pinyin": "tiándiǎn bēi",
+      "category": "trifle"
+    },
+    {
+      "english": "ice lolly, lolly, lollipop, popsicle",
+      "chinese": "冰棒",
+      "pinyin": "bīngbàng",
+      "category": "ice lolly"
+    },
+    {
+      "english": "ice lolly, lolly, lollipop, popsicle",
+      "chinese": "冰棒",
+      "pinyin": "bīngbàng",
+      "category": "ice lolly"
+    },
+    {
+      "english": "baguette",
+      "chinese": "法棍",
+      "pinyin": "fǎ gùn",
+      "category": "baguette"
+    },
+    {
+      "english": "bagel, beigel",
+      "chinese": "贝果",
+      "pinyin": "bèi guǒ",
+      "category": "bagel"
+    },
+    {
+      "english": "pretzel",
+      "chinese": "椒盐脆饼",
+      "pinyin": "jiāo yán cuì bǐng",
+      "category": "pretzel"
+    },
+    {
+      "english": "cheeseburger",
+      "chinese": "芝士汉堡",
+      "pinyin": "zhī shì hàn bǎo",
+      "category": "cheeseburger"
+    },
+    {
+      "english": "hotdog, hot dog, red hot",
+      "chinese": "热狗",
+      "pinyin": "rè gǒu",
+      "category": "hotdog"
+    },
+    {
+      "english": "mashed potato",
+      "chinese": "土豆泥",
+      "pinyin": "tǔ dòu ní",
+      "category": "mashed potato"
+    },
+    {
+      "english": "head cabbage",
+      "chinese": "包心菜",
+      "pinyin": "bāo xīn cài",
+      "category": "head cabbage"
+    },
+    {
+      "english": "broccoli",
+      "chinese": "西兰花",
+      "pinyin": "xī lán huā",
+      "category": "broccoli"
+    },
+    {
+      "english": "cauliflower",
+      "chinese": "花菜",
+      "pinyin": "huā cài",
+      "category": "cauliflower"
+    },
+    {
+      "english": "zucchini, courgette",
+      "chinese": "西葫芦",
+      "pinyin": "xī hú lú",
+      "category": "zucchini"
+    },
+    {
+      "english": "spaghetti squash",
+      "chinese": "意大利细面南瓜",
+      "pinyin": "yì dà lì xì miàn nán guā",
+      "category": "spaghetti squash"
+    },
+    {
+      "english": "acorn",
+      "chinese": "橡果南瓜",
+      "pinyin": "xiàng guǒ nán guā",
+      "category": "acorn"
+    },
+    {
+      "english": "butternut squash",
+      "chinese": "南瓜",
+      "pinyin": "nán guā",
+      "category": "butternut squash"
+    },
+    {
+      "english": "cucumber, cuke",
+      "chinese": "黄瓜",
+      "pinyin": "huáng guā",
+      "category": "cucumber"
+    },
+    {
+      "english": "artichoke, globe artichoke",
+      "chinese": "洋蓟",
+      "pinyin": "yáng jì",
+      "category": "artichoke"
+    },
+    {
+      "english": "bell pepper",
+      "chinese": "青椒",
+      "pinyin": "qīng jiāo",
+      "category": "bell pepper"
+    },
+    {
+      "english": "cardoon",
+      "chinese": "刺芹",
+      "pinyin": "cì qín",
+      "category": "cardoon"
+    },
+    {
+      "english": "mushroom",
+      "chinese": "蘑菇",
+      "pinyin": "mó gū",
+      "category": "mushroom"
+    },
+    {
+      "english": "Granny Smith",
+      "chinese": "嘎嘎果",
+      "pinyin": "gā gā guǒ",
+      "category": "Granny Smith"
+    },
+    {
+      "english": "strawberry",
+      "chinese": "草莓",
+      "pinyin": "cǎo méi",
+      "category": "strawberry"
+    },
+    {
+      "english": "orange",
+      "chinese": "橙子",
+      "pinyin": "chéng zi",
+      "category": "orange"
+    },
+    {
+      "english": "lemon",
+      "chinese": "柠檬",
+      "pinyin": "níng méng",
+      "category": "lemon"
+    },
+    {
+      "english": "fig",
+      "chinese": "无花果",
+      "pinyin": "wú huā guǒ",
+      "category": "fig"
+    },
+    {
+      "english": "pineapple, ananas",
+      "chinese": "菠萝",
+      "pinyin": "bō luó",
+      "category": "pineapple"
+    },
+    {
+      "english": "banana",
+      "chinese": "香蕉",
+      "pinyin": "xiāng jiāo",
+      "category": "banana"
+    },
+    {
+      "english": "jackfruit, jak, jack",
+      "chinese": "菠萝蜜",
+      "pinyin": "bō luó mì",
+      "category": "jackfruit"
+    },
+    {
+      "english": "custard apple",
+      "chinese": "番荔枝",
+      "pinyin": "fān lì zhī",
+      "category": "custard apple"
+    },
+    {
+      "english": "pomegranate",
+      "chinese": "石榴",
+      "pinyin": "shí liú",
+      "category": "pomegranate"
+    },
+    {
+      "english": "hay",
+      "chinese": "干草",
+      "pinyin": "gān cǎo",
+      "category": "hay"
+    },
+    {
+      "english": "carbonara",
+      "chinese": "卡邦尼面",
+      "pinyin": "kǎ bāng ní miàn",
+      "category": "carbonara"
+    },
+    {
+      "english": "chocolate sauce, chocolate syrup",
+      "chinese": "巧克力酱",
+      "pinyin": "qiǎo kè lì jiàng",
+      "category": "chocolate sauce"
+    },
+    {
+      "english": "dough",
+      "chinese": "面团",
+      "pinyin": "miàn tuán",
+      "category": "dough"
+    },
+    {
+      "english": "meat loaf, meatloaf",
+      "chinese": "肉糕",
+      "pinyin": "ròu gāo",
+      "category": "meat loaf"
+    },
+    {
+      "english": "pizza, pizza pie",
+      "chinese": "披萨",
+      "pinyin": "pī sà",
+      "category": "pizza"
+    },
+    {
+      "english": "pot pie",
+      "chinese": "罐头馅饼",
+      "pinyin": "guàn tóu xiàn bǐng",
+      "category": "pot pie"
+    },
+    {
+      "english": "burrito",
+      "chinese": "墨西哥卷饼",
+      "pinyin": "mò xī gē juǎn bǐng",
+      "category": "burrito"
+    },
+    {
+      "english": "red wine",
+      "chinese": "红葡萄酒",
+      "pinyin": "hóng pú táo jiǔ",
+      "category": "red wine"
+    },
+    {
+      "english": "espresso",
+      "chinese": "浓缩咖啡",
+      "pinyin": "nóng suō kā fēi",
+      "category": "espresso"
+    },
+    {
+      "english": "cup",
+      "chinese": "杯子",
+      "pinyin": "bēi zi",
+      "category": "cup"
+    },
+    {
+      "english": "eggnog",
+      "chinese": "蛋酒",
+      "pinyin": "dàn jiǔ",
+      "category": "eggnog"
+    },
+    {
+      "english": "alp",
+      "chinese": "阿尔卑斯山",
+      "pinyin": "ā ěr bēi sī shān",
+      "category": "alp"
+    },
+    {
+      "english": "bubble",
+      "chinese": "气泡",
+      "pinyin": "qì pào",
+      "category": "bubble"
+    },
+    {
+      "english": "cliff, drop, drop-off",
+      "chinese": "悬崖",
+      "pinyin": "xuán yá",
+      "category": "cliff"
+    },
+    {
+      "english": "coral fungus",
+      "chinese": "珊瑚菌",
+      "pinyin": "shān hú jùn",
+      "category": "coral fungus"
+    },
+    {
+      "english": "geyser",
+      "chinese": "间歇泉",
+      "pinyin": "jiàn xiē quán",
+      "category": "geyser"
+    },
+    {
+      "english": "lakeside, lakeshore",
+      "chinese": "湖畔",
+      "pinyin": "hú pàn",
+      "category": "lakeside"
+    },
+    {
+      "english": "promontory, headland, head, foreland",
+      "chinese": "海角",
+      "pinyin": "hǎi jiǎo",
+      "category": "promontory"
+    },
+    {
+      "english": "shoal",
+      "chinese": "浅滩",
+      "pinyin": "qiǎn tān",
+      "category": "shoal"
+    },
+    {
+      "english": "seashore, coast, seacoast, sea-coast",
+      "chinese": "海岸",
+      "pinyin": "hǎi àn",
+      "category": "seashore"
+    },
+    {
+      "english": "valley, vale",
+      "chinese": "山谷",
+      "pinyin": "shān gǔ",
+      "category": "valley"
+    },
+    {
+      "english": "volcano",
+      "chinese": "火山",
+      "pinyin": "huǒ shān",
+      "category": "volcano"
+    },
+    {
+      "english": "ballplayer, baseball player",
+      "chinese": "棒球运动员",
+      "pinyin": "bàng qiú yùn dòng yuán",
+      "category": "ballplayer"
+    },
+    {
+      "english": "groom, bridegroom",
+      "chinese": "新郎",
+      "pinyin": "xīn láng",
+      "category": "groom"
+    },
+    {
+      "english": "scuba diver",
+      "chinese": "水肺潜水员",
+      "pinyin": "shuǐ fèi qián shuǐ yuán",
+      "category": "scuba diver"
+    },
+    {
+      "english": "rapeseed",
+      "chinese": "油菜",
+      "pinyin": "yóu cài",
+      "category": "rapeseed"
+    },
+    {
+      "english": "daisy",
+      "chinese": "雏菊",
+      "pinyin": "chú jú",
+      "category": "daisy"
+    },
+    {
+      "english": "yellow lady's slipper, yellow lady-slipper, Cypripedium calceolus, Cypripium parviflorum\",",
+      "chinese": "黄杨兰",
+      "pinyin": "huáng yáng lán",
+      "category": "yellow lady's slipper"
+    },
+    {
+      "english": "acorn",
+      "chinese": "橡果南瓜",
+      "pinyin": "xiàng guǒ nán guā",
+      "category": "acorn"
+    },
+    {
+      "english": "acorn squash",
+      "chinese": "橡皮果南瓜",
+      "pinyin": "xiàng pí guǒ nán guā",
+      "category": "acorn squash"
+    },
+    {
+      "english": "hip, rose hip, rosehip",
+      "chinese": "玫瑰果",
+      "pinyin": "méi guī guǒ",
+      "category": "hip"
+    },
+    {
+      "english": "horse cart, horse-cart",
+      "chinese": "马车",
+      "pinyin": "mǎ chē",
+      "category": "horse cart"
+    },
+    {
+      "english": "coral fungus",
+      "chinese": "珊瑚菌",
+      "pinyin": "shān hú jùn",
+      "category": "coral fungus"
+    },
+    {
+      "english": "agaric",
+      "chinese": "伞菌",
+      "pinyin": "sǎn jùn",
+      "category": "agaric"
+    },
+    {
+      "english": "gyromitra",
+      "chinese": "地蛇菌",
+      "pinyin": "dì shé jùn",
+      "category": "gyromitra"
+    },
+    {
+      "english": "stinkhorn, carrion fungus",
+      "chinese": "恶臭菌",
+      "pinyin": "è chòu jùn",
+      "category": "stinkhorn"
+    },
+    {
+      "english": "earth star",
+      "chinese": "花序",
+      "pinyin": "huā xù",
+      "category": "earth star"
+    },
+    {
+      "english": "hen-of-the-woods, hen of the woods, Polyporus frondosus, Grifola frondosa",
+      "chinese": "牛肝菌",
+      "pinyin": "niú gān jùn",
+      "category": "hen-of-the-woods"
+    },
+    {
+      "english": "bolete",
+      "chinese": "牛肝菌",
+      "pinyin": "niú gān jùn",
+      "category": "bolete"
+    },
+    {
+      "english": "ear, spike, capitulum",
+      "chinese": "耳朵",
+      "pinyin": "ěrduo",
+      "category": "ear"
+    },
+    {
+      "english": "toilet tissue, toilet paper, bathroom tissue",
+      "chinese": "卫生纸",
+      "pinyin": "wèi shēng zhǐ",
+      "category": "toilet tissue"
+    },
+    {
+      "english": "digital clock",
+      "chinese": "数字钟",
+      "pinyin": "shù zi zhōng",
+      "category": "digital clock"
+    },
+    {
+      "english": "space bar",
+      "chinese": "空格键",
+      "pinyin": "kòng gé jiàn",
+      "category": "space bar"
     }
   ]
 } 
