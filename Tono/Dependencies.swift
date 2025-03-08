@@ -23,7 +23,7 @@
     URL: https://github.com/Cay-Zhang/SwiftSpeech.git
     Version: 0.9.0 or higher
  
- 4. Alamofire - For network requests to SpeechSuper API
+ 4. Alamofire - For network requests to thefluent.me API
     URL: https://github.com/Alamofire/Alamofire.git
     Version: 5.0.0 or higher
  

@@ -359,9 +359,13 @@ class ARViewController: UIViewController, ARSCNViewDelegate {
             if let nodeName = hitNode.name, nodeName.contains("|") {
                 let components = nodeName.components(separatedBy: "|")
                 if components.count >= 3 {
+                    let english = components[0]
                     let chinese = components[1]
                     let pinyin = components[2]
                     playPronunciation(for: chinese, pinyin: pinyin)
+                    
+                    // Notify about the detected object to show the popup again
+                    onObjectDetected?(english, chinese, pinyin)
                 } else {
                     playPronunciation(for: latestChineseTranslation, pinyin: latestPinyin)
                 }

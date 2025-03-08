@@ -29,9 +29,9 @@
 
 - [x] Enable **Microphone and Speech Recognition** capabilities in Xcode.  
 - [x] Import **AVFoundation**, **AudioKit**, and **Speech** frameworks.  
-- [ ] Install and configure **SpeechSuper API** for pronunciation assessment.  
+- [x] Install and configure **thefluent.me API** for pronunciation assessment.  
 - [x] Develop a prototype for **audio playback** using AVFoundation.  
-- [ ] Create a basic **speech recording and transcription** function using the Speech framework.  
+- [x] Create a basic **speech recording and transcription** function using the Speech framework.  
 
 ---
 
@@ -55,7 +55,7 @@
 - [x] Create a **SwiftUI view** for the camera interface using ARKit.  
 - [x] Integrate **Core ML** for real-time object recognition.  
 - [x] Display **popups with Chinese names, pinyin, and pronunciation**.  
-- [ ] Implement **speech recording** and send audio to SpeechSuper API for assessment.  
+- [x] Implement **speech recording** and send audio to thefluent.me API for assessment.  
 - [ ] Provide **feedback on pronunciation** (correct or retry).  
 - [ ] Save correctly pronounced objects to Core Data.  
 - [ ] Test for **accuracy and performance** on multiple devices.  
@@ -68,7 +68,7 @@
 - [ ] Retrieve objects from **Core Data** based on SRS schedule.  
 - [ ] Develop a **custom SRS algorithm** in Swift (Leitner or SM-2).  
 - [ ] Implement a **point system** for correct answers.  
-- [ ] Provide **pronunciation feedback** using SpeechSuper and AudioKit.  
+- [x] Provide **pronunciation feedback** using thefluent.me API.  
 - [ ] Test **SRS functionality** for appropriate intervals and difficulty.  
 
 ---
@@ -77,7 +77,7 @@
 
 - [ ] Extract **pitch and tone** using AudioKit.  
 - [ ] Compare user pronunciation to **reference pitch** for tone accuracy.  
-- [ ] Display **visual feedback** (green for correct, red for incorrect).  
+- [x] Display **visual feedback** (green for correct, red for incorrect).  
 - [ ] Store **performance data** in Core Data for future quizzes.  
 
 ---
@@ -108,7 +108,7 @@
 
 - [ ] Optimize **Core ML models** for mobile performance (quantization, pruning).  
 - [ ] Test **ARKit frame rates** and adjust for lag or delay.  
-- [ ] Minimize **network requests** for SpeechSuper API using caching.  
+- [ ] Minimize **network requests** for thefluent.me API using caching.  
 - [ ] Implement **background tasks** for data saving in Core Data.  
 - [ ] Monitor memory usage and optimize as needed.  
 
@@ -128,7 +128,7 @@
 - [ ] Request permissions for:
   - Camera access (ARKit).  
   - Microphone access (Speech).  
-  - Speech recognition (SpeechSuper API).  
+  - Speech recognition (thefluent.me API).  
 - [ ] Encrypt **Core Data** storage for user data security.  
 - [ ] Implement a **privacy policy** in the app settings.  
 
@@ -142,7 +142,7 @@
   - SRS scheduling and data retrieval.  
 - [ ] Conduct **integration testing** for:
   - ARKit and Core ML.  
-  - Audio recording and SpeechSuper API.  
+  - Audio recording and thefluent.me API.  
 - [ ] Perform **UI testing** for:
   - Navigation between explore and practice modes.  
   - Responsiveness on different screen sizes.  

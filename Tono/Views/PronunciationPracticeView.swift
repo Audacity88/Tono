@@ -31,6 +31,12 @@ struct PronunciationPracticeView: View {
     @State private var audioRecorder: AVAudioRecorder?
     @State private var recordingURL: URL?
     
+    // Pronunciation API
+    @StateObject private var pronunciationAPI = PronunciationAPI()
+    
+    // Speech manager for text-to-speech
+    @StateObject private var speechManager = SpeechManager()
+    
     var body: some View {
         VStack {
             if sessionComplete {
@@ -145,10 +151,26 @@ struct PronunciationPracticeView: View {
                             .font(.system(size: 40, weight: .bold))
                             .foregroundColor(.red)
                         
-                        Text(practiceObjects[currentIndex].pinyin ?? "")
-                            .font(.title3)
-                            .foregroundColor(.secondary)
-                            .padding(.bottom, 10)
+                        HStack(spacing: 8) {
+                            Text(practiceObjects[currentIndex].pinyin ?? "")
+                                .font(.title3)
+                                .foregroundColor(.secondary)
+                            
+                            Button(action: {
+                                if let chinese = practiceObjects[currentIndex].chinese {
+                                    speechManager.speak(chinese) { _ in }
+                                }
+                            }) {
+                                Image(systemName: "speaker.wave.2.fill")
+                                    .foregroundColor(.blue)
+                                    .padding(8)
+                                    .background(Color.blue.opacity(0.1))
+                                    .clipShape(Circle())
+                            }
+                            .disabled(speechManager.isSpeaking)
+                            .opacity(speechManager.isSpeaking ? 0.6 : 1.0)
+                        }
+                        .padding(.bottom, 10)
                         
                         // Pronunciation recording button
                         Button(action: {
@@ -174,7 +196,16 @@ struct PronunciationPracticeView: View {
                                     .foregroundColor(.white)
                             }
                         }
+                        .disabled(pronunciationAPI.isProcessing)
                         .padding()
+                        
+                        // Loading indicator during API processing
+                        if pronunciationAPI.isProcessing {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle())
+                                .scaleEffect(1.5)
+                                .padding()
+                        }
                         
                         // Feedback message
                         if showFeedback {
@@ -234,6 +265,21 @@ struct PronunciationPracticeView: View {
         .onAppear {
             setupAudioSession()
             preparePracticeItems()
+        }
+        .alert(item: Binding<AlertItem?>(
+            get: { 
+                if let error = pronunciationAPI.error {
+                    return AlertItem(message: error)
+                }
+                return nil
+            },
+            set: { _ in pronunciationAPI.error = nil }
+        )) { alertItem in
+            Alert(
+                title: Text("Error"),
+                message: Text(alertItem.message),
+                dismissButton: .default(Text("OK"))
+            )
         }
     }
     
@@ -316,24 +362,44 @@ struct PronunciationPracticeView: View {
     
     // Process the pronunciation recording
     private func processPronunciation() {
-        // In a real app, this would send the audio to SpeechSuper API
-        // For now, we'll simulate feedback with a random result
+        guard let recordingURL = recordingURL, let chineseText = practiceObjects[currentIndex].chinese else {
+            feedbackMessage = "Missing recording or text data"
+            feedbackColor = .red
+            showFeedback = true
+            return
+        }
         
-        // Simulate processing delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            // Simulate pronunciation assessment (random result for demo)
-            let randomScore = Double.random(in: 0...100)
-            
-            if randomScore > 70 {
-                self.feedbackMessage = "Great pronunciation! 👍"
-                self.feedbackColor = .green
+        // Send the recording to the Fluent API for assessment
+        pronunciationAPI.assessPronunciation(audioURL: recordingURL, text: chineseText) { result in
+            switch result {
+            case .success(let pronunciationResult):
+                // Process the result
+                let score = pronunciationResult.score
+                
+                if score > 80 {
+                    self.feedbackMessage = "Excellent pronunciation! 👍 Score: \(Int(score))/100"
+                    self.feedbackColor = .green
+                } else if score > 60 {
+                    self.feedbackMessage = "Good pronunciation. Score: \(Int(score))/100\n\(pronunciationResult.feedback)"
+                    self.feedbackColor = .green
+                } else if score > 40 {
+                    self.feedbackMessage = "Fair attempt. Score: \(Int(score))/100\n\(pronunciationResult.feedback)"
+                    self.feedbackColor = .orange
+                } else {
+                    self.feedbackMessage = "Needs improvement. Score: \(Int(score))/100\n\(pronunciationResult.feedback)"
+                    self.feedbackColor = .red
+                }
+                
+                // Show detailed feedback if available
+                if let details = pronunciationResult.details, let errors = details.specificErrors, !errors.isEmpty {
+                    self.feedbackMessage += "\n• " + errors.joined(separator: "\n• ")
+                }
+                
                 self.showFeedback = true
-            } else if randomScore > 40 {
-                self.feedbackMessage = "Good attempt, but try to improve your tone"
-                self.feedbackColor = .orange
-                self.showFeedback = true
-            } else {
-                self.feedbackMessage = "Try again, focus on the correct sounds"
+                
+            case .failure(let error):
+                // Handle error
+                self.feedbackMessage = "Error: \(error.localizedDescription)"
                 self.feedbackColor = .red
                 self.showFeedback = true
             }
@@ -365,4 +431,10 @@ struct PronunciationPracticeView: View {
             sessionComplete = true
         }
     }
+}
+
+// Alert item for error messages
+struct AlertItem: Identifiable {
+    let id = UUID()
+    let message: String
 } 

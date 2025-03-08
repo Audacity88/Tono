@@ -77,7 +77,7 @@ struct ObjectRow: View {
     var body: some View {
         HStack {
             if let imageData = object.image, let uiImage = UIImage(data: imageData) {
-                Image(uiImage: uiImage.rotate90DegreesClockwise() ?? uiImage)
+                Image(uiImage: uiImage.fixOrientation())
                     .resizable()
                     .scaledToFill()
                     .frame(width: 60, height: 60)
@@ -135,7 +135,7 @@ struct ObjectDetailView: View {
             VStack(alignment: .center, spacing: 20) {
                 // Object image
                 if let imageData = object.image, let uiImage = UIImage(data: imageData) {
-                    Image(uiImage: uiImage.rotate90DegreesClockwise() ?? uiImage)
+                    Image(uiImage: uiImage.fixOrientation())
                         .resizable()
                         .scaledToFit()
                         .frame(maxWidth: .infinity)
