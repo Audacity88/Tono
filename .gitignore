@@ -237,3 +237,12 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
+
+# ML packages
+*.mlpackage
+*.mlpackage.zip
+*.mlpackage.tar
+*.mlpackage.tar.gz
+*.mlpackage.tar.bz2
+*.mlpackage.tar.xz
+*.mlpackage.tar.lzma
