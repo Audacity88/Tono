@@ -144,3 +144,32 @@ Ultralytics offers two licensing options:
   <img src="https://github.com/ultralytics/assets/raw/main/social/logo-transparent.png" width="3%" alt="space">
   <a href="https://discord.com/invite/ultralytics"><img src="https://github.com/ultralytics/assets/raw/main/social/logo-social-discord.png" width="3%" alt="Ultralytics Discord"></a>
 </div>
+
+## 🌏 Tono Integration: Language Learning with YOLO
+
+This version of the Ultralytics YOLO iOS App includes integration with Tono, a language learning system that enhances object detection with Chinese translations and learning features.
+
+### New Features
+
+- **Object Translation**: Detected objects are automatically translated to Chinese with pinyin pronunciation
+- **Interactive Learning**: Tap on detected objects to see translations, hear pronunciations, and save to your collection
+- **Collection Management**: Save detected objects to review and practice later
+- **Practice Tools**: Use flashcards, quizzes, and pronunciation practice to improve your Chinese vocabulary
+- **Customizable Settings**: Configure both YOLO detection and language learning settings
+
+### How to Use
+
+1. **Enable Tab Bar Interface**: Go to Settings app > YOLO > Interface Settings > Enable "Use Tab Bar Interface"
+2. **Explore Tab**: Use the camera to detect objects and see their Chinese translations
+3. **Collection Tab**: View and manage your saved objects
+4. **Practice Tab**: Use various learning tools to practice your vocabulary
+5. **Settings Tab**: Configure detection and language learning settings
+
+### Technical Details
+
+The integration combines the powerful object detection capabilities of YOLO with language learning features:
+
+- UIKit and SwiftUI integration using UIHostingController
+- Core Data for persistent storage of learned vocabulary
+- Text-to-speech for Chinese pronunciation
+- Pronunciation assessment for speaking practice

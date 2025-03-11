@@ -16,6 +16,9 @@ import CoreML
 import CoreMedia
 import UIKit
 import Vision
+import SwiftUI
+import CoreData
+import SceneKit
 
 var mlModel = try! yolo11m(configuration: mlmodelConfig).model
 var mlmodelConfig: MLModelConfiguration = {
@@ -28,6 +31,7 @@ var mlmodelConfig: MLModelConfiguration = {
   return config
 }()
 
+/// The main view controller for the YOLO app, responsible for camera setup, model selection, and detection visualization.
 class ViewController: UIViewController {
   @IBOutlet var videoPreview: UIView!
   @IBOutlet var View0: UIView!
@@ -51,6 +55,18 @@ class ViewController: UIViewController {
   @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
   @IBOutlet weak var focus: UIImageView!
   @IBOutlet weak var toolBar: UIToolbar!
+  
+  // Translation-related properties
+  private var translationManager = TranslationManager.shared
+  private var speechManager = SpeechManager()
+  private var currentDetection: (english: String, chinese: String, pinyin: String)?
+  private var detectionPopupHostingController: UIHostingController<DetectionPopupView>?
+  private var persistenceController = PersistenceController.shared
+  
+  // Core Data context
+  private var managedObjectContext: NSManagedObjectContext {
+    return persistenceController.container.viewContext
+  }
 
   let selection = UISelectionFeedbackGenerator()
   var detector = try! VNCoreMLModel(for: mlModel)
@@ -87,6 +103,10 @@ class ViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    
+    // Debug logging for utility classes - keep minimal logging
+    print("App initialized with utility managers")
+    
     slider.value = 30
     setLabels()
     setUpBoundingBoxViews()
@@ -324,7 +344,9 @@ class ViewController: UIViewController {
   func setUpBoundingBoxViews() {
     // Ensure all bounding box views are initialized up to the maximum allowed.
     while boundingBoxViews.count < maxBoundingBoxViews {
-      boundingBoxViews.append(BoundingBoxView())
+      let boxView = BoundingBoxView(frame: .zero)
+      boundingBoxViews.append(boxView)
+      videoPreview.addSubview(boxView)
     }
 
     // Retrieve class labels directly from the CoreML model's class labels, if available.
@@ -341,7 +363,6 @@ class ViewController: UIViewController {
         count = 0
       }
       colors[label] = color
-
     }
   }
 
@@ -358,13 +379,15 @@ class ViewController: UIViewController {
           self.videoCapture.previewLayer?.frame = self.videoPreview.bounds  // resize preview layer
         }
 
-        // Add the bounding box layers to the UI, on top of the video preview.
-        for box in self.boundingBoxViews {
-          box.addToLayer(self.videoPreview.layer)
+        // Bring bounding box views to front
+        for boxView in self.boundingBoxViews {
+          self.videoPreview.bringSubviewToFront(boxView)
         }
 
         // Once everything is set up, we can start capturing live video.
         self.videoCapture.start()
+      } else {
+        print("Video capture setup failed")
       }
     }
   }
@@ -569,19 +592,43 @@ class ViewController: UIViewController {
           // Scale normalized to pixels [375, 812] [width, height]
           rect = VNImageRectForNormalizedRect(rect, Int(width), Int(height))
 
-          // The labels array is a list of VNClassificationObservation objects,
-          // with the highest scoring class first in the list.
+          // Get the best prediction for this observation
           let bestClass = prediction.labels[0].identifier
           let confidence = prediction.labels[0].confidence
-          // print(confidence, rect)  // debug (confidence, xywh) with xywh origin top left (pixels)
-          let label = String(format: "%@ %.1f", bestClass, confidence * 100)
-          let alpha = CGFloat((confidence - 0.2) / (1.0 - 0.2) * 0.9)
-          // Show the bounding box.
-          boundingBoxViews[i].show(
-            frame: rect,
-            label: label,
-            color: colors[bestClass] ?? UIColor.white,
-            alpha: alpha)  // alpha 0 (transparent) to 1 (opaque) for conf threshold 0.2 to 1.0)
+          
+          // Check if we have a translation for this class
+          if let translation = translationManager.getTranslation(for: bestClass) {
+              // Store the current detection for use when tapped
+              self.currentDetection = (english: bestClass, chinese: translation.chinese, pinyin: translation.pinyin)
+              
+              // Create a label with translation
+              let label = String(format: "%@ - %@ %.1f%%", bestClass, translation.chinese, confidence * 100)
+              let alpha = CGFloat((confidence - 0.2) / (1.0 - 0.2) * 0.9)
+              
+              boundingBoxViews[i].show(
+                frame: rect,
+                label: label,
+                color: colors[bestClass] ?? UIColor.white,
+                alpha: alpha)
+              
+              // Add tap gesture to the bounding box view if not already added
+              if boundingBoxViews[i].gestureRecognizers?.isEmpty ?? true {
+                  let tapGesture = UITapGestureRecognizer(target: self, action: #selector(boundingBoxTapped(_:)))
+                  boundingBoxViews[i].addGestureRecognizer(tapGesture)
+                  boundingBoxViews[i].isUserInteractionEnabled = true
+                  boundingBoxViews[i].tag = i  // Set tag to identify which box was tapped
+              }
+          } else {
+              // No translation available, use original label
+              let label = String(format: "%@ %.1f", bestClass, confidence * 100)
+              let alpha = CGFloat((confidence - 0.2) / (1.0 - 0.2) * 0.9)
+              
+              boundingBoxViews[i].show(
+                frame: rect,
+                label: label,
+                color: colors[bestClass] ?? UIColor.white,
+                alpha: alpha)
+          }
 
           if developerMode {
             // Write
@@ -656,11 +703,6 @@ class ViewController: UIViewController {
         saveText(text: str, file: "frames.txt")  // Write stats for each image
       }
     }
-
-    // Debug
-    // print(str)
-    // print(UIDevice.current.identifierForVendor!)
-    // saveImage()
   }
 
   // Pinch to Zoom Start ---------------------------------------------------------------------------------------------
@@ -701,7 +743,191 @@ class ViewController: UIViewController {
     default: break
     }
   }  // Pinch to Zoom End --------------------------------------------------------------------------------------------
-}  // ViewController class End
+
+  // MARK: - Translation and Learning Features
+  
+  /// Handle tap on a bounding box
+  @objc func boundingBoxTapped(_ gesture: UITapGestureRecognizer) {
+    guard let boxView = gesture.view as? BoundingBoxView,
+          let detection = currentDetection else {
+        return
+    }
+    
+    // Show the detection popup
+    showDetectionPopup(for: detection)
+  }
+  
+  /// Show a popup with the detected object's translation and learning options
+  func showDetectionPopup(for detection: (english: String, chinese: String, pinyin: String)) {
+    // Create the SwiftUI view
+    let detectionPopupView = DetectionPopupView(
+        english: detection.english,
+        chinese: detection.chinese,
+        pinyin: detection.pinyin,
+        onDismiss: { [weak self] in
+            self?.dismissDetectionPopup()
+        },
+        onSave: { [weak self] in
+            self?.saveDetectedObject(detection)
+            self?.dismissDetectionPopup()
+        },
+        onSpeak: { [weak self] in
+            self?.speakDetectedObject(detection.chinese)
+        }
+    )
+    
+    // Create the UIHostingController
+    let hostingController = UIHostingController(rootView: detectionPopupView)
+    hostingController.modalPresentationStyle = .overFullScreen
+    hostingController.modalTransitionStyle = .crossDissolve
+    hostingController.view.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+    
+    // Store the hosting controller
+    detectionPopupHostingController = hostingController
+    
+    // Present the popup
+    present(hostingController, animated: true)
+  }
+  
+  /// Dismiss the detection popup
+  func dismissDetectionPopup() {
+    detectionPopupHostingController?.dismiss(animated: true)
+    detectionPopupHostingController = nil
+  }
+  
+  /// Save the detected object to Core Data
+  func saveDetectedObject(_ detection: (english: String, chinese: String, pinyin: String)) {
+    // Create a position vector (in a real AR app, this would be the actual position)
+    let position = SCNVector3(x: 0, y: 0, z: 0)
+    
+    // Save the object using the PersistenceController
+    persistenceController.saveTaggedObject(
+        english: detection.english,
+        chinese: detection.chinese,
+        pinyin: detection.pinyin,
+        image: nil, // We could capture an image here if needed
+        position: position,
+        context: managedObjectContext
+    )
+    
+    // Show a confirmation to the user
+    let alert = UIAlertController(
+        title: "Saved",
+        message: "\(detection.english) (\(detection.chinese)) has been added to your collection.",
+        preferredStyle: .alert
+    )
+    alert.addAction(UIAlertAction(title: "OK", style: .default))
+    present(alert, animated: true)
+  }
+  
+  /// Speak the Chinese translation of the detected object
+  func speakDetectedObject(_ chinese: String) {
+    speechManager.speak(chinese) { _ in }
+  }
+}
+
+// MARK: - SwiftUI Views for Detection Popup
+
+/// SwiftUI view for displaying detected object information
+struct DetectionPopupView: View {
+    let english: String
+    let chinese: String
+    let pinyin: String
+    let onDismiss: () -> Void
+    let onSave: () -> Void
+    let onSpeak: () -> Void
+    
+    @State private var isRecording = false
+    
+    var body: some View {
+        VStack {
+            Spacer()
+            
+            VStack(spacing: 20) {
+                // Close button
+                HStack {
+                    Spacer()
+                    Button(action: onDismiss) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title)
+                            .foregroundColor(.white)
+                    }
+                    .padding(.trailing, 20)
+                }
+                
+                // Object information
+                Text(chinese)
+                    .font(.system(size: 36, weight: .bold))
+                    .foregroundColor(.red)
+                
+                Text(pinyin)
+                    .font(.system(size: 24))
+                    .foregroundColor(.orange)
+                
+                Text(english)
+                    .font(.system(size: 18))
+                    .foregroundColor(.white)
+                
+                // Action buttons
+                HStack(spacing: 30) {
+                    // Speak button
+                    Button(action: onSpeak) {
+                        VStack {
+                            Image(systemName: "speaker.wave.2.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(.white)
+                            Text("Speak")
+                                .font(.caption)
+                                .foregroundColor(.white)
+                        }
+                        .frame(width: 60, height: 60)
+                        .background(Color.blue)
+                        .clipShape(Circle())
+                    }
+                    
+                    // Record button (placeholder for future implementation)
+                    Button(action: {
+                        isRecording.toggle()
+                    }) {
+                        VStack {
+                            Image(systemName: isRecording ? "stop.fill" : "mic.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(.white)
+                            Text(isRecording ? "Stop" : "Record")
+                                .font(.caption)
+                                .foregroundColor(.white)
+                        }
+                        .frame(width: 60, height: 60)
+                        .background(isRecording ? Color.red : Color.green)
+                        .clipShape(Circle())
+                    }
+                    
+                    // Save button
+                    Button(action: onSave) {
+                        VStack {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(.white)
+                            Text("Save")
+                                .font(.caption)
+                                .foregroundColor(.white)
+                        }
+                        .frame(width: 60, height: 60)
+                        .background(Color.purple)
+                        .clipShape(Circle())
+                    }
+                }
+                .padding(.vertical, 20)
+            }
+            .padding()
+            .background(Color.black.opacity(0.8))
+            .cornerRadius(20)
+            .padding(.horizontal, 20)
+            
+            Spacer()
+        }
+    }
+}
 
 extension ViewController: VideoCaptureDelegate {
   func videoCapture(_ capture: VideoCapture, didCaptureVideoFrame sampleBuffer: CMSampleBuffer) {

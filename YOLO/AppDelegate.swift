@@ -13,6 +13,8 @@
 //  within the app, utilizing the device's screen scale for high-resolution captures.
 
 import UIKit
+import CoreData
+
 
 /// The main application delegate, handling global app behavior and configuration.
 @UIApplicationMain
@@ -44,8 +46,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // Ensure UserDefaults changes are immediately saved.
     UserDefaults.standard.synchronize()
+    
+    // Set up the main tab bar controller as the root view controller
+    if let useTabBar = UserDefaults.standard.object(forKey: "use_tab_bar") as? Bool, useTabBar {
+        setupTabBarController()
+    }
 
     return true
+  }
+  
+  /// Set up the main tab bar controller as the root view controller
+  func setupTabBarController() {
+    // Create the main tab bar controller
+    let tabBarController = MainTabBarController()
+    
+    // Set it as the root view controller
+    window?.rootViewController = tabBarController
+    window?.makeKeyAndVisible()
   }
 }
 

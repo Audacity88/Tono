@@ -13,15 +13,24 @@ import Foundation
 import UIKit
 
 /// Manages the visualization of bounding boxes and associated labels for object detection results.
-class BoundingBoxView {
+class BoundingBoxView: UIView {
   /// The layer that draws the bounding box around a detected object.
   let shapeLayer: CAShapeLayer
 
   /// The layer that displays the label and confidence score for the detected object.
   let textLayer: CATextLayer
+  
+  /// The detected object's class name
+  var className: String = ""
+  
+  /// The detected object's confidence score
+  var confidence: Float = 0.0
+  
+  /// The detected object's translation (if available)
+  var translation: (chinese: String, pinyin: String)? = nil
 
   /// Initializes a new BoundingBoxView with configured shape and text layers.
-  init() {
+  override init(frame: CGRect) {
     shapeLayer = CAShapeLayer()
     shapeLayer.fillColor = UIColor.clear.cgColor  // No fill to only show the bounding outline
     shapeLayer.lineWidth = 4  // Set the stroke line width
@@ -33,13 +42,19 @@ class BoundingBoxView {
     textLayer.fontSize = 14  // Set font size for the label text
     textLayer.font = UIFont(name: "Avenir", size: textLayer.fontSize)  // Use Avenir font for labels
     textLayer.alignmentMode = .center  // Center-align the text within the layer
+    
+    super.init(frame: frame)
+    
+    // Add layers to the view
+    layer.addSublayer(shapeLayer)
+    layer.addSublayer(textLayer)
+    
+    // Enable user interaction
+    isUserInteractionEnabled = true
   }
-
-  /// Adds the bounding box and text layers to a specified parent layer.
-  /// - Parameter parent: The CALayer to which the bounding box and text layers will be added.
-  func addToLayer(_ parent: CALayer) {
-    parent.addSublayer(shapeLayer)
-    parent.addSublayer(textLayer)
+  
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
   }
 
   /// Updates the bounding box and label to be visible with specified properties.
@@ -51,15 +66,25 @@ class BoundingBoxView {
   func show(frame: CGRect, label: String, color: UIColor, alpha: CGFloat) {
     CATransaction.setDisableActions(true)  // Disable implicit animations
 
-    let path = UIBezierPath(roundedRect: frame, cornerRadius: 6.0)  // Rounded rectangle for the bounding box
+    // Update the view's frame
+    self.frame = frame
+    
+    // Make sure the view is visible
+    self.isHidden = false
+    self.alpha = 1.0
+    
+    // Make the shape layer more visible
+    shapeLayer.lineWidth = 6  // Increase line width for better visibility
+    
+    let path = UIBezierPath(roundedRect: bounds, cornerRadius: 6.0)  // Rounded rectangle for the bounding box
     shapeLayer.path = path.cgPath
-    shapeLayer.strokeColor = color.withAlphaComponent(alpha).cgColor  // Apply color and alpha to the stroke
+    shapeLayer.strokeColor = color.withAlphaComponent(1.0).cgColor  // Apply full opacity for better visibility
     shapeLayer.isHidden = false  // Make the shape layer visible
 
     textLayer.string = label  // Set the label text
-    textLayer.backgroundColor = color.withAlphaComponent(alpha).cgColor  // Apply color and alpha to the background
+    textLayer.backgroundColor = color.withAlphaComponent(1.0).cgColor  // Apply full opacity for better visibility
     textLayer.isHidden = false  // Make the text layer visible
-    textLayer.foregroundColor = UIColor.white.withAlphaComponent(alpha).cgColor  // Set text color
+    textLayer.foregroundColor = UIColor.white.cgColor  // Set text color with full opacity
 
     // Calculate the text size and position based on the label content
     let attributes = [NSAttributedString.Key.font: textLayer.font as Any]
@@ -68,7 +93,7 @@ class BoundingBoxView {
       options: .truncatesLastVisibleLine,
       attributes: attributes, context: nil)
     let textSize = CGSize(width: textRect.width + 12, height: textRect.height)  // Add padding to the text size
-    let textOrigin = CGPoint(x: frame.origin.x - 2, y: frame.origin.y - textSize.height - 2)  // Position above the bounding box
+    let textOrigin = CGPoint(x: 0, y: -textSize.height - 2)  // Position above the bounding box
     textLayer.frame = CGRect(origin: textOrigin, size: textSize)  // Set the text layer frame
   }
 
