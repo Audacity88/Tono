@@ -1,5 +1,18 @@
 # Repo-specific GitIgnore ----------------------------------------------------------------------------------------------
 
+# Backup directories
+*.bak/
+*-bak/
+Tono.bak/
+yolo-ios-app.bak/
+
+# ML model files (in addition to existing rules)
+*.mlmodel
+*.mlpackage
+*.mlmodelc/
+Models/*.mlpackage/
+Models/*.mlmodel
+Models/*.mlmodelc/
 
 # Xcode GitIgnore ------------------------------------------------------------------------------------------------------
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore

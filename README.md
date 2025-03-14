@@ -1,10 +1,10 @@
 <a href="https://www.ultralytics.com/" target="_blank"><img src="https://raw.githubusercontent.com/ultralytics/assets/main/logo/Ultralytics_Logotype_Original.svg" width="320" alt="Ultralytics logo"></a>
 
-# 🚀 Ultralytics YOLO iOS App
+# 🚀 Tono - AI-Powered Language Learning
 
 [![Ultralytics Actions](https://github.com/ultralytics/yolo-ios-app/actions/workflows/format.yml/badge.svg)](https://github.com/ultralytics/yolo-ios-app/actions/workflows/format.yml) <a href="https://discord.com/invite/ultralytics"><img alt="Discord" src="https://img.shields.io/discord/1089800235347353640?logo=discord&logoColor=white&label=Discord&color=blue"></a> <a href="https://community.ultralytics.com/"><img alt="Ultralytics Forums" src="https://img.shields.io/discourse/users?server=https%3A%2F%2Fcommunity.ultralytics.com&logo=discourse&label=Forums&color=blue"></a> <a href="https://reddit.com/r/ultralytics"><img alt="Ultralytics Reddit" src="https://img.shields.io/reddit/subreddit-subscribers/ultralytics?style=flat&logo=reddit&logoColor=white&label=Reddit&color=blue"></a>
 
-Welcome to the [Ultralytics YOLO iOS App](https://apps.apple.com/us/app/idetection/id1452689527) GitHub repository! 📖 Leveraging Ultralytics' advanced [YOLO11 object detection models](https://github.com/ultralytics/ultralytics), this app transforms your iOS device into an intelligent detection tool. Explore our guide to get started with the Ultralytics YOLO iOS App and discover the world in a new and exciting way.
+Welcome to Tono, an innovative language learning app that combines Ultralytics' advanced [YOLO11 object detection models](https://github.com/ultralytics/ultralytics) with interactive Chinese language learning features. Transform your iOS device into an intelligent language learning tool that helps you learn Chinese vocabulary naturally through real-world object detection.
 
 <div align="center">
   <a href="https://apps.apple.com/us/app/idetection/id1452689527" target="_blank"><img width="90%" src="https://github.com/ultralytics/ultralytics/assets/26833433/fd3c8a92-fec0-4253-b4ac-ee94f5ced3fb" alt="Ultralytics YOLO iOS App previews"></a>
@@ -28,85 +28,101 @@ Welcome to the [Ultralytics YOLO iOS App](https://apps.apple.com/us/app/idetecti
     <img src="https://raw.githubusercontent.com/ultralytics/assets/main/app/app-store.svg" width="15%" alt="Apple App store"></a>
 </div>
 
-## 🛠 Quickstart: Setting Up the Ultralytics YOLO iOS App
+## 🌟 Features
 
-Getting started with the Ultralytics YOLO iOS App is straightforward. Follow these steps to install the app on your iOS device.
+- **Real-Time Object Detection & Translation**: Instantly detect objects and see their Chinese translations
+- **Interactive Learning**: Tap on detected objects to:
+  - View Chinese translations with pinyin
+  - Hear native pronunciations
+  - Practice your own pronunciation
+  - Save items to your personal collection
+- **Spaced Repetition**: Smart review system helps you remember vocabulary effectively
+- **Multiple AI Models**: Choose from various YOLO11 models for optimal performance:
+  - YOLO11n (fastest)
+  - YOLO11s (balanced speed/accuracy)
+  - YOLO11m (balanced)
+  - YOLO11l (accurate)
+  - YOLO11x (most accurate)
+- **AR Integration**: Place 3D Chinese labels in your environment for immersive learning
+- **Offline Support**: Core features work without internet connection
+
+## 🛠 Getting Started
 
 ### Prerequisites
 
-Ensure you have the following before you start:
-
-- **Xcode:** The Ultralytics YOLO iOS App requires Xcode installed on your macOS machine. Download it from the [Mac App Store](https://apps.apple.com/us/app/xcode/id497799835).
-
-- **An iOS Device:** For testing the app, you'll need an iPhone or iPad running [iOS 14.0](https://www.apple.com/ios/ios-18/) or later. Note: trained models can only work on iPhone or iPad running **iOS 17.0** or later.
-
-- **An Apple Developer Account:** A free Apple Developer account will suffice for device testing. Sign up [here](https://developer.apple.com/) if you haven't already.
+- **Xcode:** Latest version from the [Mac App Store](https://apps.apple.com/us/app/xcode/id497799835)
+- **iOS Device:** iPhone or iPad running iOS 16.0 or later
+- **Apple Developer Account:** Free account for testing (Sign up [here](https://developer.apple.com/))
 
 ### Installation
 
 1. **Clone the Repository:**
-
    ```sh
-   git clone https://github.com/ultralytics/yolo-ios-app.git
+   git clone git@github.com:Audacity88/Tono.git
    ```
 
-2. **Open the Project in Xcode:**
+2. **Open the Project:**
+   - Open `Tono.xcodeproj` in Xcode
+   - Select your development team in project settings
 
-   Navigate to the cloned directory and open the `YOLO.xcodeproj` file.
+3. **Add YOLO11 Models:**
+   Download and add the required YOLO11 models to the `Tono/Models` directory:
+   - yolo11n.mlpackage (recommended default)
+   - yolo11s.mlpackage
+   - yolo11m.mlpackage
+   - yolo11l.mlpackage
+   - yolo11x.mlpackage
 
-   <p align="center">
-   <img width="50%" src="https://github.com/ultralytics/ultralytics/assets/26833433/e0053238-4a7c-4d18-8720-6ce24c73dea0" alt="XCode load project screenshot">
-   </p>
+   You can create these models using the ultralytics package:
+   ```python
+   from ultralytics import YOLO
+   
+   # Export models to CoreML format
+   for size in ("n", "s", "m", "l", "x"):
+       model = YOLO(f"yolo11{size}.pt")
+       model.export(format="coreml", int8=True, nms=True)
+   ```
 
-   In Xcode, go to the project's target settings and choose your Apple Developer account under the "Signing & Capabilities" tab.
+4. **Run the App:**
+   - Connect your iOS device
+   - Select it as the run target in Xcode
+   - Build and run the project
 
-3. **Add YOLO11 Models to the Project:**
+## 💡 Usage Tips
 
-   Since the YOLO CoreML models are not versioned in this repository, you'll need to either:
+1. **Getting Started:**
+   - Allow camera access when prompted
+   - Choose your preferred YOLO model (we recommend starting with YOLO11n)
+   - Point your camera at objects to begin learning
 
-   1. Create them by exporting your trained models to CoreML INT8 models using the `ultralytics` Python package (with `pip install ultralytics`).
+2. **Learning Features:**
+   - Tap detected objects to see translations and hear pronunciations
+   - Use the AR mode to place persistent labels in your environment
+   - Review saved items in the Collection tab
+   - Practice pronunciation and take quizzes in the Practice tab
 
-      ```python
-      from ultralytics import YOLO
+3. **Settings & Customization:**
+   - Adjust detection confidence thresholds
+   - Customize learning preferences
+   - Configure pronunciation settings
+   - Manage AR features
 
-      # Load a trained YOLO11 PyTorch model
-      model = YOLO("path/to/your/trained/model.pt")
+## 🤝 Contributing
 
-      # Export the PyTorch model to CoreML INT8 format with NMS layers
-      # The imgsz property may be adjusted when you export a trained model
-      model.export(format="coreml", int8=True, nms=True, imgsz=640)
-      ```
+Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting pull requests.
 
-   2. Download the base models from our [GitHub release assets](https://github.com/ultralytics/yolo-ios-app/releases).
+## 📄 License
 
-      ```python
-      from ultralytics import YOLO
+This project is licensed under the AGPL-3.0 License - see the [LICENSE](LICENSE) file for details.
 
-      # Loop through all YOLO11 model sizes and exclude any trained models from the loop
-      for size in ("n", "s", "m", "l", "x"):
-          # Load a base YOLO11 PyTorch model
-          model = YOLO(f"yolo11{size}.pt")
+## 🌐 Contact & Support
 
-          # Export the PyTorch model to CoreML INT8 format with NMS layers
-          model.export(format="coreml", int8=True, nms=True)
-      ```
+- **Issues:** Submit bug reports and feature requests via [GitHub Issues](https://github.com/Audacity88/Tono/issues)
+- **Email:** For business inquiries, contact [support@tonoapp.com](mailto:support@tonoapp.com)
 
-   You should have 5 YOLO11 models in total. Place these in the `YOLO/Models` directory as seen in the Xcode screenshot below.
+---
 
-4. **Run the Ultralytics YOLO iOS App:**
-
-   Connect your iOS device and select it as the run target. Press the Run button to install the app on your device.
-
-   <p align="center">
-   <img width="100%" src="https://github.com/ultralytics/ultralytics/assets/26833433/d2c6a7b7-fa8b-4130-a57f-4241f7a42ff2" alt="Ultralytics YOLO XCode screenshot">
-   </p>
-
-## 🚀 Usage
-
-The Ultralytics YOLO iOS App is designed to be intuitive:
-
-- **Real-Time Detection:** Launch the app and aim your camera at objects to detect them instantly.
-- **Multiple AI Models:** Select from a range of Ultralytics YOLO11 models, from YOLO11n 'nano' to YOLO11x 'x-large'.
+Built with ❤️ using [Ultralytics YOLO](https://github.com/ultralytics/ultralytics)
 
 ## 💡 Contribute
 
