@@ -185,3 +185,4 @@ This document outlines the step-by-step process for integrating the functionalit
 - Ensure all features are compatible with iOS 17.0+
 - Test on multiple iOS versions if possible
 - Document minimum iOS version requirements
+
