@@ -28,6 +28,12 @@ class BoundingBoxView: UIView {
   
   /// The detected object's translation (if available)
   var translation: (chinese: String, pinyin: String)? = nil
+  
+  /// The center position of the bounding box for tracking
+  var centerPosition: CGPoint = .zero
+  
+  /// Unique ID for this bounding box instance
+  var boxId: UUID = UUID()
 
   /// Initializes a new BoundingBoxView with configured shape and text layers.
   override init(frame: CGRect) {

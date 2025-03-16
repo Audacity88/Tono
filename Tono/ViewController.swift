@@ -125,8 +125,12 @@ class ViewController: UIViewController {
   // Add property to store tagged detections
   private var taggedDetections: [(english: String, chinese: String, pinyin: String, worldPosition: simd_float4x4)] = []
   
-  // Track hidden bounding boxes by class name
-  private var hiddenBoxes: Set<String> = []
+  // Track labeled objects by their unique ID instead of class name
+  private var labeledBoxes: [(id: UUID, className: String, centerX: CGFloat, centerY: CGFloat)] = []
+  
+  // Stack view for created labels
+  private var labelStackView: UIView?
+  private var stackedLabels: [UIView] = []
   
   // For backwards compatibility with existing code
   private var isARActive: Bool {
@@ -216,8 +220,12 @@ class ViewController: UIViewController {
     objectsContainer.isOpaque = false
     objectsContainer.clipsToBounds = false // Allow labels to extend beyond bounds
     
-    // Enable user interaction for label taps
+    // Enable user interaction for label taps, but also let touches pass through to video preview
     objectsContainer.isUserInteractionEnabled = true
+    
+    // Critical fix: Use hit testing to pass through touches to underlying views when not on a label
+    let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(containerViewTapped(_:)))
+    objectsContainer.addGestureRecognizer(tapRecognizer)
     
     // Add the container above the video preview
     view.addSubview(objectsContainer)
@@ -313,6 +321,9 @@ class ViewController: UIViewController {
     self.pauseButtonOutlet.isEnabled = false
     self.playButtonOutlet.isEnabled = true
     
+    // Setup label stack view
+    setupLabelStackView()
+    
     // setModel()
   }
   
@@ -381,41 +392,41 @@ class ViewController: UIViewController {
   }
   
   // Helper method to create an object label
-  private func createObjectLabel(english: String, chinese: String, pinyin: String) -> UIView {
+  private func createObjectLabel(english: String, chinese: String, pinyin: String, objectId: UUID? = nil) -> UIView {
     // Create a container view for the label
     let containerView = UIView()
-    containerView.backgroundColor = UIColor.black.withAlphaComponent(0.8)
-    containerView.layer.cornerRadius = 10
+    containerView.backgroundColor = UIColor(red: 0, green: 0, blue: 0.1, alpha: 0.9) // More vibrant dark blue background
+    containerView.layer.cornerRadius = 12
     
     // Add a border for better visibility
-    containerView.layer.borderWidth = 2
-    containerView.layer.borderColor = UIColor.white.withAlphaComponent(0.7).cgColor
+    containerView.layer.borderWidth = 2.5
+    containerView.layer.borderColor = UIColor.white.withAlphaComponent(0.8).cgColor
     
     // Add drop shadow
     containerView.layer.shadowColor = UIColor.black.cgColor
-    containerView.layer.shadowOffset = CGSize(width: 0, height: 2)
-    containerView.layer.shadowOpacity = 0.8
-    containerView.layer.shadowRadius = 4
+    containerView.layer.shadowOffset = CGSize(width: 1, height: 3)
+    containerView.layer.shadowOpacity = 0.9
+    containerView.layer.shadowRadius = 5
     
     // Create the Chinese label
     let chineseLabel = UILabel()
     chineseLabel.text = chinese
-    chineseLabel.textColor = UIColor.red
-    chineseLabel.font = UIFont.boldSystemFont(ofSize: 20)
+    chineseLabel.textColor = UIColor(red: 1.0, green: 0.2, blue: 0.2, alpha: 1.0) // Brighter red
+    chineseLabel.font = UIFont.boldSystemFont(ofSize: 24) // Bigger font
     chineseLabel.textAlignment = .center
     
     // Create the pinyin label
     let pinyinLabel = UILabel()
     pinyinLabel.text = pinyin
-    pinyinLabel.textColor = UIColor.yellow
-    pinyinLabel.font = UIFont.systemFont(ofSize: 16)
+    pinyinLabel.textColor = UIColor(red: 1.0, green: 0.9, blue: 0.1, alpha: 1.0) // Brighter yellow
+    pinyinLabel.font = UIFont.systemFont(ofSize: 18) // Bigger font
     pinyinLabel.textAlignment = .center
     
     // Create the English label
     let englishLabel = UILabel()
     englishLabel.text = english
     englishLabel.textColor = UIColor.white
-    englishLabel.font = UIFont.systemFont(ofSize: 14)
+    englishLabel.font = UIFont.systemFont(ofSize: 16) // Bigger font
     englishLabel.textAlignment = .center
     
     // Add labels to container
@@ -423,11 +434,11 @@ class ViewController: UIViewController {
     containerView.addSubview(pinyinLabel)
     containerView.addSubview(englishLabel)
     
-    // Size the container and position labels - make it bigger
-    containerView.frame = CGRect(x: 0, y: 0, width: 180, height: 100)
-    chineseLabel.frame = CGRect(x: 0, y: 10, width: 180, height: 30)
-    pinyinLabel.frame = CGRect(x: 0, y: 45, width: 180, height: 25)
-    englishLabel.frame = CGRect(x: 0, y: 70, width: 180, height: 25)
+    // Size the container and position labels - make it bigger for better visibility
+    containerView.frame = CGRect(x: 0, y: 0, width: 200, height: 110)
+    chineseLabel.frame = CGRect(x: 0, y: 8, width: 200, height: 35)
+    pinyinLabel.frame = CGRect(x: 0, y: 45, width: 200, height: 30)
+    englishLabel.frame = CGRect(x: 0, y: 75, width: 200, height: 30)
     
     // Add a subtle animation to make it more noticeable
     UIView.animate(withDuration: 0.5, animations: {
@@ -443,8 +454,11 @@ class ViewController: UIViewController {
     containerView.addGestureRecognizer(tapGesture)
     containerView.isUserInteractionEnabled = true
     
-    // Store data in the view's tag
-    containerView.accessibilityLabel = "\(english)|\(chinese)|\(pinyin)"
+    // Generate a unique ID if not provided
+    let id = objectId?.uuidString ?? UUID().uuidString
+    
+    // Store data in the view's accessibility label with unique ID
+    containerView.accessibilityLabel = "\(id)|\(english)|\(chinese)|\(pinyin)"
     
     return containerView
   }
@@ -467,25 +481,63 @@ class ViewController: UIViewController {
   @objc func objectLabelTapped(_ gesture: UITapGestureRecognizer) {
     guard let containerView = gesture.view,
           let labelData = containerView.accessibilityLabel?.components(separatedBy: "|"),
-          labelData.count >= 3 else {
+          labelData.count >= 4 else {
         return
     }
     
-    let english = labelData[0]
-    let chinese = labelData[1]
-    let pinyin = labelData[2]
+    // New format: id|english|chinese|pinyin
+    let objectId = labelData[0]
+    let english = labelData[1]
+    let chinese = labelData[2]
+    let pinyin = labelData[3]
     
     // Play pronunciation
     arSceneManager.playPronunciation(for: chinese, pinyin: pinyin)
     
-    // Animate the label to give feedback
-    UIView.animate(withDuration: 0.1, animations: {
-        containerView.transform = CGAffineTransform(scaleX: 1.2, y: 1.2)
+    // Get the center of the screen for showing the label
+    let screenCenter = view.center
+    
+    // Bring this view to the absolute front to ensure it's visible above all others
+    if let container = self.arContainerView {
+        container.bringSubviewToFront(containerView)
+    }
+    
+    // First scale up the label
+    UIView.animate(withDuration: 0.2, animations: {
+        containerView.transform = CGAffineTransform(scaleX: 1.5, y: 1.5)
+        containerView.layer.zPosition = 1000 // Ensure it's at the top
+        
+        // Move to center of screen for better visibility
+        containerView.center = CGPoint(
+            x: screenCenter.x,
+            y: screenCenter.y - 100 // slightly above center
+        )
     }) { _ in
-        UIView.animate(withDuration: 0.1) {
-            containerView.transform = .identity
+        // After showing for a moment, return to stack with a delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            // Return to original position and size with animation
+            UIView.animate(withDuration: 0.5) {
+                containerView.transform = .identity
+                
+                // Force an update of the stack to properly position all labels
+                if let container = self.arContainerView {
+                    // Reset z-position to normal to ensure new labels can appear on top
+                    containerView.layer.zPosition = 0
+                    
+                    // IMMEDIATELY re-sync all labels to maintain proper ordering
+                    self.synchronizeARLabelsWithBoundingBoxes()
+                    
+                    // And re-sync again after a short delay to ensure everything is positioned correctly
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        self.synchronizeARLabelsWithBoundingBoxes()
+                    }
+                }
+            }
         }
     }
+    
+    // Show a toast with the translation
+    showToast(message: "\(english): \(chinese) (\(pinyin))")
   }
   
   override func viewWillDisappear(_ animated: Bool) {
@@ -496,6 +548,74 @@ class ViewController: UIViewController {
     
     // Pause AR session
     arSceneManager.pauseARSession()
+  }
+  
+  // Setup label stack view
+  private func setupLabelStackView() {
+    // Create a container view for the label stack in the top-right corner
+    let stackContainer = UIView()
+    stackContainer.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+    stackContainer.layer.cornerRadius = 15
+    stackContainer.translatesAutoresizingMaskIntoConstraints = false
+    view.addSubview(stackContainer)
+    
+    NSLayoutConstraint.activate([
+      stackContainer.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 80),
+      stackContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+      stackContainer.widthAnchor.constraint(equalToConstant: 140),
+      stackContainer.heightAnchor.constraint(equalToConstant: 320)
+    ])
+    
+    // Add a title label
+    let titleLabel = UILabel()
+    titleLabel.text = "Words"
+    titleLabel.textColor = .white
+    titleLabel.font = UIFont.boldSystemFont(ofSize: 16)
+    titleLabel.textAlignment = .center
+    titleLabel.translatesAutoresizingMaskIntoConstraints = false
+    stackContainer.addSubview(titleLabel)
+    
+    NSLayoutConstraint.activate([
+      titleLabel.topAnchor.constraint(equalTo: stackContainer.topAnchor, constant: 8),
+      titleLabel.leadingAnchor.constraint(equalTo: stackContainer.leadingAnchor),
+      titleLabel.trailingAnchor.constraint(equalTo: stackContainer.trailingAnchor),
+      titleLabel.heightAnchor.constraint(equalToConstant: 24)
+    ])
+    
+    // Add a scroll view for the stacked labels
+    let scrollView = UIScrollView()
+    scrollView.showsVerticalScrollIndicator = true
+    scrollView.translatesAutoresizingMaskIntoConstraints = false
+    stackContainer.addSubview(scrollView)
+    
+    NSLayoutConstraint.activate([
+      scrollView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 5),
+      scrollView.leadingAnchor.constraint(equalTo: stackContainer.leadingAnchor, constant: 5),
+      scrollView.trailingAnchor.constraint(equalTo: stackContainer.trailingAnchor, constant: -5),
+      scrollView.bottomAnchor.constraint(equalTo: stackContainer.bottomAnchor, constant: -5)
+    ])
+    
+    // Add a content view to the scroll view
+    let contentView = UIView()
+    contentView.translatesAutoresizingMaskIntoConstraints = false
+    scrollView.addSubview(contentView)
+    
+    NSLayoutConstraint.activate([
+      contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+      contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+      contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+      contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+      contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor)
+    ])
+    
+    // Store references
+    self.labelStackView = contentView
+    
+    // Initially hide the stack view until we have labels
+    stackContainer.alpha = 0.7
+    
+    // Make sure toolbar stays on top
+    ensureToolbarIsInFront()
   }
   
   // Setup AR status label
@@ -1206,12 +1326,22 @@ class ViewController: UIViewController {
           let bestClass = prediction.labels[0].identifier
           let confidence = prediction.labels[0].confidence
           
-          // Check if this class is in our hidden set
-          if hiddenBoxes.contains(bestClass) {
-            // This class should be hidden
-            boundingBoxViews[i].hide()
-            continue
+          // Check if we've already labeled this object class - prevent duplicates
+          if labeledBoxes.contains(where: { labeled in labeled.className == bestClass }) {
+              // This class is already labeled - hide it
+              boundingBoxViews[i].hide()
+              continue
           }
+          
+          // Track position for this box
+          let boxMidX = rect.midX
+          let boxMidY = rect.midY
+          
+          // Store the center position in the bounding box view for tracking
+          boundingBoxViews[i].centerPosition = CGPoint(x: boxMidX, y: boxMidY)
+          
+          // Generate a new UUID for each box to ensure proper tracking
+          boundingBoxViews[i].boxId = UUID()
           
           // Check if we have a translation for this class
           if let translation = translationManager.getTranslation(for: bestClass) {
@@ -1363,6 +1493,14 @@ class ViewController: UIViewController {
     let className = boxView.className
     let confidence = boxView.confidence
     
+    // IMPORTANT: First check if we've already labeled this class type
+    if labeledBoxes.contains(where: { $0.className == className }) {
+        // Already labeled this class - don't create a duplicate
+        print("Class \(className) is already labeled - ignoring tap")
+        showToast(message: "\(className) is already labeled")
+        return
+    }
+    
     // Check if we have a translation for this class
     guard let translation = boxView.translation ?? translationManager.getTranslation(for: className) else {
         print("No translation found for \(className)")
@@ -1378,8 +1516,9 @@ class ViewController: UIViewController {
     // This will handle all the animations, AR positioning, Core Data, etc.
     place3DTextAtBoundingBox(boxView, detection: detection)
     
-    // Add class name to hidden set so we don't show boxes for this class anymore
-    hiddenBoxes.insert(className)
+    // Track this class as labeled to prevent duplicates
+    let objectId = UUID()
+    labeledBoxes.append((id: objectId, className: className, centerX: boxView.frame.midX, centerY: boxView.frame.midY))
     
     // Add haptic feedback for better user experience
     let selection = UISelectionFeedbackGenerator()
@@ -1463,16 +1602,13 @@ class ViewController: UIViewController {
       transitionView.backgroundColor = UIColor.yellow.withAlphaComponent(0.3)
       transitionView.alpha = 0.9
     }) { _ in
-      // Hide the bounding box after animation completes
-      boxView.hide()
-      
       // Get the center of the bounding box in screen coordinates
       let boxCenter = CGPoint(
           x: boxView.frame.midX,
           y: boxView.frame.midY
       )
       
-      print("Placing text label at screen coordinates: \(boxCenter) for detection: \(detection.english)")
+      print("Creating label for: \(detection.english)")
       
       // MAKE SURE THE CONTAINER EXISTS
       if self.arContainerView == nil {
@@ -1490,29 +1626,32 @@ class ViewController: UIViewController {
       self.arContainerView?.isHidden = false
       self.view.bringSubviewToFront(self.arContainerView!)
       
-      // Create a label view in our container - with enhanced visibility
+      // Create a label view with enhanced visibility
       let objectLabel = self.createObjectLabel(
           english: detection.english, 
           chinese: detection.chinese,
           pinyin: detection.pinyin
       )
       
-      // Position it ABOVE the box center for better visibility
-      objectLabel.center = CGPoint(
-        x: boxCenter.x,
-        y: boxCenter.y - 80 // Position above the box
-      )
+      // Position the label initially at the bounding box position
+      objectLabel.center = boxCenter
       
-      // Store the class name in the accessibility label for tracking
-      // Make sure we never have empty class names
+      // Store the label data in the accessibility label
       let safeEnglish = detection.english.isEmpty ? "unknown" : detection.english
-      objectLabel.accessibilityLabel = "\(safeEnglish)|\(detection.chinese)|\(detection.pinyin)"
+      objectLabel.accessibilityLabel = "\(UUID().uuidString)|\(safeEnglish)|\(detection.chinese)|\(detection.pinyin)"
       
-      // Add to our container
-      self.arContainerView?.addSubview(objectLabel)
-      
-      // Make sure the container is in the view hierarchy
-      print("Container view has \(self.arContainerView?.subviews.count ?? 0) subviews")
+      // Add to our container 
+      if let container = self.arContainerView {
+          container.addSubview(objectLabel)
+          
+          // Make sure it has a higher z-position than existing labels
+          // This ensures it will be visually on top of any previously viewed labels
+          objectLabel.layer.zPosition = 100
+          
+          // Set tag to position index - the number of items in container will be its position
+          // This ensures each label has a fixed position in the stack
+          objectLabel.tag = container.subviews.count - 1
+      }
       
       // Make it spring into view with animation
       objectLabel.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
@@ -1520,16 +1659,18 @@ class ViewController: UIViewController {
           objectLabel.transform = CGAffineTransform.identity
           objectLabel.layer.borderColor = UIColor.green.cgColor // Flash green border
       }, completion: { _ in
-          // No permanent pulsing animation - just a brief pulse then stop
-          UIView.animate(withDuration: 0.5, delay: 0, options: [.autoreverse, .allowUserInteraction], animations: {
-              objectLabel.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
-          }, completion: { _ in
-              objectLabel.transform = .identity
-          })
+          // After appearing, run the synchronize function which will move it to the stack
+          self.synchronizeARLabelsWithBoundingBoxes()
+          
+          // Simply call synchronize to ensure proper positioning - don't bring to front
+          // This will maintain the natural ordering with new labels at the bottom
+          DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+              self.synchronizeARLabelsWithBoundingBoxes()
+          }
+          
+          // Play pronunciation
+          self.arSceneManager.playPronunciation(for: detection.chinese, pinyin: detection.pinyin)
       })
-      
-      // Play pronunciation
-      self.arSceneManager.playPronunciation(for: detection.chinese, pinyin: detection.pinyin)
       
       // Remove the transition view with fade out
       UIView.animate(withDuration: 0.3, animations: {
@@ -1538,15 +1679,9 @@ class ViewController: UIViewController {
         transitionView.removeFromSuperview()
       }
       
-      // Still save to Core Data with approximate position mapping
-      // This is a simplified approach that doesn't rely on AR positioning
-      let position = SCNVector3(
-          x: Float((boxCenter.x / self.view.bounds.width) * 2 - 1),
-          y: Float((boxCenter.y / self.view.bounds.height) * -2 + 1), 
-          z: -0.5
-      )
-      
       // Save to Core Data for persistence
+      let position = SCNVector3(x: 0, y: 0, z: 0) // Position doesn't matter for our stack approach
+      
       self.persistenceController.saveTaggedObject(
           english: detection.english,
           chinese: detection.chinese,
@@ -1585,6 +1720,9 @@ class ViewController: UIViewController {
         self.clearCoreDataObjects()
       }
     })
+    
+    // Also clear position tracking
+    labeledBoxes.removeAll()
   }
   
   // Clear all stored objects from CoreData
@@ -1599,54 +1737,82 @@ class ViewController: UIViewController {
   
   // MARK: - AR Integration
   
-  // Update container labels to follow bounding boxes
+  // Update container labels to maintain an orderly stack on the side
   func synchronizeARLabelsWithBoundingBoxes() {
-    // This function is now used to update the position of existing labels
-    // to track the objects they're attached to
-    
     guard let container = arContainerView else { return }
     
-    // Filter visible bounding boxes with non-empty class names
-    let visibleBoxes = boundingBoxViews.filter { !$0.isHidden && !$0.className.isEmpty }
+    // Get visible labels
+    let visibleLabels = container.subviews.filter { $0.alpha > 0.6 }
     
-    // Create a dictionary but handle potential duplicates
-    var visibleBoxDict = [String: BoundingBoxView]()
-    for box in visibleBoxes {
-        // Use highest confidence boxes when there are duplicates
-        if let existingBox = visibleBoxDict[box.className] {
-            if box.confidence > existingBox.confidence {
-                visibleBoxDict[box.className] = box
+    // If we have labels, organize them into a neat stack on the right side
+    if !visibleLabels.isEmpty {
+        let stackWidth = visibleLabels.first?.bounds.width ?? 180
+        let stackStartY = 130.0 // Start below status bar
+        
+        // COMPLETELY NEW APPROACH:
+        // Instead of trying to reorder continuously, we'll define fixed positions
+        // based on when views were added - earlier views at top, newer views at bottom
+        
+        // Get all visible labels
+        let labels = container.subviews.filter { $0.alpha > 0.6 }
+        
+        // Sort labels by their tag (original position when added)
+        // This ensures each label maintains its original position in the stack
+        let sortedLabels = labels.sorted { $0.tag < $1.tag }
+        
+        // Position them from top to bottom - with special handling when more than maxVisible
+        let maxVisibleLabels = 9 // Show up to 9 labels at once
+        let ySpacing = 75 // Spacing between labels - slightly reduced to fit more
+        
+        // If we have more than max labels, we need to show the most recent ones,
+        // which means showing the ones at the end of the array and shifting others up
+        if sortedLabels.count > maxVisibleLabels {
+            // When we have more than max labels, we start showing from the bottom up
+            // We'll show the last 9 labels (newest ones)
+            let startIndex = sortedLabels.count - maxVisibleLabels
+            
+            // Position the visible labels (the newest 9)
+            for i in 0..<maxVisibleLabels {
+                let labelIndex = startIndex + i
+                let label = sortedLabels[labelIndex]
+                
+                let position = CGPoint(
+                    x: self.view.bounds.width - (stackWidth * 0.4), // Partially off screen
+                    y: stackStartY + CGFloat(i * ySpacing) // Each label spaced vertically
+                )
+                
+                // Only animate if position has changed significantly
+                if abs(label.center.x - position.x) > 20 || abs(label.center.y - position.y) > 20 {
+                    UIView.animate(withDuration: 0.3) {
+                        label.center = position
+                    }
+                }
+            }
+            
+            // Hide all older labels beyond what we can show
+            for i in 0..<startIndex {
+                UIView.animate(withDuration: 0.3) {
+                    sortedLabels[i].alpha = 0.0
+                }
             }
         } else {
-            visibleBoxDict[box.className] = box
-        }
-    }
-    
-    // For each label in the container, try to find a matching bounding box
-    for subview in container.subviews {
-        // Use the accessibilityLabel to find the matching class
-        if let accessibilityLabel = subview.accessibilityLabel, !accessibilityLabel.isEmpty {
-            let components = accessibilityLabel.split(separator: "|")
-            if components.count >= 1 {
-                let className = String(components[0])
+            // If we have fewer than max labels, show all of them normally
+            for i in 0..<sortedLabels.count {
+                let label = sortedLabels[i]
+                let position = CGPoint(
+                    x: self.view.bounds.width - (stackWidth * 0.4), // Partially off screen
+                    y: stackStartY + CGFloat(i * ySpacing) // Each label spaced vertically
+                )
                 
-                // If we have a visible box for this class, update the label position
-                if let boxView = visibleBoxDict[className] {
-                    // Calculate the label position above the box
-                    let newPosition = CGPoint(
-                        x: boxView.frame.midX,
-                        y: boxView.frame.minY - 60 // Position above the box
-                    )
-                    
-                    // Animate the position update
-                    UIView.animate(withDuration: 0.2) {
-                        subview.center = newPosition
+                // Only animate if position has changed significantly
+                if abs(label.center.x - position.x) > 20 || abs(label.center.y - position.y) > 20 {
+                    UIView.animate(withDuration: 0.3) {
+                        label.center = position
                     }
                 }
             }
         }
     }
-    
   }
   
   // Fallback hit test for creating AR labels - now only used via direct user taps
@@ -1991,8 +2157,168 @@ class ViewController: UIViewController {
     // Also clear tagged detections
     taggedDetections.removeAll()
     
+    // Clear stack labels
+    if let stackView = labelStackView {
+      UIView.animate(withDuration: 0.5, animations: {
+        for subview in stackView.subviews {
+          subview.alpha = 0
+        }
+      }, completion: { _ in
+        for subview in stackView.subviews {
+          subview.removeFromSuperview()
+        }
+        self.stackedLabels.removeAll()
+      })
+    }
+    
+    // IMPORTANT: Clear labeled boxes tracking to allow creating new labels
+    labeledBoxes.removeAll()
+    
     print("Cleared all labels and tagged detections")
     showToast(message: "Cleared all object labels" + (andCoreData ? " and saved data" : ""))
+  }
+  
+  // Add a label to the stack view with animation
+  private func addLabelToStack(english: String, chinese: String, pinyin: String, fromRect: CGRect) {
+    guard let stackView = labelStackView else { return }
+    
+    // Calculate height needed for content view based on existing labels
+    var yOffset: CGFloat = 10 // Initial top margin
+    
+    if !stackedLabels.isEmpty {
+      if let lastLabel = stackedLabels.last {
+        yOffset = lastLabel.frame.maxY + 10
+      }
+    }
+    
+    // Create the mini label for the stack
+    let miniLabel = UIView(frame: CGRect(x: 10, y: yOffset, width: 120, height: 60))
+    miniLabel.backgroundColor = UIColor.black.withAlphaComponent(0.7)
+    miniLabel.layer.cornerRadius = 8
+    miniLabel.layer.borderWidth = 1
+    miniLabel.layer.borderColor = UIColor.white.withAlphaComponent(0.5).cgColor
+    
+    // Add Chinese text
+    let chineseLabel = UILabel(frame: CGRect(x: 5, y: 5, width: 110, height: 25))
+    chineseLabel.text = chinese
+    chineseLabel.textColor = UIColor.red
+    chineseLabel.font = UIFont.boldSystemFont(ofSize: 18)
+    chineseLabel.textAlignment = .center
+    miniLabel.addSubview(chineseLabel)
+    
+    // Add English text
+    let englishLabel = UILabel(frame: CGRect(x: 5, y: 30, width: 110, height: 20))
+    englishLabel.text = english
+    englishLabel.textColor = UIColor.white
+    englishLabel.font = UIFont.systemFont(ofSize: 12)
+    englishLabel.textAlignment = .center
+    miniLabel.addSubview(englishLabel)
+    
+    // Set initial position at the source rect (where the bounding box was)
+    let initialFrame = miniLabel.frame
+    miniLabel.frame = CGRect(
+      x: fromRect.midX - initialFrame.width/2, 
+      y: fromRect.midY - initialFrame.height/2,
+      width: initialFrame.width,
+      height: initialFrame.height
+    )
+    
+    // Add to view hierarchy for animation
+    view.addSubview(miniLabel)
+    
+    // Make it tappable to play pronunciation
+    miniLabel.isUserInteractionEnabled = true
+    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(stackedLabelTapped(_:)))
+    miniLabel.addGestureRecognizer(tapGesture)
+    miniLabel.accessibilityLabel = "\(english)|\(chinese)|\(pinyin)"
+    
+    // Animate to stack position
+    UIView.animate(withDuration: 0.8, delay: 0.2, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.5, options: [], animations: {
+      // Calculate the global position of where we want the label to end up in the stack
+      let stackFrame = stackView.convert(initialFrame, to: self.view)
+      miniLabel.frame = stackFrame
+      miniLabel.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
+    }, completion: { _ in
+      UIView.animate(withDuration: 0.3, animations: {
+        miniLabel.transform = .identity
+      }, completion: { _ in
+        // Remove from main view and add to stack
+        miniLabel.removeFromSuperview()
+        
+        // Reset the frame for the stack
+        miniLabel.frame = initialFrame
+        stackView.addSubview(miniLabel)
+        
+        // Update content size
+        if let scrollView = stackView.superview as? UIScrollView {
+          scrollView.contentSize = CGSize(width: stackView.frame.width, height: yOffset + miniLabel.frame.height + 10)
+        }
+        
+        // Store reference
+        self.stackedLabels.append(miniLabel)
+      })
+    })
+  }
+  
+  @objc private func stackedLabelTapped(_ gesture: UITapGestureRecognizer) {
+    guard let view = gesture.view,
+          let labelData = view.accessibilityLabel?.components(separatedBy: "|"),
+          labelData.count >= 4 else {
+      return
+    }
+    
+    // New format: id|english|chinese|pinyin
+    let english = labelData[1]
+    let chinese = labelData[2]
+    let pinyin = labelData[3]
+    
+    // Play pronunciation
+    arSceneManager.playPronunciation(for: chinese, pinyin: pinyin)
+    
+    // Get the center of the screen for showing the label
+    let screenCenter = self.view.center
+    
+    // Bring this view to the absolute front to ensure it's visible above all others
+    if let container = self.arContainerView {
+        container.bringSubviewToFront(view)
+    }
+    
+    // First scale up the label
+    UIView.animate(withDuration: 0.2, animations: {
+        view.transform = CGAffineTransform(scaleX: 1.5, y: 1.5)
+        view.layer.zPosition = 1000 // Ensure it's at the top
+        
+        // Move to center of screen for better visibility
+        view.center = CGPoint(
+            x: screenCenter.x,
+            y: screenCenter.y - 100 // slightly above center
+        )
+    }) { _ in
+        // After showing for a moment, return to stack with a delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            // Return to original position and size with animation
+            UIView.animate(withDuration: 0.5) {
+                view.transform = .identity
+                
+                // Force an update of the stack to properly position all labels
+                if let container = self.labelStackView {
+                    // Reset z-position to normal to ensure new labels can appear on top
+                    view.layer.zPosition = 0
+                    
+                    // IMMEDIATELY re-sync all labels to maintain proper ordering
+                    self.synchronizeARLabelsWithBoundingBoxes()
+                    
+                    // And re-sync again after a short delay to ensure everything is positioned correctly
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        self.synchronizeARLabelsWithBoundingBoxes()
+                    }
+                }
+            }
+        }
+    }
+    
+    // Show a toast with the translation
+    showToast(message: "\(english): \(chinese) (\(pinyin))")
   }
   
   @objc func refreshARButtonTapped() {
@@ -2126,6 +2452,37 @@ class ViewController: UIViewController {
     // This function is no longer used since AR view is always visible
     // We keep it to avoid breaking existing connections but we'll call refreshARButtonTapped instead
     refreshARButtonTapped()
+  }
+  
+  // Handle taps on container view - pass through to underlying views when not on a label
+  @objc func containerViewTapped(_ gesture: UITapGestureRecognizer) {
+    let location = gesture.location(in: gesture.view)
+    
+    // Check if the tap is on one of our labels
+    if let hitView = gesture.view?.hitTest(location, with: nil),
+       hitView != gesture.view && (hitView is UILabel || hitView.subviews.contains(where: { $0 is UILabel })) {
+        // Tap is on a label or a view containing labels, let regular handling occur
+        return
+    }
+    
+    // Tap is not on a label, forward it to the video preview
+    let locationInVideoPreview = gesture.view?.convert(location, to: videoPreview) ?? location
+    
+    // Create a simulated tap on the video preview
+    let simulatedTap = UITapGestureRecognizer(target: self, action: #selector(videoPreviewTapped(_:)))
+    simulatedTap.state = .ended
+    
+    // Create temporary view for the tap
+    let tempView = UIView(frame: CGRect(x: 0, y: 0, width: 1, height: 1))
+    tempView.center = locationInVideoPreview
+    videoPreview.addSubview(tempView)
+    
+    // Set up and trigger the tap
+    tempView.addGestureRecognizer(simulatedTap)
+    videoPreviewTapped(simulatedTap)
+    
+    // Clean up
+    tempView.removeFromSuperview()
   }
 }
 
