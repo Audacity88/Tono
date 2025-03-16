@@ -69,10 +69,9 @@ class BoundingBoxView: UIView {
     // Update the view's frame
     self.frame = frame
     
-    // Make sure the view is visible and interactive
+    // Make sure the view is visible
     self.isHidden = false
     self.alpha = 1.0
-    self.isUserInteractionEnabled = true
     
     // Ensure the bounding box is above the AR content
     self.layer.zPosition = 100
@@ -84,17 +83,11 @@ class BoundingBoxView: UIView {
     shapeLayer.path = path.cgPath
     shapeLayer.strokeColor = color.withAlphaComponent(alpha).cgColor  // Use the provided alpha
     shapeLayer.isHidden = false  // Make the shape layer visible
-    
-    // Make sure shape layer is visible above AR content
-    shapeLayer.zPosition = 100
 
     textLayer.string = label  // Set the label text
     textLayer.backgroundColor = color.withAlphaComponent(alpha).cgColor  // Use the provided alpha
     textLayer.isHidden = false  // Make the text layer visible
     textLayer.foregroundColor = UIColor.white.cgColor  // Set text color with full opacity
-    
-    // Make sure text layer is visible above AR content
-    textLayer.zPosition = 101
     
     // Add a subtle shadow to make text more visible against AR content
     textLayer.shadowOpacity = 0.8
@@ -105,23 +98,17 @@ class BoundingBoxView: UIView {
     // Calculate the text size and position based on the label content
     let attributes = [NSAttributedString.Key.font: textLayer.font as Any]
     let textRect = label.boundingRect(
-        with: CGSize(width: 400, height: 100),
-        options: .truncatesLastVisibleLine,
-        attributes: attributes, context: nil)
+      with: CGSize(width: 400, height: 100),
+      options: .truncatesLastVisibleLine,
+      attributes: attributes, context: nil)
     let textSize = CGSize(width: textRect.width + 12, height: textRect.height)  // Add padding to the text size
     let textOrigin = CGPoint(x: 0, y: -textSize.height - 2)  // Position above the bounding box
     textLayer.frame = CGRect(origin: textOrigin, size: textSize)  // Set the text layer frame
-    
-    // Print debug info
-    print("Showing bounding box for: \(label) at frame: \(frame)")
   }
 
   /// Hides the bounding box and text layers.
   func hide() {
-    print("Hiding bounding box: \(className)")
-    self.isHidden = true
     shapeLayer.isHidden = true
     textLayer.isHidden = true
-    isUserInteractionEnabled = false
   }
 }

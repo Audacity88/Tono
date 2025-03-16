@@ -1,4 +1,3 @@
-// Fixed duplicate function declaration - AR Labels Fix
 //  Ultralytics YOLO 🚀 - AGPL-3.0 License
 //
 //  Main View Controller for Ultralytics YOLO App
@@ -20,7 +19,6 @@ import Vision
 import SwiftUI
 import CoreData
 import SceneKit
-import ARKit  // Add this import for ARWorldTrackingConfiguration
 
 var mlModel = try! yolo11n(configuration: mlmodelConfig).model
 var mlmodelConfig: MLModelConfiguration = {
@@ -57,8 +55,6 @@ class ViewController: UIViewController {
   @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
   @IBOutlet weak var focus: UIImageView!
   @IBOutlet weak var toolBar: UIToolbar!
-  // Debug label - created programmatically
-  var debugLabel: UILabel?
   
   // Translation-related properties
   private var translationManager = TranslationManager.shared
@@ -125,275 +121,46 @@ class ViewController: UIViewController {
   // Track hidden bounding boxes by class name
   private var hiddenBoxes: Set<String> = []
 
-  // Add isPaused property
-  var isPaused: Bool = false
-  
-  // Add captureSession property
-  var captureSession: AVCaptureSession {
-    return videoCapture.captureSession
-  }
-
-  // Add this property to the class
-  // Set to store class names of objects with AR labels
-  var hiddenObjectLabels = Set<String>()
-
   // MARK: - View Lifecycle
 
   override func viewDidLoad() {
     super.viewDidLoad()
     
-    print("🚀 viewDidLoad called")
-    
-    // Set initial UI state
     slider.value = 30
     setLabels()
     setUpBoundingBoxViews()
     setUpOrientationChangeNotification()
     
-    // Create debug label programmatically
-    let label = UILabel(frame: CGRect(x: 10, y: 50, width: view.bounds.width - 20, height: 150))
-    label.numberOfLines = 0
-    label.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-    label.textColor = UIColor.white
-    label.font = UIFont.monospacedSystemFont(ofSize: 12, weight: .regular)
-    label.textAlignment = .left
-    label.layer.cornerRadius = 8
-    label.layer.masksToBounds = true
-    label.isHidden = false
-    label.text = "Debug Info Loading..."
-    self.debugLabel = label
-    
     // Initialize AR Scene Manager
     arSceneManager = ARSceneManager(viewController: self)
-    print("✅ ARSceneManager initialized")
     
-    // Set up AR view with priority - CRITICAL CHANGE: Make it a direct subview of the main view
+    // Add the AR view to the view hierarchy
+    // Insert it above the video preview for proper layering
+    view.insertSubview(arSceneManager.sceneView, aboveSubview: videoPreview)
+    
+    // Make sure the AR view covers the entire screen
     arSceneManager.sceneView.frame = view.bounds
+    
+    // Make the AR view fully transparent so we only see the AR content
+    arSceneManager.sceneView.alpha = 0.0 // Start with AR mode inactive
     arSceneManager.sceneView.backgroundColor = UIColor.clear
-    arSceneManager.sceneView.isOpaque = false
-    arSceneManager.sceneView.autoenablesDefaultLighting = true
     
-    // Disable debug options to remove any ghost frames
-    arSceneManager.sceneView.debugOptions = []
+    // Initially AR view is not hidden, just transparent
+    // arSceneManager.sceneView.isHidden = true
     
-    // IMPORTANT: Video view setup
-    // Make video preview transparent except for content
-    videoPreview.backgroundColor = UIColor.clear
-    
-    // Setup touch handling
-    setupTransparentInteraction()
-    
-    // Set the toolbar reference if videoPreview is a PassThroughView
-    if let passThroughView = videoPreview as? PassThroughView {
-        passThroughView.toolbar = toolBar
-    }
-    
-    // Add clear AR labels button
-    addClearARButton()
-    
-    // Add test label button
-    addTestLabelButton()
-    
-    // CRITICAL CHANGE: View hierarchy and initialization order
-    // First add AR view to view hierarchy
-    view.addSubview(arSceneManager.sceneView)
-    print("✅ AR SceneView added to view hierarchy")
-    
-    // Then add video preview above AR view
-    view.addSubview(videoPreview)
-    print("✅ Video preview added above AR view")
-    
-    // Make sure debug label is above everything
-    if let debugLabel = self.debugLabel {
-        view.addSubview(debugLabel)
-        debugLabel.layer.zPosition = 1000
-    }
-    
-    // Then make sure toolbar is at the top
-    view.bringSubviewToFront(toolBar)
-    
-    // Start AR session first to ensure it's ready
-    arSceneManager.setupARSession()
-    print("✅ AR session started")
-    
-    // Then start video capture
-    startVideo()
-    print("✅ Video capture started")
+    // Add AR toggle button
+    addARToggleButton()
     
     // Add a tap gesture recognizer to the video preview view
     let tapGesture = UITapGestureRecognizer(target: self, action: #selector(videoPreviewTapped(_:)))
-    tapGesture.cancelsTouchesInView = false // Allow touches to pass through to views underneath
     videoPreview.addGestureRecognizer(tapGesture)
     videoPreview.isUserInteractionEnabled = true
-    print("✅ Tap gesture added to video preview")
     
-    // Update debug information
-    updateARDebugInfo()
+    // Keep the video preview fully opaque
+    videoPreview.alpha = 1.0
     
-    // Force video preview to be semi-transparent to see AR content
-    videoPreview.alpha = 0.7
-    
-    // Schedule a regular update of AR debug info
-    Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-        self?.updateARDebugInfo()
-        self?.ensureBoundingBoxesAreTappable()
-    }
-    
-    // Add test label after a short delay to ensure AR session is ready
-    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-        self.arSceneManager.addTestLabel()
-        self.arSceneManager.configureARViewForTextOnly()
-        self.updateARDebugInfo()
-    }
-    
-    print("✅ viewDidLoad complete")
-  }
-  
-  // Add a simple 2D test label overlay that will be visible regardless of AR rendering
-  func addTestLabelOverlay() {
-      // Create a container view with a semi-transparent background
-      let containerView = UIView(frame: CGRect(x: 20, y: 100, width: 200, height: 120))
-      containerView.backgroundColor = UIColor.black.withAlphaComponent(0.7)
-      containerView.layer.cornerRadius = 10
-      containerView.tag = 12345 // Tag for easy reference
-      
-      // Create Chinese label
-      let chineseLabel = UILabel(frame: CGRect(x: 10, y: 10, width: 180, height: 40))
-      chineseLabel.text = "测试标签"
-      chineseLabel.textColor = UIColor.white
-      chineseLabel.font = UIFont.boldSystemFont(ofSize: 24)
-      chineseLabel.textAlignment = .center
-      
-      // Create Pinyin label
-      let pinyinLabel = UILabel(frame: CGRect(x: 10, y: 50, width: 180, height: 30))
-      pinyinLabel.text = "cèshì biāoqiān"
-      pinyinLabel.textColor = UIColor.yellow
-      pinyinLabel.font = UIFont.systemFont(ofSize: 18)
-      pinyinLabel.textAlignment = .center
-      
-      // Create English label
-      let englishLabel = UILabel(frame: CGRect(x: 10, y: 80, width: 180, height: 30))
-      englishLabel.text = "TEST LABEL"
-      englishLabel.textColor = UIColor.cyan
-      englishLabel.font = UIFont.systemFont(ofSize: 16)
-      englishLabel.textAlignment = .center
-      
-      // Add labels to container
-      containerView.addSubview(chineseLabel)
-      containerView.addSubview(pinyinLabel)
-      containerView.addSubview(englishLabel)
-      
-      // Add container to main view
-      view.addSubview(containerView)
-      
-      // Make sure it's in front of other views
-      view.bringSubviewToFront(containerView)
-      
-      // Add a tap gesture to play pronunciation
-      let tapGesture = UITapGestureRecognizer(target: self, action: #selector(testLabelTapped))
-      containerView.addGestureRecognizer(tapGesture)
-      containerView.isUserInteractionEnabled = true
-      
-      // Add a subtle animation to make it more noticeable
-      UIView.animate(withDuration: 0.5, delay: 0, options: [.autoreverse, .repeat], animations: {
-          containerView.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
-      }, completion: nil)
-      
-      print("2D test label overlay added")
-  }
-  
-  // Handle tap on the test label
-  @objc func testLabelTapped() {
-      print("Test label tapped")
-      
-      // Play pronunciation
-      arSceneManager.playPronunciation(for: "测试标签", pinyin: "cèshì biāoqiān")
-      
-      // Provide haptic feedback
-      selection.selectionChanged()
-      
-      // Show a toast message
-      showToast(message: "Test label tapped - playing pronunciation")
-  }
-  
-  // Add a method to start a timer that periodically checks and refreshes the test label
-  func startTestLabelRefreshTimer() {
-      // Create a timer that fires every 3 seconds
-      Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { [weak self] _ in
-          guard let self = self else { return }
-          
-          // Check if there's a test label in the scene
-          let hasTestLabel = self.arSceneManager.placedNodes.contains { node in
-              return node.name?.contains("TEST_LABEL") ?? false
-          }
-          
-          // If no test label is found, add one
-          if !hasTestLabel {
-              print("Test label not found, adding a new one")
-              self.arSceneManager.addTestLabel()
-          } else {
-              // If a test label exists, ensure it's visible
-              for node in self.arSceneManager.placedNodes where node.name?.contains("TEST_LABEL") ?? false {
-                  // Make sure the node is fully opaque
-                  node.opacity = 1.0
-                  node.renderingOrder = 3000 // Even higher priority
-                  
-                  // Apply to all children
-                  for childNode in node.childNodes {
-                      childNode.opacity = 1.0
-                      childNode.renderingOrder = 3000
-                      
-                      // Make materials extra bright
-                      if let geometry = childNode.geometry {
-                          for material in geometry.materials {
-                              material.transparency = 0.0 // Fully opaque
-                              material.lightingModel = .constant // No lighting effects
-                              
-                              // Increase emission intensity for better visibility
-                              if let _ = material.emission.contents {
-                                  material.emission.intensity = 5.0 // Extremely bright emission
-                              }
-                          }
-                      }
-                  }
-                  
-                  // Reposition the test label in front of the camera if possible
-                  if let frame = self.arSceneManager.sceneView.session.currentFrame {
-                      // Get the camera position and orientation
-                      let cameraTransform = frame.camera.transform
-                      let positionColumn = cameraTransform.columns.3
-                      let cameraPosition = SCNVector3(positionColumn.x, positionColumn.y, positionColumn.z)
-                      let cameraDirection = SCNVector3(-cameraTransform.columns.2.x, -cameraTransform.columns.2.y, -cameraTransform.columns.2.z)
-                      
-                      // Position the test label 0.5 meters in front of the camera
-                      let position = SCNVector3(
-                          cameraPosition.x + cameraDirection.x * 0.5,
-                          cameraPosition.y + cameraDirection.y * 0.5,
-                          cameraPosition.z + cameraDirection.z * 0.5
-                      )
-                      
-                      // Animate the position change
-                      SCNTransaction.begin()
-                      SCNTransaction.animationDuration = 0.5
-                      node.position = position
-                      SCNTransaction.commit()
-                      
-                      print("Refreshed test label position to: \(position)")
-                  }
-              }
-          }
-          
-          // Make sure video preview is semi-transparent
-          if let previewLayer = self.videoCapture.previewLayer {
-              previewLayer.opacity = 0.7
-          }
-          
-          // Ensure AR view is properly positioned
-          self.arSceneManager.sceneView.frame = self.view.bounds
-          
-          // Log the current state
-          print("Test label refresh check completed")
-      }
+    startVideo()
+    // setModel()
   }
   
   override func viewWillAppear(_ animated: Bool) {
@@ -401,58 +168,6 @@ class ViewController: UIViewController {
     
     // Start AR session
     arSceneManager.setupARSession()
-    
-    // Make sure bounding box views are above AR content
-    for boxView in boundingBoxViews {
-      videoPreview.bringSubviewToFront(boxView)
-    }
-    
-    // Resume video capture if it was running before
-    if !pauseButtonOutlet.isEnabled {
-      videoCapture.start()
-      playButtonOutlet.isEnabled = false
-      pauseButtonOutlet.isEnabled = true
-    }
-    
-    // Show a toast message to indicate the integrated mode is active
-    showToast(message: "Tap on objects to see translations")
-    
-    // Force the test label to be visible after a short delay
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-        self.forceTestLabelVisible()
-        
-        // Make video preview semi-transparent to ensure AR content is visible
-        if let previewLayer = self.videoCapture.previewLayer {
-            previewLayer.opacity = 0.7
-        }
-        
-        // Log view hierarchy for debugging
-        print("View hierarchy after viewWillAppear:")
-        print("Main view has \(self.view.subviews.count) subviews")
-        print("AR view is at index: \(self.view.subviews.firstIndex(of: self.arSceneManager.sceneView) ?? -1)")
-        print("Video preview is at index: \(self.view.subviews.firstIndex(of: self.videoPreview) ?? -1)")
-    }
-    
-    // Ensure 2D test label is visible
-    if let existingLabel = view.viewWithTag(12345) {
-        // If label exists, bring it to front
-        view.bringSubviewToFront(existingLabel)
-    } else {
-        // If label doesn't exist, add it
-        addTestLabelOverlay()
-    }
-    
-    // Ensure simple SCNView is visible
-    if let existingScnView = view.viewWithTag(54321) {
-        // If SCNView exists, bring it to front
-        view.bringSubviewToFront(existingScnView)
-    } else {
-        // If SCNView doesn't exist, add it
-        addSimpleSceneView()
-    }
-    
-    // Make sure toolbar is in front of all views
-    view.bringSubviewToFront(toolBar)
   }
   
   override func viewWillDisappear(_ animated: Bool) {
@@ -460,9 +175,6 @@ class ViewController: UIViewController {
     
     // Pause AR session
     arSceneManager.pauseARSession()
-    
-    // Pause video capture
-    videoCapture?.stop()
   }
 
   override func viewWillTransition(
@@ -609,128 +321,11 @@ class ViewController: UIViewController {
     self.labelVersion.text = "Version " + UserDefaults.standard.string(forKey: "app_version")!
   }
 
-  @IBAction func playButton(_ sender: UIBarButtonItem) {
-    // User pressed play button - start video
-    if playButtonOutlet.isEnabled {
-        print("Play button pressed - starting video")
-        
-        // Configure video capture first
-        if videoCapture == nil {
-            // If video capture is nil, initialize it
-            startVideo()
-        } else {
-            // If video capture exists, just start it
-            videoCapture.start()
-        }
-        
-        // Update button states
+  @IBAction func playButton(_ sender: Any) {
+    selection.selectionChanged()
+    self.videoCapture.start()
     playButtonOutlet.isEnabled = false
     pauseButtonOutlet.isEnabled = true
-        
-        // Update button title
-        sender.title = "Pause"
-        
-        // CRITICAL CHANGE: Keep AR session running and ensure labels are visible
-        // First verify AR session is running
-        if arSceneManager.sceneView.session.configuration == nil {
-            print("AR session not running, restarting...")
-            arSceneManager.resumeARSession()
-        }
-        
-        // Force all AR nodes to be visible with enhanced properties
-        for node in arSceneManager.placedNodes {
-            node.opacity = 1.0
-            node.renderingOrder = 3000 // Very high rendering priority
-            
-            // Apply to all children
-            for childNode in node.childNodes {
-                childNode.opacity = 1.0
-                childNode.renderingOrder = 3000
-                
-                // Make materials extremely bright for visibility
-                if let geometry = childNode.geometry {
-                    for material in geometry.materials {
-                        material.transparency = 0.0 // Fully opaque
-                        material.lightingModel = .constant // No lighting effects
-                        
-                        // Increase emission intensity for better visibility
-                        if let emission = material.emission.contents as? UIColor {
-                            material.emission.intensity = 5.0 // Very bright emission
-                        }
-                    }
-                }
-            }
-        }
-        
-        // Ensure AR view is properly configured for text visibility
-        arSceneManager.configureARViewForTextOnly()
-        
-        // Add test labels again to ensure they are visible during playback
-        arSceneManager.addTestLabel()
-        arSceneManager.addFixedTextNode()
-        
-        // Make sure 2D test label overlay is in front
-        if let existingLabel = view.viewWithTag(12345) {
-            view.bringSubviewToFront(existingLabel)
-        }
-        
-        // Make sure simple SCNView is in front
-        if let existingScnView = view.viewWithTag(54321) {
-            view.bringSubviewToFront(existingScnView)
-        }
-        
-        // Make video preview semi-transparent to ensure AR content is visible
-        if let previewLayer = videoCapture.previewLayer {
-            previewLayer.opacity = 0.7 // 70% opacity allows AR text to show through
-        }
-        
-        // Make sure toolbar is in front of all views
-        view.bringSubviewToFront(toolBar)
-        
-        // Force a layout update
-        view.setNeedsLayout()
-        view.layoutIfNeeded()
-        
-        // Schedule an additional refresh of labels after a short delay to ensure they appear
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            // Refresh the test labels
-            self.forceTestLabelVisible()
-            
-            // Log that we've refreshed the labels
-            print("Refreshed AR labels after play button pressed")
-        }
-    }
-    // User pressed pause button - pause video
-    else {
-        print("Pause button pressed - pausing video")
-        
-        // Pause video capture
-        videoCapture.stop()
-        
-        // Update button states
-        playButtonOutlet.isEnabled = true
-        pauseButtonOutlet.isEnabled = false
-        
-        // Update button title
-        sender.title = "Play"
-        
-        // Keep AR session running but refresh labels
-        arSceneManager.addTestLabel()
-        arSceneManager.addFixedTextNode()
-        
-        // Make sure 2D test label overlay is visible
-        if let existingLabel = view.viewWithTag(12345) {
-            view.bringSubviewToFront(existingLabel)
-        }
-        
-        // Make sure simple SCNView is visible
-        if let existingScnView = view.viewWithTag(54321) {
-            view.bringSubviewToFront(existingScnView)
-        }
-        
-        // Make sure toolbar is in front of all views
-        view.bringSubviewToFront(toolBar)
-    }
   }
 
   @IBAction func pauseButton(_ sender: Any?) {
@@ -738,17 +333,6 @@ class ViewController: UIViewController {
     self.videoCapture.stop()
     playButtonOutlet.isEnabled = true
     pauseButtonOutlet.isEnabled = false
-    
-    // Keep the AR session running even when paused to allow bounding boxes to work
-    // This is a key change - we don't pause the AR session anymore
-    // Instead, just ensure the bounding boxes are visible and interactive
-    
-    // Make sure bounding box views are above AR content
-    for boxView in boundingBoxViews {
-        if !boxView.isHidden {
-            videoPreview.bringSubviewToFront(boxView)
-        }
-    }
   }
 
   @IBAction func switchCameraTapped(_ sender: Any) {
@@ -830,15 +414,7 @@ class ViewController: UIViewController {
       let tapGesture = UITapGestureRecognizer(target: self, action: #selector(boundingBoxTapped(_:)))
       boxView.addGestureRecognizer(tapGesture)
       boxView.isUserInteractionEnabled = true
-        
-        // Ensure bounding boxes are visible above AR content
-        boxView.layer.zPosition = 100
-        
-        // Make sure the box view can receive touches
-        boxView.isOpaque = false
-        boxView.backgroundColor = .clear
-        
-        print("Created bounding box view with tap gesture")
+      boxView.tag = boundingBoxViews.count - 1
     }
 
     // Retrieve class labels directly from the CoreML model's class labels, if available.
@@ -856,38 +432,30 @@ class ViewController: UIViewController {
       }
       colors[label] = color
     }
-    
-    print("Initialized \(boundingBoxViews.count) bounding box views")
   }
 
   func startVideo() {
-    print("Starting video capture")
-    
-    // Initialize video capture
     videoCapture = VideoCapture()
     videoCapture.delegate = self
 
-    // Set up video capture with photo preset
     videoCapture.setUp(sessionPreset: .photo) { success in
+      // .hd4K3840x2160 or .photo (4032x3024)  Warning: 4k may not work on all devices i.e. 2019 iPod
       if success {
-            print("Video capture setup successful")
-            
-            // Add the video preview into the UI
+        // Add the video preview into the UI.
         if let previewLayer = self.videoCapture.previewLayer {
-                previewLayer.frame = self.videoPreview.bounds
-                previewLayer.videoGravity = .resizeAspectFill
           self.videoPreview.layer.addSublayer(previewLayer)
-                
-                // Make video preview semi-transparent to ensure AR content is visible
-                previewLayer.opacity = 0.7
-                
-                // Start the video capture session
+          self.videoCapture.previewLayer?.frame = self.videoPreview.bounds  // resize preview layer
+        }
+
+        // Bring bounding box views to front
+        for boxView in self.boundingBoxViews {
+          self.videoPreview.bringSubviewToFront(boxView)
+        }
+
+        // Once everything is set up, we can start capturing live video.
         self.videoCapture.start()
       } else {
-                print("ERROR: Failed to get preview layer from video capture")
-            }
-        } else {
-            print("ERROR: Failed to set up video capture")
+        print("Video capture setup failed")
       }
     }
   }
@@ -902,7 +470,7 @@ class ViewController: UIViewController {
         shortSide = min(frameWidth, frameHeight)
         frameSizeCaptured = true
       }
-        
+      /// - Tag: MappingOrientation
       // The frame is always oriented based on the camera sensor,
       // so in most cases Vision needs to rotate it for the model to work as expected.
       let imageOrientation: CGImagePropertyOrientation
@@ -924,9 +492,7 @@ class ViewController: UIViewController {
       // Invoke a VNRequestHandler with that image
       let handler = VNImageRequestHandler(
         cvPixelBuffer: pixelBuffer, orientation: imageOrientation, options: [:])
-        
-        // Always process frames, regardless of orientation or pause state
-        // This ensures bounding boxes work even when the app is paused
+      if UIDevice.current.orientation != .faceUp {  // stop if placed down on a table
         t0 = CACurrentMediaTime()  // inference start
         do {
           try handler.perform([visionRequest])
@@ -934,6 +500,7 @@ class ViewController: UIViewController {
           print(error)
         }
         t1 = CACurrentMediaTime() - t0  // inference dt
+      }
 
       currentBuffer = nil
     }
@@ -954,19 +521,6 @@ class ViewController: UIViewController {
       self.t4 = (CACurrentMediaTime() - self.t3) * 0.05 + self.t4 * 0.95  // smoothed delivered FPS
       self.labelFPS.text = String(format: "%.1f FPS - %.1f ms", 1 / self.t4, self.t2 * 1000)  // t2 seconds to ms
       self.t3 = CACurrentMediaTime()
-        
-        // Make sure AR view is properly updated regardless of play/pause state
-        if self.arSceneManager.sceneView.session.currentFrame == nil {
-            // If AR session is not running properly, restart it
-            self.arSceneManager.resumeARSession()
-        }
-        
-        // Always make bounding boxes visible above AR content
-        for boxView in self.boundingBoxViews {
-            if !boxView.isHidden {
-                self.videoPreview.bringSubviewToFront(boxView)
-            }
-        }
     }
   }
 
@@ -1065,30 +619,18 @@ class ViewController: UIViewController {
           print("Set currentDetection to: \(bestClass) - \(translation.chinese) (\(translation.pinyin))")
           self.lastDetectedClass = bestClass
           
+          // If AR mode is active, pass the detection to the AR scene manager
+          if arSceneManager.sceneView.alpha > 0.5 {
             // Update AR scene with the new detection
             arSceneManager.updateCurrentDetection(english: bestClass, chinese: translation.chinese, pinyin: translation.pinyin)
+          }
         }
       }
     }
     
     // Make sure bounding box views are above AR content
     for boxView in boundingBoxViews {
-      if !boxView.isHidden {
       videoPreview.bringSubviewToFront(boxView)
-        
-        // Make sure each visible bounding box has a tap gesture
-        if boxView.gestureRecognizers?.isEmpty ?? true {
-            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(boundingBoxTapped(_:)))
-            boxView.addGestureRecognizer(tapGesture)
-            boxView.isUserInteractionEnabled = true
-            print("👆 Added tap gesture to box for \(boxView.className)")
-        }
-        
-        // Make bounding box extremely clickable
-        boxView.backgroundColor = UIColor.clear
-        boxView.isUserInteractionEnabled = true
-        boxView.layer.zPosition = 500
-      }
     }
 
     // Process predictions and update bounding boxes
@@ -1103,9 +645,6 @@ class ViewController: UIViewController {
 
       // Sort predictions by confidence to ensure higher confidence boxes are drawn on top
       let sortedPredictions = predictions.sorted { $0.labels[0].confidence > $1.labels[0].confidence }
-      
-      // Debug: Print the number of predictions
-      print("Processing \(sortedPredictions.count) predictions, max \(Int(slider.value))")
       
       for i in 0..<boundingBoxViews.count {
         if i < sortedPredictions.count && i < Int(slider.value) {
@@ -1184,9 +723,6 @@ class ViewController: UIViewController {
               let zIndex = Int(confidence * 1000)
               boundingBoxViews[i].tag = zIndex
               
-              // Debug: Print bounding box info
-              print("📦 Showing box for \(bestClass) at \(rect) with confidence \(confidence)")
-              
               boundingBoxViews[i].show(
                 frame: rect,
                 label: label,
@@ -1198,13 +734,7 @@ class ViewController: UIViewController {
                   let tapGesture = UITapGestureRecognizer(target: self, action: #selector(boundingBoxTapped(_:)))
                   boundingBoxViews[i].addGestureRecognizer(tapGesture)
                   boundingBoxViews[i].isUserInteractionEnabled = true
-                  print("👆 Added tap gesture to box \(i) for \(bestClass)")
               }
-              
-              // Make sure the box view can receive touches
-              boundingBoxViews[i].backgroundColor = UIColor.clear
-              boundingBoxViews[i].isUserInteractionEnabled = true
-              boundingBoxViews[i].layer.zPosition = 500
           } else {
               // No translation available, use original label
               let label = String(format: "%@ %.1f", bestClass, confidence * 100)
@@ -1227,12 +757,15 @@ class ViewController: UIViewController {
       }
     }
 
-    // After updating all bounding boxes, synchronize with AR labels
+    // After updating all bounding boxes, synchronize with AR labels if AR mode is active
     // We'll use a timer to avoid doing this on every frame
+    if arSceneManager.sceneView.alpha > 0.5 {
+      // Use a static property to track when we last synchronized
       if CACurrentMediaTime() - lastARSyncTime > 2.0 { // Sync every 2 seconds
         lastARSyncTime = CACurrentMediaTime()
         // Synchronize AR labels with bounding boxes
         synchronizeARLabelsWithBoundingBoxes()
+      }
     }
 
     // Write
@@ -1304,16 +837,12 @@ class ViewController: UIViewController {
   
   /// Handle tap on a bounding box
   @objc func boundingBoxTapped(_ gesture: UITapGestureRecognizer) {
-    // Get the tapped bounding box
     guard let boxView = gesture.view as? BoundingBoxView else {
-        print("❌ Tapped view is not a BoundingBoxView")
         return
     }
     
-    print("🔍 Bounding box tapped: \(boxView.className), frame: \(boxView.frame)")
-    
-    // Directly use our createARLabelForBox method
-    createARLabelForBox(boxView)
+    // Call the method that takes a BoundingBoxView directly
+    handleBoundingBoxTap(boxView)
   }
   
   /// Handle tap on a bounding box - method that takes a BoundingBoxView directly
@@ -1333,270 +862,119 @@ class ViewController: UIViewController {
     // Create detection info from the bounding box data
     let detection = (english: className, chinese: translation.chinese, pinyin: translation.pinyin)
     
-    // Immediately hide the bounding box
-    boxView.hide()
+    // Get the center of the bounding box in screen coordinates
+    let boxCenter = CGPoint(x: boxView.frame.midX, y: boxView.frame.midY)
+    
+    // Create a visual transition effect
+    let transitionView = UIView(frame: boxView.frame)
+    transitionView.layer.borderWidth = 4
+    transitionView.layer.borderColor = UIColor.red.cgColor
+    transitionView.layer.cornerRadius = 6
+    transitionView.backgroundColor = UIColor.clear
+    videoPreview.addSubview(transitionView)
     
     // Add class name to hidden set
     hiddenBoxes.insert(className)
     
-    // Make sure AR session is running
-    if arSceneManager.sceneView.session.currentFrame == nil {
-        print("AR session not running, restarting before placing label")
-        arSceneManager.resumeARSession()
-        arSceneManager.configureARViewForTextOnly()
-        
-        // Wait a moment for AR session to initialize
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.placeARLabel(for: detection, at: boxView.frame)
-        }
-        return
-    }
-    
-    // Place AR label immediately
-    placeARLabel(for: detection, at: boxView.frame)
-  }
-  
-  // Helper method to place AR label
-  private func placeARLabel(for detection: (english: String, chinese: String, pinyin: String), at boxFrame: CGRect) {
-    // Get the center of the bounding box in screen coordinates
-    let boxCenter = CGPoint(x: boxFrame.midX, y: boxFrame.midY)
-    
-    // Ensure AR session is running
-    if arSceneManager.sceneView.session.currentFrame == nil {
-        print("AR session not running, restarting before placing label")
-        arSceneManager.resumeARSession()
-        
-        // Wait a moment for AR session to initialize
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.attemptPlaceARLabel(for: detection, at: boxCenter)
-        }
-        return
-    }
-    
-    // Place AR label immediately
-    attemptPlaceARLabel(for: detection, at: boxCenter)
-  }
-  
-  // Helper method to attempt placing an AR label at a specific point
-  private func attemptPlaceARLabel(for detection: (english: String, chinese: String, pinyin: String), at boxCenter: CGPoint) {
-    // Perform hit test to find 3D position
-    let arHitTestResults = arSceneManager.sceneView.hitTest(boxCenter, types: [.featurePoint])
-    
-    if let closestResult = arHitTestResults.first {
-        // Get coordinates of hit test
-        let transform = closestResult.worldTransform
-        let worldCoord = SCNVector3Make(transform.columns.3.x, transform.columns.3.y, transform.columns.3.z)
-        
-        print("Placing 3D text at world coordinates: \(worldCoord) for detection: \(detection.english)")
-        
-        // Create 3D text node with enhanced visibility
-        let node = arSceneManager.createNewBubbleParentNode(
-            english: detection.english,
-            chinese: detection.chinese,
-            pinyin: detection.pinyin
-        )
-        
-        // Add node to scene
-        arSceneManager.sceneView.scene.rootNode.addChildNode(node)
-        node.position = worldCoord
-        
-        // Ensure the node is fully opaque - force it here
-        node.opacity = 1.0
-        
-        // Apply enhanced non-ghosting rendering options to this node and its children
-        applyEnhancedVisibilityOptions(to: node)
-        
-        // Store the node to prevent duplicates
-        arSceneManager.placedNodes.append(node)
+    // Animate the transition view expanding slightly before hiding
+    UIView.animate(withDuration: 0.2, animations: {
+        transitionView.transform = CGAffineTransform(scaleX: 1.1, y: 1.1)
+        transitionView.alpha = 0.7
+    }) { _ in
+        // Hide the bounding box
+        boxView.hide()
         
         // Play pronunciation
-        arSceneManager.playPronunciation(for: detection.chinese, pinyin: detection.pinyin)
+        self.arSceneManager.playPronunciation(for: detection.chinese, pinyin: detection.pinyin)
         
-        // Store the detection for future reference with the actual transform
-        taggedDetections.append((
+        // Try multiple hit test types to get a reliable world position
+        var worldTransform: simd_float4x4?
+        
+        // First try feature points (most accurate for real-world positioning)
+        if let hitResult = self.arSceneManager.sceneView.hitTest(boxCenter, types: [.featurePoint]).first {
+            worldTransform = hitResult.worldTransform
+            print("Got world position from feature point hit test")
+        }
+        // If that fails, try existing planes
+        else if let hitResult = self.arSceneManager.sceneView.hitTest(boxCenter, types: [.existingPlaneUsingExtent]).first {
+            worldTransform = hitResult.worldTransform
+            print("Got world position from existing plane hit test")
+        }
+        // If that fails, try estimated horizontal planes
+        else if let hitResult = self.arSceneManager.sceneView.hitTest(boxCenter, types: [.estimatedHorizontalPlane]).first {
+            worldTransform = hitResult.worldTransform
+            print("Got world position from estimated horizontal plane hit test")
+        }
+        
+        if let transform = worldTransform {
+            print("Storing tagged detection for \(className) at world position")
+            self.taggedDetections.append((
                 english: detection.english,
                 chinese: detection.chinese,
                 pinyin: detection.pinyin,
                 worldPosition: transform
             ))
-        } else {
-        // Fallback: Use a ray from the camera through the box center
-        guard let cameraNode = arSceneManager.sceneView.pointOfView else {
-            print("Could not access camera node, using fixed position")
+            print("Total tagged detections: \(self.taggedDetections.count)")
             
-            // Create a fixed position in front of the camera
-            if let currentFrame = arSceneManager.sceneView.session.currentFrame {
-                let cameraTransform = currentFrame.camera.transform
-                let position = SCNVector3(
-                    cameraTransform.columns.3.x,
-                    cameraTransform.columns.3.y,
-                    cameraTransform.columns.3.z - 0.5 // 0.5 meters in front of camera
-                )
+            // Show a toast message confirming the object was tagged
+            self.showToast(message: "\(className) tagged for AR view")
+        } else {
+            print("Failed to get world position for \(className) - using camera-relative position")
+            
+            // Use a position relative to the camera
+            guard let frame = self.arSceneManager.sceneView.session.currentFrame else {
+                print("No current AR frame available - using default position")
+                // Use a default position as last resort
+                var defaultTransform = matrix_identity_float4x4
+                defaultTransform.columns.3 = simd_float4(0, 0, -1, 1) // 1 meter in front of camera
                 
-                // Create and place the 3D text node
-                let node = arSceneManager.createNewBubbleParentNode(
-                    english: detection.english,
-                    chinese: detection.chinese,
-                    pinyin: detection.pinyin
-                )
-                
-                arSceneManager.sceneView.scene.rootNode.addChildNode(node)
-                node.position = position
-                node.opacity = 1.0
-                
-                // Apply non-ghosting rendering options to this node and its children
-                applyNonGhostingOptions(to: node)
-                
-                arSceneManager.placedNodes.append(node)
-                
-                // Play pronunciation
-                arSceneManager.playPronunciation(for: detection.chinese, pinyin: detection.pinyin)
-                
-                // Store the detection
-                taggedDetections.append((
+                self.taggedDetections.append((
                     english: detection.english,
                     chinese: detection.chinese,
                     pinyin: detection.pinyin,
-                    worldPosition: cameraTransform
+                    worldPosition: defaultTransform
                 ))
-            }
+                
+                self.showToast(message: "\(className) tagged for AR view (default position)")
                 return
             }
             
-        // Get camera position
-        let cameraPosition = cameraNode.position
-        
-        // Convert box center to normalized device coordinates (-1 to 1)
-        let screenSize = arSceneManager.sceneView.bounds.size
-        let normalizedX = (2 * boxCenter.x / screenSize.width) - 1
-        let normalizedY = 1 - (2 * boxCenter.y / screenSize.height) // Flip Y
-        
-        // Create a direction vector from the camera through this point
-        let direction = SCNVector3(normalizedX, normalizedY, -1) // -1 for "forward" from camera
-        
-        // Place the node at a fixed distance from the camera (e.g., 1 meter)
-        let distance: Float = 1.0
-        let position = SCNVector3(
-            cameraPosition.x + direction.x * distance,
-            cameraPosition.y + direction.y * distance,
-            cameraPosition.z + direction.z * distance
-        )
-        
-        // Create and place the 3D text node
-        let node = arSceneManager.createNewBubbleParentNode(
-            english: detection.english,
-            chinese: detection.chinese,
-            pinyin: detection.pinyin
-        )
-        
-        arSceneManager.sceneView.scene.rootNode.addChildNode(node)
-        node.position = position
-        
-        // Ensure the node is fully opaque - force it here
-        node.opacity = 1.0
-        
-        // Apply non-ghosting rendering options to this node and its children
-        applyNonGhostingOptions(to: node)
-        
-        // Store the node
-        arSceneManager.placedNodes.append(node)
-        
-        // Play pronunciation
-        arSceneManager.playPronunciation(for: detection.chinese, pinyin: detection.pinyin)
-        
-        // Create a transform matrix from the camera's current transform
-        var worldPosition = matrix_identity_float4x4
-        if let currentFrame = arSceneManager.sceneView.session.currentFrame {
-            // Use the camera transform as a base
-            worldPosition = currentFrame.camera.transform
-            // Adjust the position to be in front of the camera
-            worldPosition.columns.3.z -= 1.0 // 1 meter in front
-        }
-        
-        // Store the detection for future reference
-        taggedDetections.append((
+            // Get camera transform
+            let cameraTransform = frame.camera.transform
+            
+            // Create a position 1 meter in front of the camera
+            var transform = cameraTransform
+            transform.columns.3.z -= 1.0 // 1 meter in front
+            
+            self.taggedDetections.append((
                 english: detection.english,
                 chinese: detection.chinese,
                 pinyin: detection.pinyin,
-            worldPosition: worldPosition
-        ))
-    }
-    
-    // Provide haptic feedback
-    selection.selectionChanged()
-  }
-  
-  // Helper method to apply non-ghosting rendering options to a node and its children
-  private func applyNonGhostingOptions(to node: SCNNode) {
-    // Set node to be fully opaque
-    node.opacity = 1.0
-    
-    // Set high rendering priority
-    node.renderingOrder = 100
-    
-    // Apply the same to all children
-    for childNode in node.childNodes {
-        childNode.opacity = 1.0
-        childNode.renderingOrder = 100
+                worldPosition: transform
+            ))
+            
+            print("Stored tagged detection with camera-relative position")
+            self.showToast(message: "\(className) tagged for AR view (camera-relative)")
+        }
         
-        // If this child has material, ensure it's fully opaque
-        if let geometry = childNode.geometry {
-            for material in geometry.materials {
-                material.transparency = 1.0
-            }
+        // Remove the transition view with fade out
+        UIView.animate(withDuration: 0.3, animations: {
+            transitionView.alpha = 0
+        }) { _ in
+            transitionView.removeFromSuperview()
         }
-    }
-  }
-  
-  // Add a new method for enhanced visibility options
-  private func applyEnhancedVisibilityOptions(to node: SCNNode) {
-    // Set node to be fully opaque
-    node.opacity = 1.0
-    
-    // Set very high rendering priority
-    node.renderingOrder = 1000
-    
-    // Make node billboard to always face the camera
-    let billboardConstraint = SCNBillboardConstraint()
-    billboardConstraint.freeAxes = .all
-    node.constraints = [billboardConstraint]
-    
-    // Apply the same to all children
-    for childNode in node.childNodes {
-        childNode.opacity = 1.0
-        childNode.renderingOrder = 1000
         
-        // If this child has material, ensure it's fully opaque and bright
-        if let geometry = childNode.geometry {
-            for material in geometry.materials {
-                material.transparency = 0.0  // 0.0 means fully opaque
-                material.lightingModel = .constant  // No lighting effects
-                
-                // Make emission brighter for better visibility
-                if let emissionContent = material.emission.contents {
-                    if let color = emissionContent as? UIColor {
-                        // Increase emission brightness
-                        material.emission.contents = color.withAlphaComponent(1.0)
-                        material.emission.intensity = 1.5  // Boost emission intensity
-                    }
-                }
-            }
-        }
-    }
-    
-    // Make node visible even when video is running
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-        // Re-apply opacity after a short delay to ensure it takes effect
-        node.opacity = 1.0
-        for childNode in node.childNodes {
-            childNode.opacity = 1.0
-        }
+        // Provide haptic feedback
+        self.selection.selectionChanged()
     }
   }
   
   @objc func videoPreviewTapped(_ gesture: UITapGestureRecognizer) {
     // Get the tap location
     let location = gesture.location(in: videoPreview)
+    
+    // Check if AR mode is active
+    let isARActive = arSceneManager.sceneView.alpha > 0.5
     
     // First check if the tap is on any bounding boxes, regardless of AR mode
     var tappedBoxes: [(boxView: BoundingBoxView, zIndex: Int)] = []
@@ -1621,8 +999,9 @@ class ViewController: UIViewController {
         return
     }
     
-    // If no bounding box was tapped, forward the tap to the AR scene manager
-    print("Forwarding tap to ARSceneManager")
+    // Only handle AR interactions if AR mode is active
+    if isARActive {
+        print("AR mode is active, forwarding tap to ARSceneManager")
         
         // Forward tap to AR scene manager
         let locationInARView = gesture.location(in: arSceneManager.sceneView)
@@ -1645,183 +1024,257 @@ class ViewController: UIViewController {
         // Remove the temporary view
         tempView.removeFromSuperview()
     }
+  }
+
+  /// Place 3D text at the position of a bounding box
+  private func place3DTextAtBoundingBox(_ boxView: BoundingBoxView, detection: (english: String, chinese: String, pinyin: String)) {
+    // Create a visual transition effect
+    let boxFrame = boxView.frame
+    
+    // Create a temporary view that matches the bounding box for animation
+    let transitionView = UIView(frame: boxFrame)
+    transitionView.layer.borderWidth = 4
+    transitionView.layer.borderColor = UIColor.red.cgColor
+    transitionView.layer.cornerRadius = 6
+    transitionView.backgroundColor = UIColor.clear
+    videoPreview.addSubview(transitionView)
+    
+    // Animate the transition view expanding slightly before placing AR content
+    UIView.animate(withDuration: 0.2, animations: {
+      transitionView.transform = CGAffineTransform(scaleX: 1.1, y: 1.1)
+      transitionView.alpha = 0.7
+    }) { _ in
+      // Hide the bounding box after animation completes
+      boxView.hide()
+      
+      // Get the center of the bounding box in screen coordinates
+      let boxCenter = CGPoint(
+          x: boxView.frame.midX,
+          y: boxView.frame.midY
+      )
+      
+      // Perform hit test to find 3D position
+      let arHitTestResults = self.arSceneManager.sceneView.hitTest(boxCenter, types: [.featurePoint])
+      
+      if let closestResult = arHitTestResults.first {
+          // Get coordinates of hit test
+          let transform = closestResult.worldTransform
+          let worldCoord = SCNVector3Make(transform.columns.3.x, transform.columns.3.y, transform.columns.3.z)
+          
+          print("Placing 3D text at world coordinates: \(worldCoord) for detection: \(detection.english)")
+          
+          // Create 3D text node
+          let node = self.arSceneManager.createNewBubbleParentNode(
+              english: detection.english,
+              chinese: detection.chinese,
+              pinyin: detection.pinyin
+          )
+          
+          // Add node to scene
+          self.arSceneManager.sceneView.scene.rootNode.addChildNode(node)
+          node.position = worldCoord
+          
+          // Store the node to prevent duplicates
+          self.arSceneManager.placedNodes.append(node)
+          
+          // Play pronunciation
+          self.arSceneManager.playPronunciation(for: detection.chinese, pinyin: detection.pinyin)
+          
+          // Remove the transition view with fade out
+          UIView.animate(withDuration: 0.3, animations: {
+            transitionView.alpha = 0
+          }) { _ in
+            transitionView.removeFromSuperview()
+          }
+      } else {
+          print("Could not find 3D position for bounding box. Using fallback method.")
+          
+          // Fallback: Use a ray from the camera through the box center
+          guard let cameraNode = self.arSceneManager.sceneView.pointOfView else {
+            // Remove the transition view if we can't place AR content
+            transitionView.removeFromSuperview()
+            return
+          }
+          
+          // Get camera position and orientation
+          let cameraPosition = cameraNode.position
+          
+          // Convert box center to normalized device coordinates (-1 to 1)
+          let screenSize = self.arSceneManager.sceneView.bounds.size
+          let normalizedX = (2 * boxCenter.x / screenSize.width) - 1
+          let normalizedY = 1 - (2 * boxCenter.y / screenSize.height) // Flip Y
+          
+          // Create a direction vector from the camera through this point
+          let direction = SCNVector3(normalizedX, normalizedY, -1) // -1 for "forward" from camera
+          
+          // Place the node at a fixed distance from the camera (e.g., 1 meter)
+          let distance: Float = 1.0
+          let position = SCNVector3(
+              cameraPosition.x + direction.x * distance,
+              cameraPosition.y + direction.y * distance,
+              cameraPosition.z + direction.z * distance
+          )
+          
+          // Create and place the 3D text node
+          let node = self.arSceneManager.createNewBubbleParentNode(
+              english: detection.english,
+              chinese: detection.chinese,
+              pinyin: detection.pinyin
+          )
+          
+          self.arSceneManager.sceneView.scene.rootNode.addChildNode(node)
+          node.position = position
+          
+          // Store the node
+          self.arSceneManager.placedNodes.append(node)
+          
+          // Play pronunciation
+          self.arSceneManager.playPronunciation(for: detection.chinese, pinyin: detection.pinyin)
+          
+          // Remove the transition view with fade out
+          UIView.animate(withDuration: 0.3, animations: {
+            transitionView.alpha = 0
+          }) { _ in
+            transitionView.removeFromSuperview()
+          }
+      }
+    }
+  }
 
   // MARK: - AR Integration
   
   // Synchronize AR labels with bounding boxes
   func synchronizeARLabelsWithBoundingBoxes() {
-    // Check if it's time to sync (don't do this every frame)
-    let currentTime = CACurrentMediaTime()
-    if currentTime - lastARSyncTime > 2.0 {
-        lastARSyncTime = currentTime
-        print("Synchronizing AR labels with bounding boxes")
-        
-        // First check if AR session is running
-        if arSceneManager.sceneView.session.configuration == nil {
-            print("AR session not running during sync, restarting...")
-            arSceneManager.resumeARSession()
-            
-            // Wait a moment before attempting to place labels
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                self.attemptSynchronizeARLabels()
-            }
-            return
-          }
-          
-        // Attempt to synchronize labels
-        attemptSynchronizeARLabels()
-    }
-  }
-
-  // Attempt to synchronize AR labels with bounding boxes
-  func attemptSynchronizeARLabels() {
-    print("Attempting to synchronize AR labels")
+    // Only proceed if AR mode is active
+    guard arSceneManager.sceneView.alpha > 0.5 else { return }
     
-    // Make sure all existing AR nodes are fully visible
-    for node in arSceneManager.placedNodes {
-        // Make sure the node is fully opaque
-        node.opacity = 1.0
-        node.renderingOrder = 3000 // Very high rendering priority
-        
-        // Apply to all children
-        for childNode in node.childNodes {
-            childNode.opacity = 1.0
-            childNode.renderingOrder = 3000
-            
-            // Make materials extra bright
-            if let geometry = childNode.geometry {
-                for material in geometry.materials {
-                    material.transparency = 0.0 // Fully opaque
-                    material.lightingModel = .constant // No lighting effects
-                    
-                    // Increase emission intensity for better visibility
-                    if let _ = material.emission.contents {
-                        material.emission.intensity = 5.0 // Extremely bright emission
-                    }
-                }
-            }
-        }
-    }
+    // Get all visible bounding boxes
+    let visibleBoxes = boundingBoxViews.filter { !$0.isHidden }
     
-    // Ensure all bounding boxes are visible and interactive
-    for boxView in boundingBoxViews {
-        if !boxView.isHidden {
-            // Make sure the bounding box is in front
-            videoPreview.bringSubviewToFront(boxView)
-            
-            // Make sure it's interactive
-            boxView.isUserInteractionEnabled = true
-            
-            // If this class name is in our hidden set, we've already placed an AR label for it
+    // For each visible box, check if there's already an AR label for it
+    for boxView in visibleBoxes {
       let className = boxView.className
-            if !className.isEmpty && hiddenObjectLabels.contains(className) {
-                print("Found AR label for: \(className)")
-                
-                // Try to find the AR node for this object and ensure it's visible
-                for node in arSceneManager.placedNodes {
-                    if let nodeName = node.name, nodeName.contains(className) {
-                        // Force the node to be fully visible
-                        node.opacity = 1.0
-                        node.renderingOrder = 3000
-                        
-                        print("Made AR node for \(className) fully visible")
-                    }
-                }
-            }
-        }
-    }
-    
-    // Check if there are any tagged detections that need to be displayed in AR
-    for className in hiddenObjectLabels {
-        // Check if we already have an AR node for this object
-        var hasNode = false
-        for node in arSceneManager.placedNodes {
-            if let nodeName = node.name, nodeName.contains(className) {
-                hasNode = true
-                break
-            }
-        }
+      
+      // Skip if no translation available
+      guard let translation = boxView.translation else { continue }
+      
+      // Check if there's already an AR node for this object
+      let hasARNode = arSceneManager.isNodeForObject(className)
+      
+      // If there's no AR node for this object and it has high confidence, create one
+      if !hasARNode && boxView.confidence > 0.7 {
+        // Create detection info
+        let detection = (english: className, chinese: translation.chinese, pinyin: translation.pinyin)
         
-        // If we don't have a node for this object, create one
-        if !hasNode {
-            print("Creating new AR node for: \(className)")
-            
-            // Get the translation for this object
-            if let translation = translationManager.getTranslation(for: className) {
-                // Create a detection info tuple
-                let detectionInfo = (english: className, chinese: translation.chinese, pinyin: translation.pinyin)
-                
-                // Create a temporary currentDetection
-                currentDetection = detectionInfo
-                
-                // Place the AR label for this object
-                placeARLabel(at: CGPoint(x: view.bounds.midX, y: view.bounds.midY))
-                
-                print("Created new AR node for: \(className)")
-            }
+        // Place AR label at the bounding box position
+        // We'll use a simplified version without animation for automatic placement
+        let boxCenter = CGPoint(x: boxView.frame.midX, y: boxView.frame.midY)
+        
+        // Perform hit test to find 3D position
+        if let hitResult = arSceneManager.sceneView.hitTest(boxCenter, types: [.featurePoint]).first {
+          // Get coordinates of hit test
+          let transform = hitResult.worldTransform
+          let worldCoord = SCNVector3Make(transform.columns.3.x, transform.columns.3.y, transform.columns.3.z)
+          
+          // Create 3D text node
+          let node = arSceneManager.createNewBubbleParentNode(
+            english: detection.english,
+            chinese: detection.chinese,
+            pinyin: detection.pinyin
+          )
+          
+          // Add node to scene
+          arSceneManager.sceneView.scene.rootNode.addChildNode(node)
+          node.position = worldCoord
+          
+          // Store the node
+          arSceneManager.placedNodes.append(node)
+          
+          // Don't play pronunciation for automatic placement
         }
+      }
     }
-    
-    // Create or refresh the test labels to ensure they're visible
-    arSceneManager.addTestLabel()
-    arSceneManager.addFixedTextNode()
-    
-    // Configure AR view for maximum text visibility
-    arSceneManager.configureARViewForTextOnly()
-    
-    // Log that we've completed synchronization
-    print("AR labels synchronized with bounding boxes")
   }
   
-  // Replace the AR toggle button with just a clear button
-  func addClearARButton() {
-    // Add clear AR labels button
-    let clearButton = UIButton(type: .system)
-    clearButton.setImage(UIImage(systemName: "arrow.counterclockwise.circle.fill"), for: .normal)
-    clearButton.tintColor = .white
-    clearButton.backgroundColor = UIColor.systemRed.withAlphaComponent(0.7)
-    clearButton.layer.cornerRadius = 25
-    clearButton.translatesAutoresizingMaskIntoConstraints = false
-    clearButton.addTarget(self, action: #selector(clearARButtonTapped), for: .touchUpInside)
-    
-    view.addSubview(clearButton)
-    
-    // Position button to not overlap with toolbar
-    NSLayoutConstraint.activate([
-      clearButton.widthAnchor.constraint(equalToConstant: 50),
-      clearButton.heightAnchor.constraint(equalToConstant: 50),
-      clearButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-      clearButton.bottomAnchor.constraint(equalTo: toolBar.topAnchor, constant: -20) // Position above toolbar
-    ])
-    
-    // Store reference to clear button
-    self.clearARButton = clearButton
-    
-    // Make sure button is above AR view but doesn't interfere with toolbar
-    view.bringSubviewToFront(clearButton)
-  }
-  
-  @objc func clearARButtonTapped() {
-    // Clear all AR labels
-    clearARLabels()
-    
-    // Also unhide all hidden boxes
-    hiddenBoxes.removeAll()
-    
-    // Reset the AR session to clear any stale AR content
-    arSceneManager.setupARSession()
-    
-    // Ensure AR view is configured for text-only display
-    arSceneManager.configureARViewForTextOnly()
-  }
-
-  // Clear all AR labels
-  func clearARLabels() {
-    arSceneManager.clearLabels()
-    // Also clear tagged detections when clearing AR labels
-    taggedDetections.removeAll()
-    print("Cleared all AR labels and tagged detections")
-    showToast(message: "Cleared all AR labels and tagged detections")
+  // Toggle AR view visibility
+  func toggleARView(visible: Bool) {
+    if visible {
+        print("Activating AR mode with \(taggedDetections.count) tagged detections")
+        
+        // Make sure AR session is ready before showing content
+        arSceneManager.setupARSession()
+        
+        // Make AR view fully visible with animation
+        UIView.animate(withDuration: 0.5, animations: {
+            self.arSceneManager.sceneView.alpha = 1.0
+        }, completion: { _ in
+            // Resume AR session after animation completes
+            self.arSceneManager.resumeARSession()
+            
+            // Wait a moment for AR session to stabilize before adding content
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                // Show a toast message to indicate AR mode is active
+                self.showToast(message: "AR Mode Active - Showing \(self.taggedDetections.count) tagged objects")
+                
+                // Clear existing nodes before displaying new ones
+                self.arSceneManager.clearLabels()
+                
+                // If we have no tagged detections, show a helpful message
+                if self.taggedDetections.isEmpty {
+                    self.showToast(message: "No tagged objects yet. Tap on objects to tag them.")
+                    return
+                }
+                
+                // Display all tagged detections
+                for (index, detection) in self.taggedDetections.enumerated() {
+                    print("Processing tagged detection \(index): \(detection.english)")
+                    
+                    // Create world coordinates from stored transform
+                    let worldCoord = SCNVector3Make(
+                        detection.worldPosition.columns.3.x,
+                        detection.worldPosition.columns.3.y,
+                        detection.worldPosition.columns.3.z
+                    )
+                    
+                    print("Creating node at position: \(worldCoord)")
+                    
+                    // Create 3D text node
+                    let node = self.arSceneManager.createNewBubbleParentNode(
+                        english: detection.english,
+                        chinese: detection.chinese,
+                        pinyin: detection.pinyin
+                    )
+                    
+                    // Add node to scene
+                    self.arSceneManager.sceneView.scene.rootNode.addChildNode(node)
+                    node.position = worldCoord
+                    
+                    // Store the node
+                    self.arSceneManager.placedNodes.append(node)
+                }
+                
+                // Show the clear button since we have AR content
+                self.clearARButton?.isHidden = false
+            }
+        })
+    } else {
+        // Pause AR session first to save resources
+        arSceneManager.pauseARSession()
+        
+        // Then fade out the AR view with animation
+        UIView.animate(withDuration: 0.5, animations: {
+            self.arSceneManager.sceneView.alpha = 0.0
+        }, completion: { _ in
+            // Show a toast message to indicate AR mode is inactive
+            self.showToast(message: "AR Mode Inactive")
+            
+            // Clear AR labels when deactivating AR mode
+            self.arSceneManager.clearLabels()
+            
+            // Hide the clear button
+            self.clearARButton?.isHidden = true
+        })
+    }
   }
   
   // Helper method to show toast messages
@@ -1843,732 +1296,105 @@ class ViewController: UIViewController {
     })
   }
   
-  override func viewDidAppear(_ animated: Bool) {
-    super.viewDidAppear(animated)
+  // Clear all AR labels
+  func clearARLabels() {
+    arSceneManager.clearLabels()
+    // Also clear tagged detections when clearing AR labels
+    taggedDetections.removeAll()
+    print("Cleared all AR labels and tagged detections")
+    showToast(message: "Cleared all AR labels and tagged detections")
+  }
+
+  // Add a button to toggle AR view
+  func addARToggleButton() {
+    let button = UIButton(type: .system)
+    button.setImage(UIImage(systemName: "cube.transparent"), for: .normal)
+    button.tintColor = .white
+    button.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.7)
+    button.layer.cornerRadius = 25
+    button.translatesAutoresizingMaskIntoConstraints = false
+    button.addTarget(self, action: #selector(toggleARButtonTapped), for: .touchUpInside)
     
-    // Ensure the toolbar is visible and interactive
-    view.bringSubviewToFront(toolBar)
+    view.addSubview(button)
     
-    // Set explicit z-position to be highest
-    toolBar.layer.zPosition = 1000
+    NSLayoutConstraint.activate([
+      button.widthAnchor.constraint(equalToConstant: 50),
+      button.heightAnchor.constraint(equalToConstant: 50),
+      button.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+      button.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
+    ])
     
-    // Make toolbar explicitly user-interactive
-    toolBar.isUserInteractionEnabled = true
+    // Add clear AR labels button
+    let clearButton = UIButton(type: .system)
+    clearButton.setImage(UIImage(systemName: "arrow.counterclockwise.circle.fill"), for: .normal)
+    clearButton.tintColor = .white
+    clearButton.backgroundColor = UIColor.systemRed.withAlphaComponent(0.7)
+    clearButton.layer.cornerRadius = 25
+    clearButton.translatesAutoresizingMaskIntoConstraints = false
+    clearButton.addTarget(self, action: #selector(clearARButtonTapped), for: .touchUpInside)
+    clearButton.isHidden = true // Initially hidden
     
-    // Ensure all toolbar items are enabled correctly
-    for item in toolBar.items ?? [] {
-        if item === playButtonOutlet {
-            item.isEnabled = !pauseButtonOutlet.isEnabled
-        } else if item === pauseButtonOutlet {
-            item.isEnabled = !playButtonOutlet.isEnabled
+    view.addSubview(clearButton)
+    
+    NSLayoutConstraint.activate([
+      clearButton.widthAnchor.constraint(equalToConstant: 50),
+      clearButton.heightAnchor.constraint(equalToConstant: 50),
+      clearButton.trailingAnchor.constraint(equalTo: button.leadingAnchor, constant: -10),
+      clearButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
+    ])
+    
+    // Store reference to clear button
+    self.clearARButton = clearButton
+  }
+  
+  @objc func clearARButtonTapped() {
+    // Clear all AR labels
+    clearARLabels()
+  }
+  
+  @objc func toggleARButtonTapped() {
+    // Toggle AR view visibility based on alpha instead of hidden property
+    let isVisible = arSceneManager.sceneView.alpha > 0.5
+    print("Toggling AR mode from \(isVisible ? "active" : "inactive") to \(!isVisible ? "active" : "inactive")")
+    
+    // Show a loading indicator while AR is initializing
+    let loadingIndicator = UIActivityIndicatorView(style: .large)
+    loadingIndicator.color = .white
+    loadingIndicator.center = view.center
+    view.addSubview(loadingIndicator)
+    loadingIndicator.startAnimating()
+    
+    // Run the AR session toggle on a background thread to prevent UI freezing
+    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+      guard let self = self else { return }
+      
+      // Make sure the AR view is properly positioned in the view hierarchy
+      if !isVisible {
+        DispatchQueue.main.async {
+          // Bring bounding box views to front so they appear above AR content
+          for boxView in self.boundingBoxViews {
+            self.videoPreview.bringSubviewToFront(boxView)
+          }
         }
-    }
-    
-    // Force layout update
-    view.setNeedsLayout()
-    view.layoutIfNeeded()
-    
-    print("Toolbar brought to front and made interactive")
-  }
-
-  override func viewWillLayoutSubviews() {
-    super.viewWillLayoutSubviews()
-    
-    // Make sure toolbar is always on top during layout
-    view.bringSubviewToFront(toolBar)
-    
-    // Update AR view frame to fill the screen
-    arSceneManager.sceneView.frame = view.bounds
-    
-    // Keep video preview full size
-    videoPreview.frame = view.bounds
-    
-    // Update video preview layer
-    videoCapture?.previewLayer?.frame = videoPreview.bounds
-  }
-
-  // Add a new method to force the test label to be visible
-  func forceTestLabelVisible() {
-    print("Forcing test label to be visible")
-    
-    // First ensure AR view is properly positioned
-    arSceneManager.sceneView.frame = view.bounds
-    
-    // Make sure AR view is a direct subview of the main view
-    if arSceneManager.sceneView.superview != view {
-        arSceneManager.sceneView.removeFromSuperview()
-        view.addSubview(arSceneManager.sceneView)
-        
-        // Position AR view below video preview but above other views
-        view.insertSubview(arSceneManager.sceneView, belowSubview: videoPreview)
-    }
-    
-    // Make sure video preview is transparent
-    videoPreview.backgroundColor = UIColor.clear
-    if let previewLayer = videoCapture.previewLayer {
-        previewLayer.opacity = 0.7 // Make video feed semi-transparent
-    }
-    
-    // Force AR session to be running
-    if arSceneManager.sceneView.session.currentFrame == nil {
-        print("AR session not running, restarting...")
-        arSceneManager.resumeARSession()
-    }
-    
-    // Add a new test label
-    arSceneManager.addTestLabel()
-    
-    // Configure AR view for maximum text visibility
-    arSceneManager.configureARViewForTextOnly()
-    
-    // Ensure toolbar is in front
-    view.bringSubviewToFront(toolBar)
-    
-    // Log that we've forced the test label to be visible
-    print("Test label should now be visible")
-    
-    // Show a toast message
-    showToast(message: "Test label added - should be visible now")
-  }
-
-  // Add a simple SCNView with text that doesn't rely on AR
-  func addSimpleSceneView() {
-      print("Adding simple SCNView with text")
-      
-      // Create a simple SCNView
-      let scnView = SCNView(frame: CGRect(x: 20, y: 250, width: 200, height: 150))
-      scnView.backgroundColor = UIColor.black.withAlphaComponent(0.7)
-      scnView.layer.cornerRadius = 10
-      scnView.tag = 54321 // Tag for easy reference
-      
-      // Create a new scene
-      let scene = SCNScene()
-      
-      // Create a camera node
-      let cameraNode = SCNNode()
-      cameraNode.camera = SCNCamera()
-      cameraNode.position = SCNVector3(0, 0, 5)
-      scene.rootNode.addChildNode(cameraNode)
-      
-      // Create a light node
-      let lightNode = SCNNode()
-      lightNode.light = SCNLight()
-      lightNode.light?.type = .omni
-      lightNode.position = SCNVector3(0, 10, 10)
-      scene.rootNode.addChildNode(lightNode)
-      
-      // Create an ambient light node
-      let ambientLightNode = SCNNode()
-      ambientLightNode.light = SCNLight()
-      ambientLightNode.light?.type = .ambient
-      ambientLightNode.light?.color = UIColor.white
-      scene.rootNode.addChildNode(ambientLightNode)
-      
-      // Create Chinese text
-      let chineseText = SCNText(string: "简单3D文本", extrusionDepth: 1.0)
-      chineseText.firstMaterial?.diffuse.contents = UIColor.white
-      chineseText.firstMaterial?.emission.contents = UIColor.white
-      chineseText.firstMaterial?.emission.intensity = 2.0
-      
-      // Create Chinese text node
-      let chineseTextNode = SCNNode(geometry: chineseText)
-      chineseTextNode.scale = SCNVector3(0.1, 0.1, 0.1)
-      chineseTextNode.position = SCNVector3(0, 0.5, 0)
-      
-      // Center the text
-      let (min, max) = chineseText.boundingBox
-      let width = max.x - min.x
-      chineseTextNode.pivot = SCNMatrix4MakeTranslation(width/2, 0, 0)
-      
-      // Add the text node to the scene
-      scene.rootNode.addChildNode(chineseTextNode)
-      
-      // Create English text
-      let englishText = SCNText(string: "SIMPLE 3D TEXT", extrusionDepth: 1.0)
-      englishText.firstMaterial?.diffuse.contents = UIColor.cyan
-      englishText.firstMaterial?.emission.contents = UIColor.cyan
-      englishText.firstMaterial?.emission.intensity = 2.0
-      
-      // Create English text node
-      let englishTextNode = SCNNode(geometry: englishText)
-      englishTextNode.scale = SCNVector3(0.1, 0.1, 0.1)
-      englishTextNode.position = SCNVector3(0, -0.5, 0)
-      
-      // Center the text
-      let (minE, maxE) = englishText.boundingBox
-      let widthE = maxE.x - minE.x
-      englishTextNode.pivot = SCNMatrix4MakeTranslation(widthE/2, 0, 0)
-      
-      // Add the text node to the scene
-      scene.rootNode.addChildNode(englishTextNode)
-      
-      // Add a rotation animation to make the text more visible
-      let rotateAction = SCNAction.rotateBy(x: 0, y: CGFloat(Float.pi * 2), z: 0, duration: 10.0)
-      let repeatRotate = SCNAction.repeatForever(rotateAction)
-      chineseTextNode.runAction(repeatRotate)
-      englishTextNode.runAction(repeatRotate)
-      
-      // Set the scene to the view
-      scnView.scene = scene
-      scnView.allowsCameraControl = true
-      scnView.autoenablesDefaultLighting = true
-      scnView.backgroundColor = UIColor.black
-      
-      // Add the view to the main view
-      view.addSubview(scnView)
-      
-      // Make sure it's in front of other views
-      view.bringSubviewToFront(scnView)
-      
-      // Add a tap gesture to play pronunciation
-      let tapGesture = UITapGestureRecognizer(target: self, action: #selector(simpleSceneViewTapped))
-      scnView.addGestureRecognizer(tapGesture)
-      scnView.isUserInteractionEnabled = true
-      
-      print("Simple SCNView with text added")
-  }
-
-  // Handle tap on the simple scene view
-  @objc func simpleSceneViewTapped() {
-      print("Simple scene view tapped")
-          
-          // Play pronunciation
-      arSceneManager.playPronunciation(for: "简单3D文本", pinyin: "jiǎndān 3D wénběn")
-      
-      // Provide haptic feedback
-      selection.selectionChanged()
-      
-      // Show a toast message
-      showToast(message: "Simple 3D text tapped - playing pronunciation")
-  }
-
-  // Place an AR label at a specific screen point
-  func placeARLabel(at point: CGPoint) {
-      print("🔍 placeARLabel called at point: \(point)")
-      
-      // Check if we have a current detection
-      guard let detection = currentDetection else {
-          print("❌ No current detection available")
-            return
-          }
-          
-      print("✅ Current detection: \(detection.english) - \(detection.chinese) (\(detection.pinyin))")
-      
-      // Update debug information
-      updateARDebugInfo()
-      
-      // Check if AR session is running
-      if arSceneManager.sceneView.session.configuration == nil {
-          print("⚠️ AR session not running, restarting...")
-          arSceneManager.resumeARSession()
-          arSceneManager.configureARViewForTextOnly()
-          
-          // Wait a moment before attempting to place label
-          DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-              print("🔄 Retrying placeARLabel after AR session restart")
-              self.updateARDebugInfo()
-              self.attemptPlaceARLabel(at: point, for: detection)
-          }
-          return
       }
       
-      print("🚀 AR session is running, attempting to place the label")
-      
-      // Attempt to place the AR label
-      attemptPlaceARLabel(at: point, for: detection)
-  }
-
-  // Attempt to place an AR label at a specific point for a detection
-  func attemptPlaceARLabel(at point: CGPoint, for detection: (english: String, chinese: String, pinyin: String)) {
-      print("🎯 Attempting to place AR label for: \(detection.english) at point: \(point)")
-      
-      // Update debug info
-      updateARDebugInfo()
-      
-      // Make sure AR view is fully opaque
-      arSceneManager.sceneView.alpha = 1.0
-      arSceneManager.sceneView.isHidden = false
-      
-      // Make sure video preview is semitransparent to allow seeing AR content
-      videoPreview.alpha = 0.7
-      
-      // Ensure AR view is in view hierarchy and visible
-      if arSceneManager.sceneView.superview == nil {
-          print("⚠️ AR view not in hierarchy, adding it")
-          view.insertSubview(arSceneManager.sceneView, belowSubview: videoPreview)
-      }
-      
-      // Ensure view is setup correctly
-      arSceneManager.configureARViewForTextOnly()
-      
-      // Perform hit test to find 3D position
-      let hitTestResults = arSceneManager.sceneView.hitTest(point, types: [.featurePoint, .estimatedHorizontalPlane])
-      print("📊 Hit test results count: \(hitTestResults.count)")
-      
-      if let result = hitTestResults.first {
-          // Get world coordinates from hit test
-          let transform = result.worldTransform
-          let position = SCNVector3(
-              transform.columns.3.x,
-              transform.columns.3.y,
-              transform.columns.3.z
-          )
-          
-          print("📍 Hit test found position: \(position)")
-          
-          // Create and place the AR label node
-          let node = arSceneManager.createNewBubbleParentNode(
-              english: detection.english,
-              chinese: detection.chinese,
-              pinyin: detection.pinyin
-          )
-          
-          // Make sure node is fully visible with high priority
-          node.opacity = 1.0
-          node.renderingOrder = 3000
-          
-          for childNode in node.childNodes {
-              childNode.opacity = 1.0
-              childNode.renderingOrder = 3000
-          }
-          
-          // Add the node to the scene
-          arSceneManager.sceneView.scene.rootNode.addChildNode(node)
-          node.position = position
-          
-          // Add to placed nodes array
-          arSceneManager.placedNodes.append(node)
-          
-          // Add to hidden set
-          hiddenObjectLabels.insert(detection.english)
-          
-          // Provide feedback
-          selection.selectionChanged()
-          
-          // Play pronunciation
-          arSceneManager.playPronunciation(for: detection.chinese, pinyin: detection.pinyin)
-          
-          print("✅ AR label placed at position: \(position)")
-          print("📊 Total placed nodes: \(arSceneManager.placedNodes.count)")
-          
-          // Update debug info after placing node
-          updateARDebugInfo()
-      } else {
-          // If hit test fails, place at a fixed position in front of camera
-          print("⚠️ Hit test failed, using fallback position in front of camera")
-          
-          // FALLBACK: Always use a fixed position in front of camera since hit tests might be failing
-          let cameraPosition: SCNVector3
-          let cameraDirection: SCNVector3
-          
-          if let frame = arSceneManager.sceneView.session.currentFrame {
-              // Get camera position and direction
-              let cameraTransform = frame.camera.transform
-              let positionColumn = cameraTransform.columns.3
-              cameraPosition = SCNVector3(positionColumn.x, positionColumn.y, positionColumn.z)
-              cameraDirection = SCNVector3(
-                  -cameraTransform.columns.2.x,
-                  -cameraTransform.columns.2.y,
-                  -cameraTransform.columns.2.z
-              )
-              
-              print("📍 Using camera transform from AR session")
-          } else {
-              // Use default position and direction
-              cameraPosition = SCNVector3(0, 0, 0)
-              cameraDirection = SCNVector3(0, 0, -1)
-              print("⚠️ No camera transform available, using default values")
-          }
-          
-          // Position the label 0.5 meters in front of the camera
-          let position = SCNVector3(
-              cameraPosition.x + cameraDirection.x * 0.5,
-              cameraPosition.y + cameraDirection.y * 0.5,
-              cameraPosition.z + cameraDirection.z * 0.5
-          )
-          
-          print("📍 Using camera-relative position: \(position)")
-          
-          // Create and place the AR label node
-          let node = arSceneManager.createNewBubbleParentNode(
-            english: detection.english,
-            chinese: detection.chinese,
-            pinyin: detection.pinyin
-          )
-          
-          // Make sure node is fully visible
-          node.opacity = 1.0
-          node.renderingOrder = 3000
-          
-          // Add the node to the scene
-          arSceneManager.sceneView.scene.rootNode.addChildNode(node)
-          node.position = position
-          
-          // Add to placed nodes array
-          arSceneManager.placedNodes.append(node)
-          
-          // Add to hidden set
-          hiddenObjectLabels.insert(detection.english)
-          
-          // Provide feedback
-          selection.selectionChanged()
-          
-          // Play pronunciation
-          arSceneManager.playPronunciation(for: detection.chinese, pinyin: detection.pinyin)
-          
-          print("✅ AR label placed at fixed position in front of camera: \(position)")
-          print("📊 Total placed nodes: \(arSceneManager.placedNodes.count)")
-          
-          // Update debug info after placing node
-          updateARDebugInfo()
-      }
-      
-      // Force UI updates
+      // Toggle AR view on the main thread
       DispatchQueue.main.async {
-          // Force update the view hierarchy
-          self.view.bringSubviewToFront(self.videoPreview)
-          if let debugLabel = self.debugLabel {
-              self.view.bringSubviewToFront(debugLabel)
-              // Make the debug label more visible
-              debugLabel.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-              debugLabel.textColor = UIColor.white
-              debugLabel.layer.zPosition = 1000
-          }
-          self.view.bringSubviewToFront(self.toolBar)
-          
-          // Make AR view visible
-          self.arSceneManager.sceneView.isHidden = false
-          self.arSceneManager.sceneView.alpha = 1.0
-          
-          // Update AR debug info again after UI changes
-          self.updateARDebugInfo()
-      }
-  }
-
-  // Update debug label with AR information
-  func updateARDebugInfo() {
-      // Get current AR session state
-      let sessionConfig = arSceneManager.sceneView.session.configuration != nil ? "Active" : "Not configured"
-      let currentFrame = arSceneManager.sceneView.session.currentFrame != nil ? "Available" : "Not available"
-      let nodesCount = arSceneManager.placedNodes.count
-      
-      // Get AR view info
-      let arViewInHierarchy = arSceneManager.sceneView.superview != nil ? "In hierarchy" : "Not in hierarchy"
-      let arViewHidden = arSceneManager.sceneView.isHidden ? "Hidden" : "Visible"
-      let arViewAlpha = String(format: "%.2f", arSceneManager.sceneView.alpha)
-      
-      // Create debug text
-      let debugText = """
-      AR Session: \(sessionConfig)
-      Current Frame: \(currentFrame)
-      AR Nodes: \(nodesCount)
-      AR View: \(arViewInHierarchy), \(arViewHidden), Alpha: \(arViewAlpha)
-      Current Detection: \(currentDetection?.english ?? "None")
-      """
-      
-      // Update debug label
-      debugLabel?.text = debugText
-  }
-
-  // Ensure bounding boxes are properly configured for tapping
-  func ensureBoundingBoxesAreTappable() {
-      print("🔍 Checking bounding box tap configuration")
-      
-      var tappableCount = 0
-      var untappableCount = 0
-      
-      for (index, boxView) in boundingBoxViews.enumerated() {
-          if !boxView.isHidden {
-              // Make sure the box is visible and interactive
-              boxView.isUserInteractionEnabled = true
-              boxView.alpha = 1.0
-              
-              // Make sure it has a tap gesture recognizer
-              var hasTapGesture = false
-              if let gestures = boxView.gestureRecognizers {
-                  for gesture in gestures {
-                      if gesture is UITapGestureRecognizer {
-                          hasTapGesture = true
-                          break
-                      }
-                  }
-              }
-              
-              // If no tap gesture, add one
-              if !hasTapGesture {
-                  print("⚠️ Adding missing tap gesture to box \(index)")
-                  let tapGesture = UITapGestureRecognizer(target: self, action: #selector(boundingBoxTapped(_:)))
-                  boxView.addGestureRecognizer(tapGesture)
-              }
-              
-              // Ensure it's in front of other views
-              videoPreview.bringSubviewToFront(boxView)
-              
-              // Print debug info about this box
-              print("📦 Box \(index): \(boxView.className), frame: \(boxView.frame), interactive: \(boxView.isUserInteractionEnabled)")
-              
-              tappableCount += 1
-          } else {
-              untappableCount += 1
-          }
-      }
-      
-      print("📊 Bounding box status: \(tappableCount) tappable, \(untappableCount) hidden")
-  }
-
-  // Direct placement of AR label with guaranteed visibility
-  func placeARLabelGuaranteed(for detection: (english: String, chinese: String, pinyin: String)) {
-      print("🚀 GUARANTEED AR LABEL PLACEMENT for \(detection.english)")
-      
-      // Make sure AR view is fully visible
-      arSceneManager.sceneView.isHidden = false
-      arSceneManager.sceneView.alpha = 1.0
-      
-      // Make sure video preview is semi-transparent
-      videoPreview.alpha = 0.7
-      
-      // Ensure AR view is in hierarchy
-      if arSceneManager.sceneView.superview == nil {
-          view.insertSubview(arSceneManager.sceneView, belowSubview: videoPreview)
-          print("⚠️ Had to add AR view to hierarchy")
-      }
-      
-      // Force configurating AR view for text visibility
-      arSceneManager.configureARViewForTextOnly()
-      
-      // Create the node for the AR label
-      let node = arSceneManager.createNewBubbleParentNode(
-                        english: detection.english,
-                        chinese: detection.chinese,
-                        pinyin: detection.pinyin
-                    )
-                    
-      // Make the node extremely visible
-      node.opacity = 1.0
-      node.renderingOrder = 3000
-      node.scale = SCNVector3(1.2, 1.2, 1.2)
-      
-      // Apply visibility settings to all children
-      for childNode in node.childNodes {
-          childNode.opacity = 1.0
-          childNode.renderingOrder = 3000
-      }
-      
-      // Determine position directly in front of camera
-      var position = SCNVector3(0, 0, -0.5) // Default fallback
-      
-      if let frame = arSceneManager.sceneView.session.currentFrame {
-          // Use camera position and direction
-          let cameraTransform = frame.camera.transform
-          let cameraPos = SCNVector3(
-              cameraTransform.columns.3.x,
-              cameraTransform.columns.3.y,
-              cameraTransform.columns.3.z
-          )
-          
-          let cameraDir = SCNVector3(
-              -cameraTransform.columns.2.x,
-              -cameraTransform.columns.2.y,
-              -cameraTransform.columns.2.z
-          )
-          
-          // Position 0.5 meters in front of camera
-          position = SCNVector3(
-              cameraPos.x + cameraDir.x * 0.5,
-              cameraPos.y + cameraDir.y * 0.5,
-              cameraPos.z + cameraDir.z * 0.5
-          )
-          print("📍 Positioning at camera-relative position: \(position)")
-      } else {
-          print("⚠️ No camera frame available, using default position")
-      }
-      
-      // Add node to scene
-      arSceneManager.sceneView.scene.rootNode.addChildNode(node)
-      node.position = position
-      
-      // Add to placed nodes array
-      arSceneManager.placedNodes.append(node)
-      
-      // Force UI updates
-      view.bringSubviewToFront(videoPreview)
-      if let debugLabel = debugLabel {
-          view.bringSubviewToFront(debugLabel)
-      }
-      view.bringSubviewToFront(toolBar)
-      
-      // Play pronunciation 
-      arSceneManager.playPronunciation(for: detection.chinese, pinyin: detection.pinyin)
-      
-      print("✅ AR label placed at: \(position), total placed nodes: \(arSceneManager.placedNodes.count)")
-      
-      // Update debug info
-      updateARDebugInfo()
-  }
-
-  // Add a test label button to the toolbar
-  func addTestLabelButton() {
-    // Create a button with a clear icon
-    let testButton = UIBarButtonItem(
-        title: "Test Label",
-        style: .plain,
-        target: self,
-        action: #selector(testLabelButtonPressed)
-    )
-    
-    // Add to toolbar items
-    var items = toolBar.items ?? []
-    items.append(testButton)
-    toolBar.items = items
-    
-    print("✅ Test label button added to toolbar")
-  }
-
-  // Handle test label button press
-  @objc func testLabelButtonPressed() {
-    print("🔍 Test label button pressed")
-    
-    // Create a test detection
-    let testDetection = (english: "TEST OBJECT", chinese: "测试物体", pinyin: "cèshì wùtǐ")
-    
-    // Place AR label using direct placement method
-    placeARLabelInFrontOfCamera(for: testDetection)
-    
-    // Also add a test label using ARSceneManager's method
-    arSceneManager.addTestLabel()
-    
-    // Provide feedback
-    selection.selectionChanged()
-    showToast(message: "Test label added")
-    
-    // Update debug info
-    updateARDebugInfo()
-  }
-
-
-// Place an AR label directly in front of the camera without hit testing
-func placeARLabelInFrontOfCamera(for detection: (english: String, chinese: String, pinyin: String)) {
-    print("🎯 Placing AR label directly in front of camera for: \(detection.english)")
-    
-    // Make sure the AR view is visible and in the hierarchy
-    if arSceneManager.sceneView.superview == nil {
-        view.insertSubview(arSceneManager.sceneView, at: 0)
-        print("⚠️ Had to add AR view to hierarchy")
-    }
-    
-    // Make sure AR view is fully visible
-    arSceneManager.sceneView.isHidden = false
-    arSceneManager.sceneView.alpha = 1.0
-    
-    // Make video preview semi-transparent
-    videoPreview.alpha = 0.7
-    
-    // Force configurating AR view for text visibility
-    arSceneManager.configureARViewForTextOnly()
-    
-    // Create the AR text node
-    let node = arSceneManager.createNewBubbleParentNode(
-        english: detection.english,
-        chinese: detection.chinese,
-        pinyin: detection.pinyin
-    )
-    
-    // Position directly in front of the camera
-    var position = SCNVector3(0, 0, -0.5) // Default fallback position
-    
-    if let frame = arSceneManager.sceneView.session.currentFrame {
-        // Get camera position and orientation
-        let cameraTransform = frame.camera.transform
-        let cameraPosition = SCNVector3(
-            cameraTransform.columns.3.x,
-            cameraTransform.columns.3.y,
-            cameraTransform.columns.3.z
-        )
+        self.toggleARView(visible: !isVisible)
         
-        let cameraDirection = SCNVector3(
-            -cameraTransform.columns.2.x,
-            -cameraTransform.columns.2.y,
-            -cameraTransform.columns.2.z
-        )
+        // Show/hide clear button
+        self.clearARButton?.isHidden = isVisible
         
-        // Position 0.5 meters in front of camera
-        position = SCNVector3(
-            cameraPosition.x + cameraDirection.x * 0.5,
-            cameraPosition.y + cameraDirection.y * 0.5,
-            cameraPosition.z + cameraDirection.z * 0.5
-        )
-    } else {
-        print("⚠️ No camera frame available, using default position")
-        
-        // Try to set the AR session config if missing
-        if arSceneManager.sceneView.session.configuration == nil {
-            arSceneManager.resumeARSession()
+        // Update the AR toggle button icon to reflect the current state
+        if let button = loadingIndicator.superview?.subviews.first(where: { $0 is UIButton && ($0 as? UIButton)?.actions(forTarget: self, forControlEvent: .touchUpInside)?.contains("toggleARButtonTapped") == true }) as? UIButton {
+          button.setImage(UIImage(systemName: !isVisible ? "cube.fill" : "cube.transparent"), for: .normal)
+          button.backgroundColor = !isVisible ? UIColor.systemGreen.withAlphaComponent(0.7) : UIColor.systemBlue.withAlphaComponent(0.7)
         }
-    }
-    
-    // Add the node to the scene
-    arSceneManager.sceneView.scene.rootNode.addChildNode(node)
-    node.position = position
-    
-    // Add to placed nodes array
-    arSceneManager.placedNodes.append(node)
-    
-    // Add to hidden object labels set
-    hiddenObjectLabels.insert(detection.english)
-    
-    // Play pronunciation audio
-    arSceneManager.playPronunciation(for: detection.chinese, pinyin: detection.pinyin)
-    
-    print("✅ AR label placed at position: \(position)")
-    
-    // Update debug info
-    updateARDebugInfo()
-}
-
-// Update createARLabelForBox to use the direct method
-func createARLabelForBox(_ boxView: BoundingBoxView) {
-    let className = boxView.className
-    print("🏷️ Creating AR label for box: \(className)")
-    
-    if className.isEmpty {
-        print("❌ No class name available for this box")
-        return
-    }
-    
-    // Get translation for the class name
-    if let translation = translationManager.getTranslation(for: className) {
-        print("✅ Found translation for: \(className) - \(translation.chinese) (\(translation.pinyin))")
         
-        // Create a detection info tuple
-        let detectionInfo = (english: className, chinese: translation.chinese, pinyin: translation.pinyin)
-        
-        // Update current detection
-        currentDetection = detectionInfo
-        print("✅ Current detection updated: \(detectionInfo.english)")
-        
-        // Hide the bounding box
-        boxView.hide()
-        print("✅ Bounding box hidden")
-        
-        // Add to hidden sets
-        hiddenObjectLabels.insert(className)
-        hiddenBoxes.insert(className)
-        print("✅ Added \(className) to hidden sets")
-        
-        // Place AR label directly in front of camera - no hit testing
-        placeARLabelInFrontOfCamera(for: detectionInfo)
-        
-        // Make sure video preview is semi-transparent to see AR content
-        videoPreview.alpha = 0.7
-        
-        // Provide haptic feedback
-        selection.selectionChanged()
-        
-        // Show a toast message
-        showToast(message: "Added AR label for: \(className)")
-    } else {
-        print("❌ No translation found for: \(className)")
-        showToast(message: "No translation available for: \(className)")
+        // Remove loading indicator
+        loadingIndicator.stopAnimating()
+        loadingIndicator.removeFromSuperview()
+      }
     }
   }
 }
@@ -2783,83 +1609,5 @@ extension ViewController: AVCapturePhotoCaptureDelegate {
     } else {
       print("AVCapturePhotoCaptureDelegate Error")
     }
-  }
-}
-
-// Extension to make transparent views not intercept touches
-extension ViewController {
-    // Override the viewDidLoad method to add a custom subclass for video preview
-    func setupTransparentInteraction() {
-        // Create a custom UIView subclass for videoPreview if it's not already
-        if !(videoPreview is PassThroughView) && videoPreview != nil {
-            let oldVideoPreview = videoPreview!
-            let newVideoPreview = PassThroughView(frame: oldVideoPreview.frame)
-            
-            // Transfer all properties and subviews to the new view
-            newVideoPreview.backgroundColor = oldVideoPreview.backgroundColor
-            newVideoPreview.isUserInteractionEnabled = oldVideoPreview.isUserInteractionEnabled
-            
-            for subview in oldVideoPreview.subviews {
-                subview.removeFromSuperview()
-                newVideoPreview.addSubview(subview)
-            }
-            
-            // Transfer gesture recognizers
-            for gesture in oldVideoPreview.gestureRecognizers ?? [] {
-                oldVideoPreview.removeGestureRecognizer(gesture)
-                newVideoPreview.addGestureRecognizer(gesture)
-            }
-            
-            // Replace in view hierarchy
-            if let superview = oldVideoPreview.superview, let index = superview.subviews.firstIndex(of: oldVideoPreview) {
-                superview.insertSubview(newVideoPreview, at: index)
-                oldVideoPreview.removeFromSuperview()
-            }
-            
-            // Set the custom view as videoPreview
-            videoPreview = newVideoPreview
-            
-            // Add any additional layers (like preview layer)
-            if let previewLayer = videoCapture?.previewLayer {
-                videoPreview.layer.addSublayer(previewLayer)
-                videoCapture.previewLayer?.frame = videoPreview.bounds
-            }
-        }
-    }
-}
-
-// Custom UIView subclass that passes touches to lower views in specific areas
-class PassThroughView: UIView {
-    // Store a reference to the toolbar, if available
-    weak var toolbar: UIToolbar?
-    
-    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        // Check if we have a toolbar reference
-        if let toolbar = toolbar {
-            // Convert point to toolbar's coordinate space
-            let pointInToolbar = convert(point, to: toolbar.superview)
-            
-            // If the point is inside the toolbar, return false to pass the touch through
-            if toolbar.frame.contains(pointInToolbar) {
-                return false
-            }
-        }
-        
-        // First check if the point is inside any bounding box
-        for subview in subviews {
-            if let boxView = subview as? BoundingBoxView,
-               !boxView.isHidden && boxView.isUserInteractionEnabled && boxView.frame.contains(point) {
-                print("Touch inside bounding box: \(boxView.className)")
-                return true
-            }
-        }
-        
-        // If there's a visible layer at this point, handle touch
-        if let previewLayer = layer.sublayers?.first as? AVCaptureVideoPreviewLayer {
-            return previewLayer.frame.contains(point) && previewLayer.opacity > 0.3
-        }
-        
-        // For all other cases, allow the touch to pass through
-        return false
   }
 }

@@ -47,18 +47,14 @@ class ARSceneManager: NSObject, ARSCNViewDelegate {
         // Set the scene to the view
         sceneView.scene = scene
         
-        // Make the scene view completely transparent so only AR content is visible
+        // Make the scene view transparent so only AR content is visible
         sceneView.backgroundColor = UIColor.clear
-        sceneView.isOpaque = false
         
         // Remove the default lighting to avoid interference with camera view
         sceneView.automaticallyUpdatesLighting = false
         
         // Enable Default Lighting - makes the 3D text a bit poppier
         sceneView.autoenablesDefaultLighting = true
-        
-        // Disable debug options to remove any visual artifacts
-        sceneView.debugOptions = []
         
         // Add tap gesture recognizer
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(gestureRecognize:)))
@@ -70,74 +66,42 @@ class ARSceneManager: NSObject, ARSCNViewDelegate {
     
     // Set up the AR session
     func setupARSession() {
-        print("Setting up AR session from scratch")
-        
-        // Clean up any existing resources before setup
-        cleanupARScene()
-        
-        // Create a session configuration
-        let configuration = ARWorldTrackingConfiguration()
-        
-        // Enable plane detection for better AR placement
-        configuration.planeDetection = [.horizontal, .vertical]
-        
-        // Disable unnecessary features to improve performance and reduce visual artifacts
-        if #available(iOS 13.0, *) {
-            // Explicitly disable person segmentation to avoid visual artifacts
-            configuration.frameSemantics = []
-        }
-        
-        // Run the session with the new configuration
-        sceneView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
-        print("AR session started with fresh configuration")
-        
-        // Configure view properties
-        sceneView.preferredFramesPerSecond = 30
-        sceneView.antialiasingMode = .none
-        sceneView.debugOptions = []
-        sceneView.backgroundColor = UIColor.clear
-        sceneView.isOpaque = false
-        
-        // Disable any rendering of the point cloud or planes
-        sceneView.rendersCameraGrain = false
-        if #available(iOS 13.0, *) {
-            sceneView.rendersMotionBlur = false
-        }
-        
-        // Configure for text-only display
-        configureARViewForTextOnly()
-        
-        // Add test labels
-        addTestLabel()
-        addFixedTextNode()
-        
-        // Print success message
-        print("AR session setup complete with \(placedNodes.count) nodes")
-    }
-    
-    // Clean up the AR scene to remove any visual artifacts
-    func cleanupARScene() {
-        // Remove all nodes except placed text nodes
-        let rootNode = sceneView.scene.rootNode
-        for child in rootNode.childNodes {
-            // Skip our placed text nodes
-            if !placedNodes.contains(child) {
-                child.removeFromParentNode()
+        // Create the configuration on a background thread to avoid freezing the UI
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+            
+            // Create a session configuration
+            let configuration = ARWorldTrackingConfiguration()
+            
+            // Enable plane detection for better AR placement
+            configuration.planeDetection = [.horizontal, .vertical]
+            
+            // Optimize AR configuration for performance
+            if #available(iOS 13.0, *) {
+                // Only use person segmentation if needed
+                // configuration.frameSemantics.insert(.personSegmentationWithDepth)
             }
-        }
-        
-        // Remove any existing anchors
-        let anchors = sceneView.session.currentFrame?.anchors ?? []
-        for anchor in anchors {
-            if !(anchor is ARPlaneAnchor) {
-                sceneView.session.remove(anchor: anchor)
+            
+            // Run the session on the main thread
+            DispatchQueue.main.async {
+                // Set lower frame rate to reduce CPU usage
+                self.sceneView.preferredFramesPerSecond = 30
+                
+                // Disable unnecessary features to improve performance
+                self.sceneView.antialiasingMode = .none
+                
+                // Set the session debug options to show feature points
+                self.sceneView.debugOptions = []
+                
+                // Run the view's session with automatic configuration
+                self.sceneView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
+                
+                print("AR session started with optimized configuration")
+                
+                // Make sure the AR view is transparent to allow bounding boxes to be visible
+                self.sceneView.backgroundColor = UIColor.clear
+                self.sceneView.isOpaque = false
             }
-        }
-        
-        // Create a clean scene if needed
-        if sceneView.scene.rootNode.childNodes.isEmpty {
-            let scene = SCNScene()
-            sceneView.scene = scene
         }
     }
     
@@ -148,131 +112,33 @@ class ARSceneManager: NSObject, ARSCNViewDelegate {
     
     // Resume the AR session
     func resumeARSession() {
-        print("Resuming AR session")
-        
-        // Create a session configuration
-        let configuration = ARWorldTrackingConfiguration()
-        
-        // Enable plane detection for better AR placement
-        configuration.planeDetection = [.horizontal, .vertical]
-        
-        // Disable unnecessary features to improve performance and reduce visual artifacts
-        if #available(iOS 13.0, *) {
-            // Explicitly disable person segmentation to avoid visual artifacts
-            configuration.frameSemantics = []
-        }
-        
-        // Run the session with the new configuration
-        sceneView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
-        print("AR session resumed with fresh configuration")
-        
-        // Configure view properties
-        sceneView.preferredFramesPerSecond = 30
-        sceneView.antialiasingMode = .none
-        sceneView.debugOptions = []
-        sceneView.backgroundColor = UIColor.clear
-        sceneView.isOpaque = false
-        
-        // Disable any rendering of the point cloud or planes
-        sceneView.rendersCameraGrain = false
-        if #available(iOS 13.0, *) {
-            sceneView.rendersMotionBlur = false
-        }
-        
-        // Configure for text-only display
-        configureARViewForTextOnly()
-        
-        // Add test labels
-        addTestLabel()
-        addFixedTextNode()
-        
-        // Print success message
-        print("AR session resume complete with \(placedNodes.count) nodes")
-    }
-    
-    // Configure AR view for text-only display
-    func configureARViewForTextOnly() {
-        print("Configuring AR view for maximum text visibility")
-        
-        // Disable all debug options completely
-        sceneView.debugOptions = []
-        
-        // Make sure the scene view background is completely transparent
-        sceneView.backgroundColor = UIColor.clear
-        sceneView.isOpaque = false
-        
-        // Set scene background to clear
-        sceneView.scene.background.contents = UIColor.clear
-        
-        // Disable camera grain and motion blur for cleaner visuals
-        sceneView.rendersCameraGrain = false
-        if #available(iOS 13.0, *) {
-            sceneView.rendersMotionBlur = false
-        }
-        
-        // Set up bright lighting environment for better text visibility
-        let lightingEnvironment = sceneView.scene.lightingEnvironment
-        lightingEnvironment.intensity = 2.0 // Brighter lighting
-        lightingEnvironment.contents = UIColor.white // White environment lighting
-        
-        // Add a directional light to ensure text is well-lit
-        let directionalLight = SCNLight()
-        directionalLight.type = .directional
-        directionalLight.intensity = 1000 // Very bright light
-        directionalLight.color = UIColor.white
-        directionalLight.castsShadow = false
-        
-        let lightNode = SCNNode()
-        lightNode.light = directionalLight
-        lightNode.position = SCNVector3(0, 10, 0)
-        lightNode.eulerAngles = SCNVector3(-Float.pi/2, 0, 0) // Point down
-        sceneView.scene.rootNode.addChildNode(lightNode)
-        
-        // Add ambient light for overall brightness
-        let ambientLight = SCNLight()
-        ambientLight.type = .ambient
-        ambientLight.intensity = 1000 // Very bright ambient light
-        ambientLight.color = UIColor.white
-        
-        let ambientNode = SCNNode()
-        ambientNode.light = ambientLight
-        sceneView.scene.rootNode.addChildNode(ambientNode)
-        
-        // Ensure all existing nodes are fully visible
-        for node in placedNodes {
-            // Force full opacity
-            node.opacity = 1.0
-            node.renderingOrder = 2000 // Very high rendering priority
+        // Create the configuration on a background thread to avoid freezing the UI
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
             
-            // Apply to all children
-            for childNode in node.childNodes {
-                childNode.opacity = 1.0
-                childNode.renderingOrder = 2000
+            let configuration = ARWorldTrackingConfiguration()
+            configuration.planeDetection = [.horizontal, .vertical]
+            
+            // Optimize AR configuration for performance
+            if #available(iOS 13.0, *) {
+                // Only use person segmentation if needed
+                // configuration.frameSemantics.insert(.personSegmentationWithDepth)
+            }
+            
+            // Run the session on the main thread
+            DispatchQueue.main.async {
+                // Set lower frame rate to reduce CPU usage
+                self.sceneView.preferredFramesPerSecond = 30
                 
-                // Make materials extra bright
-                if let geometry = childNode.geometry {
-                    for material in geometry.materials {
-                        material.transparency = 0.0 // Fully opaque
-                        material.lightingModel = .constant // No lighting effects
-                        
-                        // Increase emission intensity for better visibility
-                        if let _ = material.emission.contents {
-                            material.emission.intensity = 3.0 // Very bright emission
-                        }
-                    }
-                }
-            }
-            
-            // Add a billboard constraint if not already present
-            if node.constraints == nil || node.constraints?.isEmpty ?? true {
-                let billboardConstraint = SCNBillboardConstraint()
-                billboardConstraint.freeAxes = .all
-                node.constraints = [billboardConstraint]
+                // Run the session with the new configuration
+                self.sceneView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
+                print("AR session resumed with optimized configuration")
+                
+                // Make sure the AR view is transparent to allow bounding boxes to be visible
+                self.sceneView.backgroundColor = UIColor.clear
+                self.sceneView.isOpaque = false
             }
         }
-        
-        // Log configuration completion
-        print("AR view configured for maximum text visibility with \(placedNodes.count) visible nodes")
     }
     
     // Set up audio session for playback
@@ -459,118 +325,109 @@ class ARSceneManager: NSObject, ARSCNViewDelegate {
     
     // Create a new 3D text node
     func createNewBubbleParentNode(english: String, chinese: String, pinyin: String) -> SCNNode {
-        print("📝 Creating AR text node: \(english) - \(chinese) (\(pinyin))")
+        // Warning: Creating 3D Text is susceptible to crashing. To reduce chances of crashing; reduce number of polygons, letters, smoothness, etc.
         
-        // Create a parent node to hold all text elements
-        let bubbleNode = SCNNode()
+        // TEXT BILLBOARD CONSTRAINT
+        let billboardConstraint = SCNBillboardConstraint()
+        billboardConstraint.freeAxes = SCNBillboardAxis.Y
         
-        // Set a unique name for this node to identify it later
-        bubbleNode.name = "\(english)|\(chinese)|\(pinyin)"
+        // Create a parent node for all text elements
+        let bubbleNodeParent = SCNNode()
         
-        // Create a background plane for better text visibility - MAKE IT LARGER
-        let backgroundPlane = SCNPlane(width: 0.25, height: 0.2)
-        let backgroundNode = SCNNode(geometry: backgroundPlane)
-        backgroundNode.position = SCNVector3(0, 0, -0.01) // Slightly behind text
-        
-        // Set background material with HIGHER opacity for better contrast
+        // Add a background plane to make text more visible
+        let backgroundPlane = SCNPlane(width: 0.2, height: 0.15)
+        backgroundPlane.cornerRadius = 0.02
         let backgroundMaterial = SCNMaterial()
-        backgroundMaterial.diffuse.contents = UIColor.black
-        backgroundMaterial.transparency = 0.0 // Fully opaque (was 0.1)
-        backgroundMaterial.lightingModel = .constant // No lighting effects
+        backgroundMaterial.diffuse.contents = UIColor.black.withAlphaComponent(0.7)
         backgroundPlane.materials = [backgroundMaterial]
         
-        // Add background to parent node
-        bubbleNode.addChildNode(backgroundNode)
+        let backgroundNode = SCNNode(geometry: backgroundPlane)
+        backgroundNode.position = SCNVector3(0, -0.05, -0.01) // Slightly behind text
+        bubbleNodeParent.addChildNode(backgroundNode)
         
-        // Create Chinese text node with LARGER text
-        let chineseText = SCNText(string: chinese, extrusionDepth: 0.01)
-        chineseText.font = UIFont.systemFont(ofSize: 0.6, weight: .bold) // Increased size (was 0.5)
-        chineseText.firstMaterial?.diffuse.contents = UIColor.white
+        // CHINESE TEXT
+        let chineseText = SCNText(string: chinese, extrusionDepth: CGFloat(bubbleDepth))
+        var chineseFont = UIFont(name: "PingFangSC-Semibold", size: 0.15)
+        chineseFont = chineseFont?.withTraits(traits: .traitBold)
+        chineseText.font = chineseFont
+        chineseText.alignmentMode = CATextLayerAlignmentMode.center.rawValue
+        chineseText.firstMaterial?.diffuse.contents = UIColor.red
+        chineseText.firstMaterial?.specular.contents = UIColor.white
+        chineseText.firstMaterial?.isDoubleSided = true
+        chineseText.chamferRadius = CGFloat(bubbleDepth)
         
-        // Add BRIGHTER emission to Chinese text for better visibility
-        chineseText.firstMaterial?.emission.contents = UIColor.white
-        chineseText.firstMaterial?.emission.intensity = 5.0 // Much brighter (was 2.0)
-        chineseText.firstMaterial?.lightingModel = .constant // No lighting effects
-        chineseText.firstMaterial?.transparency = 0.0 // Fully opaque
+        // Add a slight outline to make text more visible
+        chineseText.firstMaterial?.emission.contents = UIColor.red.withAlphaComponent(0.5)
         
-        // Calculate text size and position
+        // CHINESE NODE
+        let (minBoundChinese, maxBoundChinese) = chineseText.boundingBox
         let chineseNode = SCNNode(geometry: chineseText)
-        chineseNode.scale = SCNVector3(0.035, 0.035, 0.035) // Larger scale (was 0.03)
-        let (chineseMin, chineseMax) = chineseText.boundingBox
-        let chineseWidth = Float(chineseMax.x - chineseMin.x)
-        chineseNode.position = SCNVector3(-Float(chineseWidth) * 0.035 / 2, 0.04, 0.01) // Slightly in front
-        chineseNode.renderingOrder = 3000 // Very high rendering priority (was 2000)
-        chineseNode.opacity = 1.0 // Ensure full opacity
+        chineseNode.pivot = SCNMatrix4MakeTranslation((maxBoundChinese.x - minBoundChinese.x)/2, minBoundChinese.y, bubbleDepth/2)
+        chineseNode.scale = SCNVector3Make(0.2, 0.2, 0.2)
         
-        // Create Pinyin text node
-        let pinyinText = SCNText(string: pinyin, extrusionDepth: 0.01)
-        pinyinText.font = UIFont.systemFont(ofSize: 0.5) // Larger (was 0.4)
-        pinyinText.firstMaterial?.diffuse.contents = UIColor.yellow
+        // PINYIN TEXT
+        let pinyinText = SCNText(string: pinyin, extrusionDepth: CGFloat(bubbleDepth))
+        let pinyinFont = UIFont(name: "Avenir-Medium", size: 0.12)
+        pinyinText.font = pinyinFont
+        pinyinText.alignmentMode = CATextLayerAlignmentMode.center.rawValue
+        pinyinText.firstMaterial?.diffuse.contents = UIColor.orange
+        pinyinText.firstMaterial?.specular.contents = UIColor.white
+        pinyinText.firstMaterial?.isDoubleSided = true
+        pinyinText.chamferRadius = CGFloat(bubbleDepth)
         
-        // Add BRIGHTER emission to Pinyin text for better visibility
-        pinyinText.firstMaterial?.emission.contents = UIColor.yellow
-        pinyinText.firstMaterial?.emission.intensity = 5.0 // Much brighter (was 2.0)
-        pinyinText.firstMaterial?.lightingModel = .constant // No lighting effects
-        pinyinText.firstMaterial?.transparency = 0.0 // Fully opaque
+        // Add a slight outline to make text more visible
+        pinyinText.firstMaterial?.emission.contents = UIColor.orange.withAlphaComponent(0.5)
         
-        // Calculate text size and position
+        // PINYIN NODE
+        let (minBoundPinyin, maxBoundPinyin) = pinyinText.boundingBox
         let pinyinNode = SCNNode(geometry: pinyinText)
-        pinyinNode.scale = SCNVector3(0.03, 0.03, 0.03) // Larger scale (was 0.025)
-        let (pinyinMin, pinyinMax) = pinyinText.boundingBox
-        let pinyinWidth = Float(pinyinMax.x - pinyinMin.x)
-        pinyinNode.position = SCNVector3(-Float(pinyinWidth) * 0.03 / 2, 0.0, 0.01) // Slightly in front
-        pinyinNode.renderingOrder = 3000 // Higher rendering priority (was 2000)
-        pinyinNode.opacity = 1.0 // Ensure full opacity
+        pinyinNode.pivot = SCNMatrix4MakeTranslation((maxBoundPinyin.x - minBoundPinyin.x)/2, minBoundPinyin.y, bubbleDepth/2)
+        pinyinNode.scale = SCNVector3Make(0.15, 0.15, 0.15)
+        pinyinNode.position = SCNVector3(0, -0.05, 0)
         
-        // Create English text node
-        let englishText = SCNText(string: english, extrusionDepth: 0.01)
-        englishText.font = UIFont.systemFont(ofSize: 0.5) // Larger (was 0.4)
-        englishText.firstMaterial?.diffuse.contents = UIColor.cyan
+        // ENGLISH TEXT
+        let englishText = SCNText(string: english, extrusionDepth: CGFloat(bubbleDepth))
+        let englishFont = UIFont(name: "Avenir-Light", size: 0.1)
+        englishText.font = englishFont
+        englishText.alignmentMode = CATextLayerAlignmentMode.center.rawValue
+        englishText.firstMaterial?.diffuse.contents = UIColor.white
+        englishText.firstMaterial?.specular.contents = UIColor.white
+        englishText.firstMaterial?.isDoubleSided = true
+        englishText.chamferRadius = CGFloat(bubbleDepth)
         
-        // Add BRIGHTER emission to English text for better visibility
-        englishText.firstMaterial?.emission.contents = UIColor.cyan
-        englishText.firstMaterial?.emission.intensity = 5.0 // Much brighter (was 2.0)
-        englishText.firstMaterial?.lightingModel = .constant // No lighting effects
-        englishText.firstMaterial?.transparency = 0.0 // Fully opaque
+        // Add a slight outline to make text more visible
+        englishText.firstMaterial?.emission.contents = UIColor.white.withAlphaComponent(0.5)
         
-        // Calculate text size and position
+        // ENGLISH NODE
+        let (minBoundEnglish, maxBoundEnglish) = englishText.boundingBox
         let englishNode = SCNNode(geometry: englishText)
-        englishNode.scale = SCNVector3(0.025, 0.025, 0.025) // Larger scale (was 0.02)
-        let (englishMin, englishMax) = englishText.boundingBox
-        let englishWidth = Float(englishMax.x - englishMin.x)
-        englishNode.position = SCNVector3(-Float(englishWidth) * 0.025 / 2, -0.04, 0.01) // Slightly in front
-        englishNode.renderingOrder = 3000 // Higher rendering priority (was 2000)
-        englishNode.opacity = 1.0 // Ensure full opacity
+        englishNode.pivot = SCNMatrix4MakeTranslation((maxBoundEnglish.x - minBoundEnglish.x)/2, minBoundEnglish.y, bubbleDepth/2)
+        englishNode.scale = SCNVector3Make(0.15, 0.15, 0.15)
+        englishNode.position = SCNVector3(0, -0.1, 0)
         
-        // Add all text nodes to parent
-        bubbleNode.addChildNode(chineseNode)
-        bubbleNode.addChildNode(pinyinNode)
-        bubbleNode.addChildNode(englishNode)
+        // CENTRE POINT NODE - Make it smaller and less visible
+        let sphere = SCNSphere(radius: 0.002)
+        sphere.firstMaterial?.diffuse.contents = UIColor.cyan.withAlphaComponent(0.5)
+        let sphereNode = SCNNode(geometry: sphere)
         
-        // Add a billboard constraint to make the text always face the camera
-        let billboardConstraint = SCNBillboardConstraint()
-        billboardConstraint.freeAxes = .all
-        bubbleNode.constraints = [billboardConstraint]
+        // Add all nodes to parent
+        bubbleNodeParent.addChildNode(chineseNode)
+        bubbleNodeParent.addChildNode(pinyinNode)
+        bubbleNodeParent.addChildNode(englishNode)
+        bubbleNodeParent.addChildNode(sphereNode)
+        bubbleNodeParent.constraints = [billboardConstraint]
         
-        // Set HIGHEST rendering priority for the entire node
-        bubbleNode.renderingOrder = 3000 // Higher (was 2000)
-        bubbleNode.opacity = 1.0
+        // Store the current word data with the node
+        bubbleNodeParent.name = "\(english)|\(chinese)|\(pinyin)"
         
-        // Skip animation and just set the final scale immediately
-        bubbleNode.scale = SCNVector3(1.5, 1.5, 1.5) // Larger scale (was 1.0)
-        bubbleNode.opacity = 1.0
+        // Add a subtle animation to make the node appear
+        bubbleNodeParent.opacity = 0
+        let fadeInAction = SCNAction.fadeIn(duration: 0.5)
+        let scaleAction = SCNAction.scale(to: 1.0, duration: 0.5)
+        let groupAction = SCNAction.group([fadeInAction, scaleAction])
+        bubbleNodeParent.runAction(groupAction)
         
-        // Add a continuous animation to make it more noticeable
-        let pulseAction = SCNAction.sequence([
-            SCNAction.scale(to: 1.7, duration: 0.5),
-            SCNAction.scale(to: 1.5, duration: 0.5)
-        ])
-        let repeatPulse = SCNAction.repeatForever(pulseAction)
-        bubbleNode.runAction(repeatPulse)
-        
-        print("✅ AR text node created successfully")
-        
-        return bubbleNode
+        return bubbleNodeParent
     }
     
     // Function to play pronunciation using text-to-speech
@@ -677,113 +534,6 @@ class ARSceneManager: NSObject, ARSCNViewDelegate {
             node.removeFromParentNode()
         }
         placedNodes.removeAll()
-    }
-    
-    // Add a test label that's always visible in the AR view
-    func addTestLabel() {
-        print("Adding test label to AR view")
-        
-        // Create a test label that will always be visible
-        let testNode = createNewBubbleParentNode(
-            english: "TEST LABEL",
-            chinese: "测试标签",
-            pinyin: "cèshì biāoqiān"
-        )
-        
-        // Position the test label in front of the camera
-        guard let frame = sceneView.session.currentFrame else {
-            print("No current frame available, positioning test label at origin")
-            testNode.position = SCNVector3(0, 0, -0.5)
-            sceneView.scene.rootNode.addChildNode(testNode)
-            placedNodes.append(testNode)
-            return
-        }
-        
-        // Get the camera position and orientation
-        let cameraTransform = frame.camera.transform
-        let positionColumn = cameraTransform.columns.3
-        let cameraPosition = SCNVector3(positionColumn.x, positionColumn.y, positionColumn.z)
-        let cameraDirection = SCNVector3(-cameraTransform.columns.2.x, -cameraTransform.columns.2.y, -cameraTransform.columns.2.z)
-        
-        // Position the test label 0.5 meters in front of the camera
-        let position = SCNVector3(
-            cameraPosition.x + cameraDirection.x * 0.5,
-            cameraPosition.y + cameraDirection.y * 0.5,
-            cameraPosition.z + cameraDirection.z * 0.5
-        )
-        
-        testNode.position = position
-        
-        // Make sure the test node is fully opaque and has high rendering priority
-        testNode.opacity = 1.0
-        testNode.renderingOrder = 2000 // Even higher than regular labels
-        
-        // Add a special name to identify this as a test label
-        testNode.name = "TEST_LABEL|测试标签|cèshì biāoqiān"
-        
-        // Add the test node to the scene
-        sceneView.scene.rootNode.addChildNode(testNode)
-        placedNodes.append(testNode)
-        
-        // Log that we've added the test label
-        print("Test label added at position: \(position)")
-        
-        // Add a continuous animation to make it more noticeable
-        let pulseAction = SCNAction.sequence([
-            SCNAction.scale(to: 1.2, duration: 0.5),
-            SCNAction.scale(to: 1.0, duration: 0.5)
-        ])
-        let repeatPulse = SCNAction.repeatForever(pulseAction)
-        testNode.runAction(repeatPulse)
-        
-        // Also add a test label to the resumeARSession method
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            // Play pronunciation to confirm audio is working
-            self.playPronunciation(for: "测试标签", pinyin: "cèshì biāoqiān")
-        }
-    }
-    
-    // Add a fixed 3D text node that doesn't rely on AR features
-    func addFixedTextNode() {
-        print("Adding fixed 3D text node to scene")
-        
-        // Create a new node with test text
-        let testNode = createNewBubbleParentNode(
-            english: "FIXED 3D TEXT",
-            chinese: "固定3D文本",
-            pinyin: "gùdìng 3D wénběn"
-        )
-        
-        // Position the node at a fixed position in front of the camera
-        // This doesn't rely on AR hit testing or feature points
-        testNode.position = SCNVector3(0, 0, -0.5)
-        
-        // Make sure the node is fully opaque and has high rendering priority
-        testNode.opacity = 1.0
-        testNode.renderingOrder = 3000 // Very high rendering priority
-        
-        // Add a special name to identify this as a fixed test node
-        testNode.name = "FIXED_TEST_NODE|固定3D文本|gùdìng 3D wénběn"
-        
-        // Add the node directly to the root node of the scene
-        sceneView.scene.rootNode.addChildNode(testNode)
-        placedNodes.append(testNode)
-        
-        // Log that we've added the fixed test node
-        print("Fixed 3D text node added at position: \(testNode.position)")
-        
-        // Add a continuous animation to make it more noticeable
-        let pulseAction = SCNAction.sequence([
-            SCNAction.scale(to: 1.2, duration: 0.5),
-            SCNAction.scale(to: 1.0, duration: 0.5)
-        ])
-        let repeatPulse = SCNAction.repeatForever(pulseAction)
-        testNode.runAction(repeatPulse)
-        
-        // Play pronunciation after a delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.playPronunciation(for: "固定3D文本", pinyin: "gùdìng 3D wénběn")
-        }
     }
 }
 
