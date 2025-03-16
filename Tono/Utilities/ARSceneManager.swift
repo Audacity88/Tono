@@ -47,13 +47,27 @@ class ARSceneManager: NSObject, ARSCNViewDelegate {
         // Set the scene to the view
         sceneView.scene = scene
         
-        // Make the scene view transparent so only AR content is visible
+        // CRITICAL: Configure as pure tracking overlay - no camera feed!
+        
+        // Make the AR view totally transparent
         sceneView.backgroundColor = UIColor.clear
+        sceneView.scene.background.contents = UIColor.clear
+        sceneView.isOpaque = false
         
-        // Remove the default lighting to avoid interference with camera view
-        sceneView.automaticallyUpdatesLighting = false
+        // Turn off all AR camera rendering features
+        if #available(iOS 13.0, *) {
+            sceneView.rendersCameraGrain = false
+            
+            // Don't show debug features by default - only on request
+            if UserDefaults.standard.bool(forKey: "developer_mode") {
+                sceneView.debugOptions = [.showFeaturePoints]
+            } else {
+                sceneView.debugOptions = []
+            }
+        }
         
-        // Enable Default Lighting - makes the 3D text a bit poppier
+        // Setup for optimal AR experience
+        sceneView.automaticallyUpdatesLighting = true
         sceneView.autoenablesDefaultLighting = true
         
         // Add tap gesture recognizer
@@ -64,17 +78,33 @@ class ARSceneManager: NSObject, ARSCNViewDelegate {
         setupAudioSession()
     }
     
-    // Set up the AR session
+    // Set up the AR session - MINIMAL MODE
     func setupARSession() {
-        // Create the configuration on a background thread to avoid freezing the UI
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+        // First stop any existing AR session
+        sceneView.session.pause()
+        
+        // Clear all nodes from the scene for a clean start
+        sceneView.scene.rootNode.childNodes.forEach { $0.removeFromParentNode() }
+        
+        // Create the configuration on the main thread to avoid threading issues
+        DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             
-            // Create a session configuration
+            // The most minimal possible configuration
             let configuration = ARWorldTrackingConfiguration()
             
-            // Enable plane detection for better AR placement
-            configuration.planeDetection = [.horizontal, .vertical]
+            // Disable all unnecessary AR features
+            configuration.planeDetection = []
+            
+            // Force AR session to run with minimal settings
+            let options: ARSession.RunOptions = [.removeExistingAnchors]
+            self.sceneView.session.run(configuration, options: options)
+            
+            // Manually set the scene to be transparent in ALL ways
+            self.sceneView.scene = SCNScene() // Completely empty scene
+            self.sceneView.isOpaque = false
+            self.sceneView.backgroundColor = UIColor.clear
+            self.sceneView.scene.background.contents = UIColor.clear
             
             // Enable world tracking with extended tracking for better AR position persistence
             if #available(iOS 12.0, *) {
@@ -95,36 +125,31 @@ class ARSceneManager: NSObject, ARSCNViewDelegate {
                 }
             }
             
-            // Optimize AR configuration for performance
-            if #available(iOS 13.0, *) {
-                // Only use person segmentation if needed
-                // configuration.frameSemantics.insert(.personSegmentationWithDepth)
-            }
-            
             // Run the session on the main thread
             DispatchQueue.main.async {
-                // Set lower frame rate to reduce CPU usage
+                // Set up scene view for optimal performance with video feed
                 self.sceneView.preferredFramesPerSecond = 30
-                
-                // Disable unnecessary features to improve performance
                 self.sceneView.antialiasingMode = .none
                 
-                // Set the session debug options to show feature points for better tracking
+                // Show debug options if in developer mode
                 if UserDefaults.standard.bool(forKey: "developer_mode") {
                     self.sceneView.debugOptions = [.showFeaturePoints]
                 } else {
                     self.sceneView.debugOptions = []
                 }
                 
-                // Run the view's session with improved tracking options
-                // Important: Don't reset tracking to maintain world position consistency
-                self.sceneView.session.run(configuration)
-                
-                print("AR session started with optimized configuration and improved position tracking")
-                
-                // Make sure the AR view is transparent to allow bounding boxes to be visible
+                // CRITICAL: Make the ARSCNView completely transparent except for AR content
                 self.sceneView.backgroundColor = UIColor.clear
                 self.sceneView.isOpaque = false
+                self.sceneView.scene.background.contents = UIColor.clear
+                
+                // Disable debug features that might interfere with transparency
+                self.sceneView.debugOptions = []
+                
+                // Run the view's session with tracking options
+                self.sceneView.session.run(configuration)
+                
+                print("AR session started with optimized configuration")
                 
                 // Start regular world map saving
                 if #available(iOS 12.0, *) {
@@ -195,6 +220,25 @@ class ARSceneManager: NSObject, ARSCNViewDelegate {
             let currentTrackingState = self.sceneView.session.currentFrame?.camera.trackingState
             print("Current AR tracking state: \(String(describing: currentTrackingState))")
             
+            guard let configuration = self.sceneView.session.configuration as? ARWorldTrackingConfiguration else {
+                print("No AR configuration found - creating a new one")
+                // Create a new configuration
+                let newConfig = ARWorldTrackingConfiguration()
+                newConfig.planeDetection = [.horizontal, .vertical]
+                // CRITICAL: Don't use AR camera feed since we have our own video feed
+                newConfig.providesAudioData = false
+                
+                // Run with the new configuration
+                self.sceneView.session.run(newConfig)
+                return
+            }
+            
+            // Make a copy of the current configuration
+            let updatedConfig = configuration
+            
+            // IMPORTANT: Don't use AR camera feed since we have our own video feed
+            updatedConfig.providesAudioData = false
+            
             // Update camera tracking configuration while maintaining tracking state
             var options: ARSession.RunOptions = []
             
@@ -211,38 +255,41 @@ class ARSceneManager: NSObject, ARSCNViewDelegate {
                 // Only use reset tracking if tracking state is limited
                 // This will reset the world coordinate system but help recover from tracking failures
                 if reason == .excessiveMotion || reason == .initializing {
-                    if let worldMapData = UserDefaults.standard.data(forKey: "arWorldMap"),
-                       let configuration = self.sceneView.session.configuration as? ARWorldTrackingConfiguration {
-                        
+                    if let worldMapData = UserDefaults.standard.data(forKey: "arWorldMap") {
                         do {
                             // Try to reload the world map
                             let worldMap = try NSKeyedUnarchiver.unarchivedObject(ofClass: ARWorldMap.self, from: worldMapData)
-                            configuration.initialWorldMap = worldMap
+                            updatedConfig.initialWorldMap = worldMap
                             
                             // Run with the world map but don't reset tracking
-                            self.sceneView.session.run(configuration, options: options)
+                            self.sceneView.session.run(updatedConfig, options: options)
                             print("Reloaded world map to attempt recovery")
                         } catch {
                             print("Failed to load world map for recovery: \(error)")
-                            // If we can't load the world map, just run the existing configuration
-                            self.sceneView.session.run(self.sceneView.session.configuration!, options: options)
+                            // If we can't load the world map, just run the updated configuration
+                            self.sceneView.session.run(updatedConfig, options: options)
                         }
                     } else {
                         // Fallback if no world map
-                        self.sceneView.session.run(self.sceneView.session.configuration!, options: options)
+                        self.sceneView.session.run(updatedConfig, options: options)
                     }
                 } else {
-                    // For other limited tracking reasons, use current configuration
-                    self.sceneView.session.run(self.sceneView.session.configuration!, options: options)
+                    // For other limited tracking reasons, use updated configuration
+                    self.sceneView.session.run(updatedConfig, options: options)
                 }
             } else {
                 // For normal tracking, just update the session
-                self.sceneView.session.run(self.sceneView.session.configuration!, options: options)
+                self.sceneView.session.run(updatedConfig, options: options)
             }
             
             // Ensure the view is rendering
             self.sceneView.isPlaying = true
             self.sceneView.scene.isPaused = false
+            
+            // Make sure the scene view is properly set up
+            self.sceneView.backgroundColor = UIColor.clear
+            self.sceneView.isOpaque = false
+            self.sceneView.scene.background.contents = UIColor.clear
             
             print("Refreshed AR session for continuous tracking")
             

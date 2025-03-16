@@ -145,6 +145,32 @@ extension PersistenceController {
         }
     }
     
+    // Delete all tagged objects from Core Data
+    func deleteAllTaggedObjects(context: NSManagedObjectContext) {
+        // Fetch all objects
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = TaggedObject.fetchRequest()
+        
+        // Create a batch delete request
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+        deleteRequest.resultType = .resultTypeObjectIDs
+        
+        do {
+            // Execute the delete
+            let result = try context.execute(deleteRequest) as? NSBatchDeleteResult
+            if let objectIDs = result?.result as? [NSManagedObjectID] {
+                // Sync the deletion with the managed object context
+                let changes = [NSDeletedObjectsKey: objectIDs]
+                NSManagedObjectContext.mergeChanges(fromRemoteContextSave: changes, into: [context])
+            }
+            
+            // Save context changes
+            try context.save()
+            print("Successfully deleted all tagged objects")
+        } catch {
+            print("Error deleting tagged objects: \(error)")
+        }
+    }
+    
     // Update review status after a successful review
     func updateReviewStatus(for object: TaggedObject, wasCorrect: Bool, context: NSManagedObjectContext) {
         // Implementation of SM-2 spaced repetition algorithm

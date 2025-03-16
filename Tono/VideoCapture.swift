@@ -69,9 +69,20 @@ public class VideoCapture: NSObject {
   public func setUp(
     sessionPreset: AVCaptureSession.Preset = .hd1280x720, completion: @escaping (Bool) -> Void
   ) {
+    // Add check to avoid setting up an already configured session
+    if captureSession.isRunning {
+      print("Warning: Camera is already running during setup!")
+      DispatchQueue.main.async {
+        completion(true)
+      }
+      return
+    }
+    
     queue.async {
+      print("Setting up camera on background thread")
       let success = self.setUpCamera(sessionPreset: sessionPreset)
       DispatchQueue.main.async {
+        print("Camera setup complete, success: \(success)")
         completion(success)
       }
     }
@@ -90,10 +101,22 @@ public class VideoCapture: NSObject {
       captureSession.addInput(videoInput)
     }
 
+    // Create and configure preview layer with better error handling
     let previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
     previewLayer.videoGravity = .resizeAspectFill
-    previewLayer.connection?.videoOrientation = .portrait
+    
+    // Set orientation explicitly
+    if let connection = previewLayer.connection {
+        connection.videoOrientation = .portrait
+        print("Preview layer connection established and orientation set to portrait")
+    } else {
+        print("Warning: Preview layer connection is nil")
+    }
+    
+    // Store reference to preview layer
     self.previewLayer = previewLayer
+    
+    print("Preview layer created with video gravity: \(previewLayer.videoGravity.rawValue)")
 
     let settings: [String: Any] = [
       kCVPixelBufferPixelFormatTypeKey as String: NSNumber(value: kCVPixelFormatType_32BGRA)
@@ -143,16 +166,37 @@ public class VideoCapture: NSObject {
   // Starts the video capture session.
   public func start() {
     if !captureSession.isRunning {
+      print("Starting video capture session")
       DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-        self?.captureSession.startRunning()
+        guard let self = self else { return }
+        self.captureSession.startRunning()
+        
+        // Verify that the session started
+        DispatchQueue.main.async {
+          print("Video capture session running: \(self.captureSession.isRunning)")
+          
+          // Make sure the preview layer is properly configured
+          if let previewLayer = self.previewLayer {
+            print("Preview layer frame: \(previewLayer.frame)")
+            print("Preview layer connection enabled: \(previewLayer.connection?.isEnabled ?? false)")
+          } else {
+            print("Warning: Preview layer is nil after starting session")
+          }
+        }
       }
+    } else {
+      print("Video capture session already running")
     }
   }
 
   // Stops the video capture session.
   public func stop() {
     if captureSession.isRunning {
+      print("Stopping video capture session")
       captureSession.stopRunning()
+      print("Video capture session stopped")
+    } else {
+      print("Video capture session already stopped")
     }
   }
 

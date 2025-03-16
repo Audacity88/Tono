@@ -66,7 +66,22 @@ class BoundingBoxView: UIView {
   func show(frame: CGRect, label: String, color: UIColor, alpha: CGFloat) {
     CATransaction.setDisableActions(true)  // Disable implicit animations
 
-    // Update the view's frame
+    // Validate the frame - don't proceed if it contains NaN values
+    if frame.origin.x.isNaN || frame.origin.y.isNaN || 
+       frame.size.width.isNaN || frame.size.height.isNaN {
+        print("Warning: Invalid frame with NaN values detected. Skipping box update.")
+        hide() // Hide the box instead of causing a crash
+        return
+    }
+    
+    // Ensure width and height are positive and not zero
+    if frame.size.width <= 0 || frame.size.height <= 0 {
+        print("Warning: Invalid frame size (zero or negative). Skipping box update.")
+        hide()
+        return
+    }
+    
+    // Update the view's frame with validated values
     self.frame = frame
     
     // Make sure the view is visible

@@ -1,0 +1,16 @@
+{
+  "provider": "bedrock",
+  "useBedrock": true,
+  "aws": {
+    "profile": "bedrock",
+    "region": "us-east-1",
+    "model": "anthropic.claude-3-7-sonnet-20250219-v1:0"
+  },
+  "skipAuth": true,
+  "forceBedrock": true,
+  "auth": {
+    "type": "bedrock",
+    "skipOAuth": true
+  },
+  "model": "anthropic.claude-3-7-sonnet-20250219-v1:0"
+} 
