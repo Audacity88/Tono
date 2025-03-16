@@ -1,0 +1,404 @@
+{
+  "translations": [
+    {
+      "english": "person",
+      "chinese": "人",
+      "pinyin": "rén"
+    },
+    {
+      "english": "bicycle",
+      "chinese": "自行车",
+      "pinyin": "zìxíngchē"
+    },
+    {
+      "english": "car",
+      "chinese": "汽车",
+      "pinyin": "qìchē"
+    },
+    {
+      "english": "motorcycle",
+      "chinese": "摩托车",
+      "pinyin": "mótuōchē"
+    },
+    {
+      "english": "airplane",
+      "chinese": "飞机",
+      "pinyin": "fēijī"
+    },
+    {
+      "english": "bus",
+      "chinese": "公共汽车",
+      "pinyin": "gōnggòng qìchē"
+    },
+    {
+      "english": "train",
+      "chinese": "火车",
+      "pinyin": "huǒchē"
+    },
+    {
+      "english": "truck",
+      "chinese": "卡车",
+      "pinyin": "kǎchē"
+    },
+    {
+      "english": "boat",
+      "chinese": "船",
+      "pinyin": "chuán"
+    },
+    {
+      "english": "traffic light",
+      "chinese": "红绿灯",
+      "pinyin": "hónglǜdēng"
+    },
+    {
+      "english": "fire hydrant",
+      "chinese": "消防栓",
+      "pinyin": "xiāofáng shuān"
+    },
+    {
+      "english": "stop sign",
+      "chinese": "停止标志",
+      "pinyin": "tíngzhǐ biāozhì"
+    },
+    {
+      "english": "parking meter",
+      "chinese": "停车计时器",
+      "pinyin": "tíngchē jìshí qì"
+    },
+    {
+      "english": "bench",
+      "chinese": "长凳",
+      "pinyin": "chángdèng"
+    },
+    {
+      "english": "bird",
+      "chinese": "鸟",
+      "pinyin": "niǎo"
+    },
+    {
+      "english": "cat",
+      "chinese": "猫",
+      "pinyin": "māo"
+    },
+    {
+      "english": "dog",
+      "chinese": "狗",
+      "pinyin": "gǒu"
+    },
+    {
+      "english": "horse",
+      "chinese": "马",
+      "pinyin": "mǎ"
+    },
+    {
+      "english": "sheep",
+      "chinese": "羊",
+      "pinyin": "yáng"
+    },
+    {
+      "english": "cow",
+      "chinese": "牛",
+      "pinyin": "niú"
+    },
+    {
+      "english": "elephant",
+      "chinese": "大象",
+      "pinyin": "dàxiàng"
+    },
+    {
+      "english": "bear",
+      "chinese": "熊",
+      "pinyin": "xióng"
+    },
+    {
+      "english": "zebra",
+      "chinese": "斑马",
+      "pinyin": "bānmǎ"
+    },
+    {
+      "english": "giraffe",
+      "chinese": "长颈鹿",
+      "pinyin": "chángjǐnglù"
+    },
+    {
+      "english": "backpack",
+      "chinese": "背包",
+      "pinyin": "bēibāo"
+    },
+    {
+      "english": "umbrella",
+      "chinese": "雨伞",
+      "pinyin": "yǔsǎn"
+    },
+    {
+      "english": "handbag",
+      "chinese": "手提包",
+      "pinyin": "shǒutíbāo"
+    },
+    {
+      "english": "tie",
+      "chinese": "领带",
+      "pinyin": "lǐngdài"
+    },
+    {
+      "english": "suitcase",
+      "chinese": "手提箱",
+      "pinyin": "shǒutíxiāng"
+    },
+    {
+      "english": "frisbee",
+      "chinese": "飞盘",
+      "pinyin": "fēipán"
+    },
+    {
+      "english": "skis",
+      "chinese": "滑雪板",
+      "pinyin": "huáxuě bǎn"
+    },
+    {
+      "english": "snowboard",
+      "chinese": "单板滑雪",
+      "pinyin": "dānbǎn huáxuě"
+    },
+    {
+      "english": "sports ball",
+      "chinese": "运动球",
+      "pinyin": "yùndòng qiú"
+    },
+    {
+      "english": "kite",
+      "chinese": "风筝",
+      "pinyin": "fēngzheng"
+    },
+    {
+      "english": "baseball bat",
+      "chinese": "棒球棒",
+      "pinyin": "bàngqiú bàng"
+    },
+    {
+      "english": "baseball glove",
+      "chinese": "棒球手套",
+      "pinyin": "bàngqiú shǒutào"
+    },
+    {
+      "english": "skateboard",
+      "chinese": "滑板",
+      "pinyin": "huábǎn"
+    },
+    {
+      "english": "surfboard",
+      "chinese": "冲浪板",
+      "pinyin": "chōnglàng bǎn"
+    },
+    {
+      "english": "tennis racket",
+      "chinese": "网球拍",
+      "pinyin": "wǎngqiú pāi"
+    },
+    {
+      "english": "bottle",
+      "chinese": "瓶子",
+      "pinyin": "píngzi"
+    },
+    {
+      "english": "wine glass",
+      "chinese": "酒杯",
+      "pinyin": "jiǔbēi"
+    },
+    {
+      "english": "cup",
+      "chinese": "杯子",
+      "pinyin": "bēizi"
+    },
+    {
+      "english": "fork",
+      "chinese": "叉子",
+      "pinyin": "chāzi"
+    },
+    {
+      "english": "knife",
+      "chinese": "刀",
+      "pinyin": "dāo"
+    },
+    {
+      "english": "spoon",
+      "chinese": "勺子",
+      "pinyin": "sháozi"
+    },
+    {
+      "english": "bowl",
+      "chinese": "碗",
+      "pinyin": "wǎn"
+    },
+    {
+      "english": "banana",
+      "chinese": "香蕉",
+      "pinyin": "xiāngjiāo"
+    },
+    {
+      "english": "apple",
+      "chinese": "苹果",
+      "pinyin": "píngguǒ"
+    },
+    {
+      "english": "sandwich",
+      "chinese": "三明治",
+      "pinyin": "sānmíngzhì"
+    },
+    {
+      "english": "orange",
+      "chinese": "橙子",
+      "pinyin": "chéngzi"
+    },
+    {
+      "english": "broccoli",
+      "chinese": "西兰花",
+      "pinyin": "xīlánhuā"
+    },
+    {
+      "english": "carrot",
+      "chinese": "胡萝卜",
+      "pinyin": "húluóbo"
+    },
+    {
+      "english": "hot dog",
+      "chinese": "热狗",
+      "pinyin": "règǒu"
+    },
+    {
+      "english": "pizza",
+      "chinese": "披萨",
+      "pinyin": "pīsà"
+    },
+    {
+      "english": "donut",
+      "chinese": "甜甜圈",
+      "pinyin": "tiántiánquān"
+    },
+    {
+      "english": "cake",
+      "chinese": "蛋糕",
+      "pinyin": "dàngāo"
+    },
+    {
+      "english": "chair",
+      "chinese": "椅子",
+      "pinyin": "yǐzi"
+    },
+    {
+      "english": "couch",
+      "chinese": "沙发",
+      "pinyin": "shāfā"
+    },
+    {
+      "english": "potted plant",
+      "chinese": "盆栽",
+      "pinyin": "pénzāi"
+    },
+    {
+      "english": "bed",
+      "chinese": "床",
+      "pinyin": "chuáng"
+    },
+    {
+      "english": "dining table",
+      "chinese": "餐桌",
+      "pinyin": "cānzhuō"
+    },
+    {
+      "english": "toilet",
+      "chinese": "厕所",
+      "pinyin": "cèsuǒ"
+    },
+    {
+      "english": "tv",
+      "chinese": "电视",
+      "pinyin": "diànshì"
+    },
+    {
+      "english": "laptop",
+      "chinese": "笔记本电脑",
+      "pinyin": "bǐjìběn diànnǎo"
+    },
+    {
+      "english": "mouse",
+      "chinese": "鼠标",
+      "pinyin": "shǔbiāo"
+    },
+    {
+      "english": "remote",
+      "chinese": "遥控器",
+      "pinyin": "yáokòngqì"
+    },
+    {
+      "english": "keyboard",
+      "chinese": "键盘",
+      "pinyin": "jiànpán"
+    },
+    {
+      "english": "cell phone",
+      "chinese": "手机",
+      "pinyin": "shǒujī"
+    },
+    {
+      "english": "microwave",
+      "chinese": "微波炉",
+      "pinyin": "wēibōlú"
+    },
+    {
+      "english": "oven",
+      "chinese": "烤箱",
+      "pinyin": "kǎoxiāng"
+    },
+    {
+      "english": "toaster",
+      "chinese": "烤面包机",
+      "pinyin": "kǎo miànbāo jī"
+    },
+    {
+      "english": "sink",
+      "chinese": "水槽",
+      "pinyin": "shuǐcáo"
+    },
+    {
+      "english": "refrigerator",
+      "chinese": "冰箱",
+      "pinyin": "bīngxiāng"
+    },
+    {
+      "english": "book",
+      "chinese": "书",
+      "pinyin": "shū"
+    },
+    {
+      "english": "clock",
+      "chinese": "时钟",
+      "pinyin": "shízhōng"
+    },
+    {
+      "english": "vase",
+      "chinese": "花瓶",
+      "pinyin": "huāpíng"
+    },
+    {
+      "english": "scissors",
+      "chinese": "剪刀",
+      "pinyin": "jiǎndāo"
+    },
+    {
+      "english": "teddy bear",
+      "chinese": "泰迪熊",
+      "pinyin": "tàidí xióng"
+    },
+    {
+      "english": "hair drier",
+      "chinese": "吹风机",
+      "pinyin": "chuīfēngjī"
+    },
+    {
+      "english": "toothbrush",
+      "chinese": "牙刷",
+      "pinyin": "yáshuā"
+    }
+  ]
+} 
