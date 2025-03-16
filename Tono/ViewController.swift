@@ -108,12 +108,17 @@ class ViewController: UIViewController {
   
   // UI elements
   private var clearARButton: UIButton?
+  private var arToggleButton: UIButton?
   
   // Track the last detected class to avoid duplicate logging
   private var lastDetectedClass: String?
   
   // Track the last time we synchronized AR labels with bounding boxes
   private var lastARSyncTime: CFTimeInterval = 0
+  private var lastARRefreshTime: CFTimeInterval = 0
+  private var arTrackingStateTimer: Timer?
+  private var arStatusLabel: UILabel?
+  private var refreshARButton: UIButton?
 
   // Add property to store tagged detections
   private var taggedDetections: [(english: String, chinese: String, pinyin: String, worldPosition: simd_float4x4)] = []
@@ -145,8 +150,11 @@ class ViewController: UIViewController {
     arSceneManager.sceneView.alpha = 0.0 // Start with AR mode inactive
     arSceneManager.sceneView.backgroundColor = UIColor.clear
     
-    // Initially AR view is not hidden, just transparent
-    // arSceneManager.sceneView.isHidden = true
+    // Set up AR session immediately - keeps it running in the background
+    // for more accurate position tracking
+    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+        self.arSceneManager.setupARSession()
+    }
     
     // Add AR toggle button
     addARToggleButton()
@@ -158,6 +166,12 @@ class ViewController: UIViewController {
     
     // Keep the video preview fully opaque
     videoPreview.alpha = 1.0
+    
+    // Add AR status indicator
+    setupARStatusLabel()
+    
+    // Start AR tracking monitoring
+    startARTrackingStateMonitoring()
     
     startVideo()
     // setModel()
@@ -173,8 +187,107 @@ class ViewController: UIViewController {
   override func viewWillDisappear(_ animated: Bool) {
     super.viewWillDisappear(animated)
     
+    // Stop AR tracking monitoring
+    stopARTrackingStateMonitoring()
+    
     // Pause AR session
     arSceneManager.pauseARSession()
+  }
+  
+  // Setup AR status label
+  private func setupARStatusLabel() {
+    let label = UILabel()
+    label.translatesAutoresizingMaskIntoConstraints = false
+    label.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+    label.textColor = .white
+    label.textAlignment = .center
+    label.layer.cornerRadius = 10
+    label.clipsToBounds = true
+    label.isHidden = true // Initially hidden
+    label.font = UIFont.systemFont(ofSize: 12)
+    label.text = "AR: Normal"
+    label.alpha = 0.0
+    
+    view.addSubview(label)
+    
+    NSLayoutConstraint.activate([
+      label.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
+      label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+      label.widthAnchor.constraint(equalToConstant: 150),
+      label.heightAnchor.constraint(equalToConstant: 30)
+    ])
+    
+    arStatusLabel = label
+  }
+  
+  // Start monitoring AR tracking state
+  private func startARTrackingStateMonitoring() {
+    // Cancel any existing timer
+    stopARTrackingStateMonitoring()
+    
+    // Start a new timer that checks tracking state every 1 second
+    arTrackingStateTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+      self?.updateARTrackingState()
+    }
+  }
+  
+  // Stop monitoring AR tracking state
+  private func stopARTrackingStateMonitoring() {
+    arTrackingStateTimer?.invalidate()
+    arTrackingStateTimer = nil
+  }
+  
+  // Update AR tracking state and UI
+  private func updateARTrackingState() {
+    // Only update if AR view is visible
+    guard arSceneManager.sceneView.alpha > 0.5 else {
+      arStatusLabel?.alpha = 0.0
+      return
+    }
+    
+    // Get current tracking state
+    if let frame = arSceneManager.sceneView.session.currentFrame {
+      let trackingState = frame.camera.trackingState
+      
+      // Update status label based on tracking state
+      switch trackingState {
+      case .normal:
+        arStatusLabel?.text = "AR: Normal"
+        arStatusLabel?.backgroundColor = UIColor.systemGreen.withAlphaComponent(0.6)
+        // Hide refresh button if tracking is normal
+        refreshARButton?.isHidden = true
+      case .limited(let reason):
+        // Show different message based on reason
+        switch reason {
+        case .excessiveMotion:
+          arStatusLabel?.text = "AR: Move Slower"
+        case .initializing:
+          arStatusLabel?.text = "AR: Initializing..."
+        case .insufficientFeatures:
+          arStatusLabel?.text = "AR: Scan Area"
+        case .relocalizing:
+          arStatusLabel?.text = "AR: Relocalizing..."
+        @unknown default:
+          arStatusLabel?.text = "AR: Limited"
+        }
+        arStatusLabel?.backgroundColor = UIColor.systemOrange.withAlphaComponent(0.6)
+        // Show refresh button if tracking is limited
+        refreshARButton?.isHidden = false
+      case .notAvailable:
+        arStatusLabel?.text = "AR: Not Available"
+        arStatusLabel?.backgroundColor = UIColor.systemRed.withAlphaComponent(0.6)
+        // Show refresh button if tracking is not available
+        refreshARButton?.isHidden = false
+      @unknown default:
+        arStatusLabel?.text = "AR: Unknown"
+        arStatusLabel?.backgroundColor = UIColor.darkGray.withAlphaComponent(0.6)
+      }
+      
+      // Make status label visible with animation
+      UIView.animate(withDuration: 0.3) {
+        self.arStatusLabel?.alpha = 1.0
+      }
+    }
   }
 
   override func viewWillTransition(
@@ -619,10 +732,10 @@ class ViewController: UIViewController {
           print("Set currentDetection to: \(bestClass) - \(translation.chinese) (\(translation.pinyin))")
           self.lastDetectedClass = bestClass
           
-          // If AR mode is active, pass the detection to the AR scene manager
+          // If AR mode is active, update current detection
           if arSceneManager.sceneView.alpha > 0.5 {
-            // Update AR scene with the new detection
-            arSceneManager.updateCurrentDetection(english: bestClass, chinese: translation.chinese, pinyin: translation.pinyin)
+            // Store the detection for later AR use
+            self.currentDetection = (english: bestClass, chinese: translation.chinese, pinyin: translation.pinyin)
           }
         }
       }
@@ -887,33 +1000,76 @@ class ViewController: UIViewController {
         // Play pronunciation
         self.arSceneManager.playPronunciation(for: detection.chinese, pinyin: detection.pinyin)
         
-        // Try multiple hit test types to get a reliable world position
+        // SIMPLIFIED: Use direct feature point hit testing from the backup implementation
         var worldTransform: simd_float4x4?
         
-        // First try feature points (most accurate for real-world positioning)
-        if let hitResult = self.arSceneManager.sceneView.hitTest(boxCenter, types: [.featurePoint]).first {
-            worldTransform = hitResult.worldTransform
+        // Use simpler hit testing focused on feature points - this is more stable than the complex approach
+        // First try feature points which are best for accurate position tracking
+        let arHitTestResults = self.arSceneManager.sceneView.hitTest(boxCenter, types: [.featurePoint])
+        if let closestResult = arHitTestResults.first {
+            // Got a direct feature point hit - most stable for position tracking
+            worldTransform = closestResult.worldTransform
             print("Got world position from feature point hit test")
-        }
-        // If that fails, try existing planes
-        else if let hitResult = self.arSceneManager.sceneView.hitTest(boxCenter, types: [.existingPlaneUsingExtent]).first {
-            worldTransform = hitResult.worldTransform
-            print("Got world position from existing plane hit test")
-        }
-        // If that fails, try estimated horizontal planes
+        } 
+        // Fallback to horizontal plane detection
         else if let hitResult = self.arSceneManager.sceneView.hitTest(boxCenter, types: [.estimatedHorizontalPlane]).first {
             worldTransform = hitResult.worldTransform
-            print("Got world position from estimated horizontal plane hit test")
+            print("Got world position from estimated horizontal plane")
+        }
+        // As a last resort, place in front of the camera at a fixed distance
+        else {
+            // If hit testing fails entirely, use a position directly in front of the camera
+            guard let frame = self.arSceneManager.sceneView.session.currentFrame else {
+                print("No current AR frame available")
+                return
+            }
+            
+            // Create a transform 1 meter in front of the camera
+            let cameraTransform = frame.camera.transform
+            let cameraDirection = simd_normalize(simd_make_float3(cameraTransform.columns.2))
+            
+            // Fixed distance placement (simpler than trying to estimate)
+            let fixedDistance: Float = 1.0 // 1 meter in front of camera
+            
+            // Position in front of camera
+            var position = simd_make_float3(cameraTransform.columns.3)
+            position -= cameraDirection * fixedDistance
+            
+            var transform = matrix_identity_float4x4
+            transform.columns.3 = simd_make_float4(position.x, position.y, position.z, 1)
+            worldTransform = transform
+            
+            print("Created fixed position in front of camera")
         }
         
         if let transform = worldTransform {
             print("Storing tagged detection for \(className) at world position")
+            
+            // Extract position from transform matrix
+            let position = SCNVector3(
+                x: transform.columns.3.x,
+                y: transform.columns.3.y,
+                z: transform.columns.3.z
+            )
+            
+            // Save to Core Data for persistence
+            self.persistenceController.saveTaggedObject(
+                english: detection.english,
+                chinese: detection.chinese,
+                pinyin: detection.pinyin,
+                image: nil, // Could capture image from current frame if needed
+                position: position,
+                context: self.managedObjectContext
+            )
+            
+            // Also keep in memory for immediate use
             self.taggedDetections.append((
                 english: detection.english,
                 chinese: detection.chinese,
                 pinyin: detection.pinyin,
                 worldPosition: transform
             ))
+            
             print("Total tagged detections: \(self.taggedDetections.count)")
             
             // Show a toast message confirming the object was tagged
@@ -928,6 +1084,20 @@ class ViewController: UIViewController {
                 var defaultTransform = matrix_identity_float4x4
                 defaultTransform.columns.3 = simd_float4(0, 0, -1, 1) // 1 meter in front of camera
                 
+                // Extract position for Core Data
+                let defaultPosition = SCNVector3(x: 0, y: 0, z: -1)
+                
+                // Save to Core Data for persistence
+                self.persistenceController.saveTaggedObject(
+                    english: detection.english,
+                    chinese: detection.chinese,
+                    pinyin: detection.pinyin,
+                    image: nil,
+                    position: defaultPosition,
+                    context: self.managedObjectContext
+                )
+                
+                // Also keep in memory
                 self.taggedDetections.append((
                     english: detection.english,
                     chinese: detection.chinese,
@@ -939,13 +1109,44 @@ class ViewController: UIViewController {
                 return
             }
             
-            // Get camera transform
+            // Intelligent distance estimation based on bounding box size
+            // Objects with larger boxes are typically closer to the camera
+            let boxWidthNormalized = boxView.bounds.width / self.view.bounds.width
+            
+            // Use an inverse relationship - larger boxes = closer objects
+            // Scale ranges from ~1.0 (very large box) to ~5.0 (very small box)
+            let estimatedDistance = max(1.0, 5.0 - (boxWidthNormalized * 10))
+            
+            // Get camera transform and direction vector
             let cameraTransform = frame.camera.transform
+            let cameraForward = simd_normalize(simd_make_float3(cameraTransform.columns.2))
             
-            // Create a position 1 meter in front of the camera
-            var transform = cameraTransform
-            transform.columns.3.z -= 1.0 // 1 meter in front
+            // Calculate position by moving in the camera's forward direction by the estimated distance
+            var cameraPosition = simd_make_float3(cameraTransform.columns.3)
+            let objectPosition = cameraPosition - (cameraForward * Float(estimatedDistance))
             
+            // Create the final transform
+            var transform = matrix_identity_float4x4
+            transform.columns.3 = simd_make_float4(objectPosition.x, objectPosition.y, objectPosition.z, 1)
+            
+            // Extract position for Core Data
+            let position = SCNVector3(
+                x: objectPosition.x,
+                y: objectPosition.y,
+                z: objectPosition.z
+            )
+            
+            // Save to Core Data for persistence
+            self.persistenceController.saveTaggedObject(
+                english: detection.english,
+                chinese: detection.chinese,
+                pinyin: detection.pinyin,
+                image: nil,
+                position: position,
+                context: self.managedObjectContext
+            )
+            
+            // Also keep in memory
             self.taggedDetections.append((
                 english: detection.english,
                 chinese: detection.chinese,
@@ -953,8 +1154,8 @@ class ViewController: UIViewController {
                 worldPosition: transform
             ))
             
-            print("Stored tagged detection with camera-relative position")
-            self.showToast(message: "\(className) tagged for AR view (camera-relative)")
+            print("Stored tagged detection with estimated position at \(estimatedDistance)m distance")
+            self.showToast(message: "\(className) tagged at estimated distance: \(String(format: "%.1f", estimatedDistance))m")
         }
         
         // Remove the transition view with fade out
@@ -1148,6 +1349,16 @@ class ViewController: UIViewController {
     // Only proceed if AR mode is active
     guard arSceneManager.sceneView.alpha > 0.5 else { return }
     
+    // Check if AR tracking is normal
+    if let camera = arSceneManager.sceneView.session.currentFrame?.camera {
+        if camera.trackingState != .normal {
+            // AR tracking is limited or unavailable - force refresh
+            arSceneManager.refreshARSession()
+            print("AR tracking state is limited - refreshing session")
+            return
+        }
+    }
+    
     // Get all visible bounding boxes
     let visibleBoxes = boundingBoxViews.filter { !$0.isHidden }
     
@@ -1170,30 +1381,63 @@ class ViewController: UIViewController {
         // We'll use a simplified version without animation for automatic placement
         let boxCenter = CGPoint(x: boxView.frame.midX, y: boxView.frame.midY)
         
-        // Perform hit test to find 3D position
-        if let hitResult = arSceneManager.sceneView.hitTest(boxCenter, types: [.featurePoint]).first {
-          // Get coordinates of hit test
-          let transform = hitResult.worldTransform
-          let worldCoord = SCNVector3Make(transform.columns.3.x, transform.columns.3.y, transform.columns.3.z)
-          
-          // Create 3D text node
-          let node = arSceneManager.createNewBubbleParentNode(
-            english: detection.english,
-            chinese: detection.chinese,
-            pinyin: detection.pinyin
-          )
-          
-          // Add node to scene
-          arSceneManager.sceneView.scene.rootNode.addChildNode(node)
-          node.position = worldCoord
-          
-          // Store the node
-          arSceneManager.placedNodes.append(node)
-          
-          // Don't play pronunciation for automatic placement
+        // Try using the new raycast API first if available
+        if #available(iOS 13.0, *) {
+            guard let query = arSceneManager.sceneView.raycastQuery(from: boxCenter, 
+                                                                  allowing: .existingPlaneInfinite, 
+                                                                  alignment: .any) else { 
+                print("Could not create raycast query")
+                return
+            }
+            
+            let raycastResults = arSceneManager.sceneView.session.raycast(query)
+            if let firstResult = raycastResults.first {
+                let worldPos = SCNVector3(
+                    x: firstResult.worldTransform.columns.3.x,
+                    y: firstResult.worldTransform.columns.3.y, 
+                    z: firstResult.worldTransform.columns.3.z
+                )
+                
+                createARLabelForBox(detection: detection, position: worldPos)
+            } else {
+                // Fallback to older hit test API
+                fallbackHitTestForBox(detection: detection, boxCenter: boxCenter)
+            }
+        } else {
+            // Fallback to older hit test API
+            fallbackHitTestForBox(detection: detection, boxCenter: boxCenter)
         }
       }
     }
+  }
+  
+  // Fallback hit test for creating AR labels
+  private func fallbackHitTestForBox(detection: (english: String, chinese: String, pinyin: String), boxCenter: CGPoint) {
+    // Perform hit test to find 3D position
+    if let hitResult = arSceneManager.sceneView.hitTest(boxCenter, types: [.featurePoint]).first {
+      // Get coordinates of hit test
+      let transform = hitResult.worldTransform
+      let worldCoord = SCNVector3Make(transform.columns.3.x, transform.columns.3.y, transform.columns.3.z)
+      
+      createARLabelForBox(detection: detection, position: worldCoord)
+    }
+  }
+  
+  // Create AR label at the specified position
+  private func createARLabelForBox(detection: (english: String, chinese: String, pinyin: String), position: SCNVector3) {
+    // Create 3D text node
+    let node = arSceneManager.createNewBubbleParentNode(
+      english: detection.english,
+      chinese: detection.chinese,
+      pinyin: detection.pinyin
+    )
+    
+    // Add node to scene
+    arSceneManager.sceneView.scene.rootNode.addChildNode(node)
+    node.position = position
+    
+    // Store the node
+    arSceneManager.placedNodes.append(node)
   }
   
   // Toggle AR view visibility
@@ -1201,20 +1445,38 @@ class ViewController: UIViewController {
     if visible {
         print("Activating AR mode with \(taggedDetections.count) tagged detections")
         
-        // Make sure AR session is ready before showing content
-        arSceneManager.setupARSession()
+        // We don't set up the AR session here because it's already running in the background
+        // Resume the session if it was paused
+        arSceneManager.resumeARSession()
+        
+        // Start tracking state monitoring
+        startARTrackingStateMonitoring()
         
         // Make AR view fully visible with animation
         UIView.animate(withDuration: 0.5, animations: {
             self.arSceneManager.sceneView.alpha = 1.0
+            // Make status label visible
+            self.arStatusLabel?.isHidden = false
         }, completion: { _ in
-            // Resume AR session after animation completes
-            self.arSceneManager.resumeARSession()
+            // Ensure the AR session is active and tracking
+            self.arSceneManager.refreshARSession(reloadAnchors: false)
             
-            // Wait a moment for AR session to stabilize before adding content
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                // Show a toast message to indicate AR mode is active
+            // Update tracking state immediately
+            self.updateARTrackingState()
+            
+            // Add AR content immediately after resuming tracking
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                // Show toast messages with positioning tips
                 self.showToast(message: "AR Mode Active - Showing \(self.taggedDetections.count) tagged objects")
+                
+                // After a delay, show positioning tips
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    if let frame = self.arSceneManager.sceneView.session.currentFrame {
+                        if case .limited = frame.camera.trackingState {
+                            self.showToast(message: "Move device slowly to improve tracking")
+                        }
+                    }
+                }
                 
                 // Clear existing nodes before displaying new ones
                 self.arSceneManager.clearLabels()
@@ -1225,39 +1487,93 @@ class ViewController: UIViewController {
                     return
                 }
                 
-                // Display all tagged detections
-                for (index, detection) in self.taggedDetections.enumerated() {
-                    print("Processing tagged detection \(index): \(detection.english)")
+                // Fetch saved objects from Core Data
+                let savedObjects = self.persistenceController.fetchTaggedObjects(context: self.managedObjectContext)
+                
+                // If we have saved objects in Core Data, use those instead of in-memory tagged detections
+                if !savedObjects.isEmpty {
+                    print("Using \(savedObjects.count) objects from Core Data for AR view")
                     
-                    // Create world coordinates from stored transform
-                    let worldCoord = SCNVector3Make(
-                        detection.worldPosition.columns.3.x,
-                        detection.worldPosition.columns.3.y,
-                        detection.worldPosition.columns.3.z
-                    )
+                    // Display all saved objects
+                    for (index, object) in savedObjects.enumerated() {
+                        print("Processing saved object \(index): \(object.english ?? "unknown")")
+                        
+                        // Get position from the object
+                        let worldCoord = object.position
+                        
+                        print("Creating node at position: \(worldCoord)")
+                        
+                        // Create 3D text node
+                        let node = self.arSceneManager.createNewBubbleParentNode(
+                            english: object.english ?? "unknown",
+                            chinese: object.chinese ?? "",
+                            pinyin: object.pinyin ?? ""
+                        )
+                        
+                        // Add node to scene
+                        self.arSceneManager.sceneView.scene.rootNode.addChildNode(node)
+                        node.position = worldCoord
+                        
+                        // Store the node
+                        self.arSceneManager.placedNodes.append(node)
+                    }
+                } else {
+                    // Fall back to in-memory tagged detections if no saved objects
+                    print("No saved objects found, using \(self.taggedDetections.count) tagged detections")
                     
-                    print("Creating node at position: \(worldCoord)")
-                    
-                    // Create 3D text node
-                    let node = self.arSceneManager.createNewBubbleParentNode(
-                        english: detection.english,
-                        chinese: detection.chinese,
-                        pinyin: detection.pinyin
-                    )
-                    
-                    // Add node to scene
-                    self.arSceneManager.sceneView.scene.rootNode.addChildNode(node)
-                    node.position = worldCoord
-                    
-                    // Store the node
-                    self.arSceneManager.placedNodes.append(node)
+                    // Display all tagged detections
+                    for (index, detection) in self.taggedDetections.enumerated() {
+                        print("Processing tagged detection \(index): \(detection.english)")
+                        
+                        // Create world coordinates from stored transform
+                        let worldCoord = SCNVector3Make(
+                            detection.worldPosition.columns.3.x,
+                            detection.worldPosition.columns.3.y,
+                            detection.worldPosition.columns.3.z
+                        )
+                        
+                        print("Creating node at position: \(worldCoord)")
+                        
+                        // Create 3D text node
+                        let node = self.arSceneManager.createNewBubbleParentNode(
+                            english: detection.english,
+                            chinese: detection.chinese,
+                            pinyin: detection.pinyin
+                        )
+                        
+                        // Add node to scene
+                        self.arSceneManager.sceneView.scene.rootNode.addChildNode(node)
+                        node.position = worldCoord
+                        
+                        // Store the node
+                        self.arSceneManager.placedNodes.append(node)
+                    }
                 }
                 
-                // Show the clear button since we have AR content
+                // Show the buttons since AR is active
                 self.clearARButton?.isHidden = false
+                
+                // Show refresh button based on tracking state
+                if let frame = self.arSceneManager.sceneView.session.currentFrame {
+                    if case .limited = frame.camera.trackingState {
+                        self.refreshARButton?.isHidden = false
+                    } else {
+                        self.refreshARButton?.isHidden = true
+                    }
+                } else {
+                    self.refreshARButton?.isHidden = false
+                }
             }
         })
     } else {
+        // Stop tracking state monitoring
+        stopARTrackingStateMonitoring()
+        
+        // Hide the status label
+        UIView.animate(withDuration: 0.3) {
+            self.arStatusLabel?.alpha = 0.0
+        }
+        
         // Pause AR session first to save resources
         arSceneManager.pauseARSession()
         
@@ -1271,8 +1587,9 @@ class ViewController: UIViewController {
             // Clear AR labels when deactivating AR mode
             self.arSceneManager.clearLabels()
             
-            // Hide the clear button
+            // Hide the buttons
             self.clearARButton?.isHidden = true
+            self.refreshARButton?.isHidden = true
         })
     }
   }
@@ -1326,7 +1643,7 @@ class ViewController: UIViewController {
     
     // Add clear AR labels button
     let clearButton = UIButton(type: .system)
-    clearButton.setImage(UIImage(systemName: "arrow.counterclockwise.circle.fill"), for: .normal)
+    clearButton.setImage(UIImage(systemName: "trash"), for: .normal)
     clearButton.tintColor = .white
     clearButton.backgroundColor = UIColor.systemRed.withAlphaComponent(0.7)
     clearButton.layer.cornerRadius = 25
@@ -1345,11 +1662,160 @@ class ViewController: UIViewController {
     
     // Store reference to clear button
     self.clearARButton = clearButton
+    
+    // Add AR refresh button
+    let refreshButton = UIButton(type: .system)
+    refreshButton.setImage(UIImage(systemName: "arrow.counterclockwise.circle.fill"), for: .normal)
+    refreshButton.tintColor = .white
+    refreshButton.backgroundColor = UIColor.systemOrange.withAlphaComponent(0.7)
+    refreshButton.layer.cornerRadius = 25
+    refreshButton.translatesAutoresizingMaskIntoConstraints = false
+    refreshButton.addTarget(self, action: #selector(refreshARButtonTapped), for: .touchUpInside)
+    refreshButton.isHidden = true // Initially hidden
+    
+    view.addSubview(refreshButton)
+    
+    NSLayoutConstraint.activate([
+      refreshButton.widthAnchor.constraint(equalToConstant: 50),
+      refreshButton.heightAnchor.constraint(equalToConstant: 50),
+      refreshButton.trailingAnchor.constraint(equalTo: clearButton.leadingAnchor, constant: -10),
+      refreshButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
+    ])
+    
+    // Store reference to refresh button
+    self.refreshARButton = refreshButton
   }
   
   @objc func clearARButtonTapped() {
     // Clear all AR labels
     clearARLabels()
+  }
+  
+  @objc func refreshARButtonTapped() {
+    // Show a loading indicator
+    let loadingIndicator = UIActivityIndicatorView(style: .large)
+    loadingIndicator.color = .white
+    loadingIndicator.center = view.center
+    view.addSubview(loadingIndicator)
+    loadingIndicator.startAnimating()
+    
+    // Keep track of timing for performance monitoring
+    let refreshStartTime = CACurrentMediaTime()
+    lastARRefreshTime = refreshStartTime
+    
+    // Update the status label
+    arStatusLabel?.text = "AR: Refreshing..."
+    arStatusLabel?.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.6)
+    
+    // Show toast with instructions
+    showToast(message: "Hold device steady during refresh...")
+    
+    // Run the refresh on a background thread
+    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+      guard let self = self else { return }
+      
+      // Decide whether to remove anchors based on tracking state
+      var removeAnchors = false
+      var resetTracking = false
+      
+      if let frame = self.arSceneManager.sceneView.session.currentFrame {
+        if case .limited(let reason) = frame.camera.trackingState {
+          // Check how long we've been in limited state
+          let currentTime = CACurrentMediaTime()
+          let timeSinceLastRefresh = currentTime - self.lastARRefreshTime
+          
+          // If tracking has been limited for a while, try more aggressive recovery
+          if timeSinceLastRefresh > 10.0 {
+            // Remove anchors if we have severe tracking issues
+            if reason == .excessiveMotion || reason == .initializing {
+              removeAnchors = true
+              print("Tracking limited for >10s, removing anchors for recovery")
+            }
+            
+            // Only reset tracking as a last resort after multiple limited tracking states
+            if UserDefaults.standard.integer(forKey: "ar_consecutive_limited_states") > 3 {
+              resetTracking = true
+              print("Multiple consecutive tracking failures, resetting tracking")
+              
+              // Reset the counter after a reset
+              UserDefaults.standard.set(0, forKey: "ar_consecutive_limited_states")
+            } else {
+              // Increment the counter
+              let currentCount = UserDefaults.standard.integer(forKey: "ar_consecutive_limited_states")
+              UserDefaults.standard.set(currentCount + 1, forKey: "ar_consecutive_limited_states")
+            }
+          }
+        } else {
+          // Reset the counter if we have good tracking
+          UserDefaults.standard.set(0, forKey: "ar_consecutive_limited_states")
+        }
+      }
+      
+      // Try a two-step refresh for better results
+      if resetTracking {
+        // First pause briefly
+        self.arSceneManager.pauseARSession()
+        
+        // Short delay to let the system reset
+        Thread.sleep(forTimeInterval: 0.5)
+        
+        // Then resume with a fresh session
+        self.arSceneManager.resumeARSession()
+        
+        // Notify the user
+        DispatchQueue.main.async {
+          self.showToast(message: "AR tracking reset - establishing new positioning")
+        }
+      } else {
+        // Standard refresh
+        self.arSceneManager.refreshARSession(reloadAnchors: removeAnchors)
+      }
+      
+      // Record the positions before refresh
+      let previousPositions = self.arSceneManager.placedNodes.map { ($0.name ?? "", $0.position) }
+      
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        // Remove loading indicator
+        loadingIndicator.stopAnimating()
+        loadingIndicator.removeFromSuperview()
+        
+        // Update status label
+        self.updateARTrackingState()
+        
+        // Show toast message
+        let refreshTime = String(format: "%.1f", (CACurrentMediaTime() - refreshStartTime))
+        self.showToast(message: "AR view refreshed in \(refreshTime)s")
+        
+        // Reset consecutive failures if tracking is now good
+        if let frame = self.arSceneManager.sceneView.session.currentFrame,
+           case .normal = frame.camera.trackingState {
+          UserDefaults.standard.set(0, forKey: "ar_consecutive_limited_states")
+          
+          // Hide the refresh button if tracking is now good
+          self.refreshARButton?.isHidden = true
+        }
+        
+        // If we still have tracking issues, suggest movement
+        if let frame = self.arSceneManager.sceneView.session.currentFrame,
+           case .limited(let reason) = frame.camera.trackingState {
+          
+          DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            switch reason {
+            case .excessiveMotion:
+              self.showToast(message: "Hold device more steady")
+            case .insufficientFeatures:
+              self.showToast(message: "Move to area with more visual details")
+            case .initializing:
+              self.showToast(message: "Move device slowly to map environment")
+            case .relocalizing:
+              self.showToast(message: "Look around slowly to help relocalize")
+            @unknown default:
+              self.showToast(message: "Try toggling AR mode off and on if issues persist")
+            }
+          }
+        }
+      }
+    }
   }
   
   @objc func toggleARButtonTapped() {
@@ -1382,9 +1848,6 @@ class ViewController: UIViewController {
       DispatchQueue.main.async {
         self.toggleARView(visible: !isVisible)
         
-        // Show/hide clear button
-        self.clearARButton?.isHidden = isVisible
-        
         // Update the AR toggle button icon to reflect the current state
         if let button = loadingIndicator.superview?.subviews.first(where: { $0 is UIButton && ($0 as? UIButton)?.actions(forTarget: self, forControlEvent: .touchUpInside)?.contains("toggleARButtonTapped") == true }) as? UIButton {
           button.setImage(UIImage(systemName: !isVisible ? "cube.fill" : "cube.transparent"), for: .normal)
@@ -1394,6 +1857,19 @@ class ViewController: UIViewController {
         // Remove loading indicator
         loadingIndicator.stopAnimating()
         loadingIndicator.removeFromSuperview()
+        
+        // If activating AR mode, check the tracking state after a short delay
+        if !isVisible {
+          DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            self.updateARTrackingState()
+            
+            // If we have tracking issues, offer a hint
+            if let frame = self.arSceneManager.sceneView.session.currentFrame,
+               case .limited = frame.camera.trackingState {
+              self.showToast(message: "AR tracking limited. Try using the refresh button")
+            }
+          }
+        }
       }
     }
   }

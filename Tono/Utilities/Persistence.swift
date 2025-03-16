@@ -94,8 +94,13 @@ extension PersistenceController {
         }
     }
     
-    // Check if an object with the same English name already exists
+    // Check if an object with the same English name already exists at the same position
     func isDuplicate(english: String, context: NSManagedObjectContext) -> Bool {
+        // Disable duplicate checking temporarily to help fix position tracking issues
+        print("Duplicate checking disabled to improve AR position tracking")
+        return false
+        
+        /* Original duplicate checking logic - disabled for now
         let fetchRequest: NSFetchRequest<TaggedObject> = TaggedObject.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "english ==[c] %@", english)
         fetchRequest.fetchLimit = 1
@@ -107,6 +112,7 @@ extension PersistenceController {
             print("Error checking for duplicate: \(error)")
             return false
         }
+        */
     }
     
     // Get all tagged objects
