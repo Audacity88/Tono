@@ -29,6 +29,9 @@ class ARSceneManager: NSObject, ARSCNViewDelegate {
     // Translation manager
     let translationManager = TranslationManager.shared
     
+    // Reference to the world map saving timer
+    private var worldMapSavingTimer: Timer?
+    
     // Initialize with a view controller
     init(viewController: UIViewController) {
         super.init()
@@ -162,15 +165,23 @@ class ARSceneManager: NSObject, ARSCNViewDelegate {
     // Save the AR world map periodically to improve position tracking
     @available(iOS 12.0, *)
     private func startWorldMapSaving() {
+        // Cancel any existing timer
+        worldMapSavingTimer?.invalidate()
+        
         // Schedule timer to save world map every 30 seconds
-        Timer.scheduledTimer(withTimeInterval: 30.0, repeats: true) { [weak self] _ in
+        worldMapSavingTimer = Timer.scheduledTimer(withTimeInterval: 30.0, repeats: true) { [weak self] _ in
             self?.saveWorldMap()
         }
+        
+        // Initial save
+        saveWorldMap()
+        
+        print("Started world map saving timer")
     }
     
     // Save the current AR world map
     @available(iOS 12.0, *)
-    private func saveWorldMap() {
+    @objc private func saveWorldMap() {
         self.sceneView.session.getCurrentWorldMap { worldMap, error in
             guard let worldMap = worldMap, error == nil else {
                 print("Failed to get current world map: \(error?.localizedDescription ?? "Unknown error")")
@@ -208,6 +219,48 @@ class ARSceneManager: NSObject, ARSCNViewDelegate {
     // Pause the AR session
     func pauseARSession() {
         sceneView.session.pause()
+    }
+    
+    // Stop saving the world map
+    @available(iOS 12.0, *)
+    func stopWorldMapSaving() {
+        // Cancel the timer
+        worldMapSavingTimer?.invalidate()
+        worldMapSavingTimer = nil
+        
+        // Cancel any scheduled save operations
+        NSObject.cancelPreviousPerformRequests(withTarget: self, 
+                                             selector: #selector(saveWorldMap), 
+                                             object: nil)
+        
+        print("World map saving stopped")
+    }
+    
+    // Restore world map from last session (if available)
+    @available(iOS 12.0, *)
+    func restoreWorldMapFromLastSession() -> Bool {
+        if let lastSessionWorldMapData = UserDefaults.standard.data(forKey: "arWorldMap_lastSession") {
+            do {
+                let worldMap = try NSKeyedUnarchiver.unarchivedObject(ofClass: ARWorldMap.self, from: lastSessionWorldMapData)
+                
+                // Create a new configuration with this world map
+                let configuration = ARWorldTrackingConfiguration()
+                configuration.planeDetection = [.horizontal, .vertical]
+                configuration.initialWorldMap = worldMap
+                
+                // Restart session with this world map
+                sceneView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
+                
+                print("Restored world map from last session")
+                return true
+            } catch {
+                print("Failed to restore world map from last session: \(error)")
+                return false
+            }
+        } else {
+            print("No world map found from last session")
+            return false
+        }
     }
     
     // Refresh the AR session - ensures continuous tracking

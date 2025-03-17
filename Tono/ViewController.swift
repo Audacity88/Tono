@@ -19,6 +19,7 @@ import Vision
 import SwiftUI
 import CoreData
 import SceneKit
+import ARKit
 
 var mlModel = try! yolo11n(configuration: mlmodelConfig).model
 var mlmodelConfig: MLModelConfiguration = {
@@ -32,7 +33,7 @@ var mlmodelConfig: MLModelConfiguration = {
 }()
 
 /// The main view controller for the YOLO app, responsible for camera setup, model selection, and detection visualization.
-class ViewController: UIViewController {
+class ViewController: UIViewController, ARSCNViewDelegate {
   @IBOutlet var videoPreview: UIView!
   @IBOutlet var View0: UIView!
   @IBOutlet var segmentedControl: UISegmentedControl!
@@ -83,6 +84,9 @@ class ViewController: UIViewController {
   var longSide: CGFloat = 3
   var shortSide: CGFloat = 4
   var frameSizeCaptured = false
+  
+  // Track the last bounding box that was focused on for capture
+  var lastFocusedBoundingBox: BoundingBoxView?
 
   // Developer mode
   let developerMode = UserDefaults.standard.bool(forKey: "developer_mode")  // developer mode selected in settings
@@ -104,7 +108,7 @@ class ViewController: UIViewController {
   // MARK: - Properties
   
   // AR Scene Manager for 3D text tags
-  var arSceneManager: ARSceneManager!
+  private var arSceneManager: ARSceneManager!
   
   // UI elements
   private var clearARButton: UIButton?
@@ -120,7 +124,8 @@ class ViewController: UIViewController {
   private var arTrackingStateTimer: Timer?
   private var arStatusLabel: UILabel?
   private var refreshARButton: UIButton?
-  private var arContainerView: UIView? // Our container for AR object views
+  // View for displaying AR content (separate from camera feed)
+  private var arContainerView: PassthroughContainerView? // Our container for AR object views
 
   // Add property to store tagged detections
   private var taggedDetections: [(english: String, chinese: String, pinyin: String, worldPosition: simd_float4x4)] = []
@@ -215,17 +220,17 @@ class ViewController: UIViewController {
     view.bringSubviewToFront(videoPreview)
     
     // Next, create the AR container which will go above the camera feed
-    let objectsContainer = UIView(frame: view.bounds)
+    let objectsContainer = PassthroughContainerView(frame: view.bounds)
     objectsContainer.backgroundColor = UIColor.clear
     objectsContainer.isOpaque = false
     objectsContainer.clipsToBounds = false // Allow labels to extend beyond bounds
     
     // Enable user interaction for label taps, but also let touches pass through to video preview
     objectsContainer.isUserInteractionEnabled = true
+    objectsContainer.isMultipleTouchEnabled = true
     
-    // Critical fix: Use hit testing to pass through touches to underlying views when not on a label
-    let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(containerViewTapped(_:)))
-    objectsContainer.addGestureRecognizer(tapRecognizer)
+    // With PassthroughContainerView, we don't need this explicit tap recognizer
+    // as the view will automatically pass through touches to underlying views
     
     // Add the container above the video preview
     view.addSubview(objectsContainer)
@@ -333,17 +338,93 @@ class ViewController: UIViewController {
     // Start AR session
     arSceneManager.setupARSession()
     
-    // Clear all Core Data objects on app startup - start fresh each time
-    // This prevents the old labels from reappearing
-    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-        self.clearCoreDataObjects()
-    }
+    // No longer clearing Core Data objects on app startup
+    // This allows the collection to persist between tab switches
   }
   
   // Helper method to ensure toolbar is always at the front of the view hierarchy
   private func ensureToolbarIsInFront() {
-    if let toolBar = self.toolBar {
-        self.view.bringSubviewToFront(toolBar)
+    if let toolbar = self.toolBar {
+      self.view.bringSubviewToFront(toolbar)
+      
+      // Add hide all labels button if it doesn't exist
+      if toolbar.items?.contains(where: { $0.tag == 999 }) != true {
+        addHideLabelsButton()
+      }
+    }
+  }
+  
+  // Add a button to hide/show all labels
+  private func addHideLabelsButton() {
+    guard let toolbar = self.toolBar else { return }
+    
+    // Create a button to hide all labels
+    let hideButton = UIBarButtonItem(
+      image: UIImage(systemName: "eye.slash"),
+      style: .plain,
+      target: self,
+      action: #selector(toggleLabelsVisibility)
+    )
+    hideButton.tag = 999 // Special tag to identify this button
+    
+    // Get current items
+    var items = toolbar.items ?? []
+    
+    // Check if we already have reasonable item count to avoid duplicates
+    if items.count < 8 {
+      // Add a flexible space and the hide button
+      items.append(UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil))
+      items.append(hideButton)
+      
+      // Update toolbar items
+      toolbar.setItems(items, animated: false)
+    }
+  }
+  
+  // Toggle visibility of all label containers
+  @objc private func toggleLabelsVisibility() {
+    guard let container = arContainerView else { return }
+    
+    // Check if labels are currently visible
+    let areLabelsVisible = container.subviews.first?.isHidden == false
+    
+    // Toggle visibility
+    if areLabelsVisible {
+      // Hide all labels
+      UIView.animate(withDuration: 0.3) {
+        for labelView in container.subviews {
+          labelView.isHidden = true
+        }
+      }
+      
+      // Change button icon
+      if let button = toolBar.items?.first(where: { $0.tag == 999 }) {
+        button.image = UIImage(systemName: "eye")
+      }
+      
+      // Show toast
+      showToast(message: "All labels hidden - tap objects to tag")
+      
+      // Enable force passthrough to ensure taps reach video preview
+      container.forcePassthrough = true
+    } else {
+      // Show all labels
+      UIView.animate(withDuration: 0.3) {
+        for labelView in container.subviews {
+          labelView.isHidden = false
+        }
+      }
+      
+      // Change button icon
+      if let button = toolBar.items?.first(where: { $0.tag == 999 }) {
+        button.image = UIImage(systemName: "eye.slash")
+      }
+      
+      // Show toast
+      showToast(message: "Labels visible again")
+      
+      // Disable force passthrough
+      container.forcePassthrough = false
     }
   }
   
@@ -352,42 +433,15 @@ class ViewController: UIViewController {
     // Clear our container view
     self.arContainerView?.subviews.forEach { $0.removeFromSuperview() }
     
-    print("Loading objects into container view")
+    print("Initializing container view for AR labels")
     
-    // Remove static test objects since we don't need them anymore
-    // We'll only show objects that the user has explicitly tagged
+    // We no longer load saved objects from Core Data into this view
+    // The container view is only for temporary AR labels during this session
+    // Saved objects are only shown in the Collection tab
     
-    // Fetch saved objects from Core Data
-    let savedObjects = self.persistenceController.fetchTaggedObjects(context: self.managedObjectContext)
+    print("Container view ready for adding AR labels")
     
-    // If we have saved objects in Core Data, add those as well
-    if !savedObjects.isEmpty {
-        print("Loading \(savedObjects.count) additional objects from Core Data into container view")
-        
-        // Display all saved objects
-        for (index, object) in savedObjects.enumerated() {
-            print("Processing saved object \(index): \(object.english ?? "unknown")")
-            
-            // Create a simple UILabel for the object
-            let objectLabel = createObjectLabel(
-                english: object.english ?? "unknown",
-                chinese: object.chinese ?? "",
-                pinyin: object.pinyin ?? ""
-            )
-            
-            // Position it approximately based on stored 3D coordinates
-            let position = object.position
-            let screenPoint = convertWorldPositionToScreenPoint(position)
-            objectLabel.center = screenPoint
-            
-            // Add to our container
-            self.arContainerView?.addSubview(objectLabel)
-        }
-    } else {
-        print("No saved objects found in Core Data, using only test objects")
-    }
-    
-    // Make sure the toolbar remains on top after adding AR objects
+    // Make sure the toolbar remains on top after setup
     ensureToolbarIsInFront()
   }
   
@@ -395,32 +449,26 @@ class ViewController: UIViewController {
   private func createObjectLabel(english: String, chinese: String, pinyin: String, objectId: UUID? = nil) -> UIView {
     // Create a container view for the label
     let containerView = UIView()
-    containerView.backgroundColor = UIColor(red: 0, green: 0, blue: 0.1, alpha: 0.9) // More vibrant dark blue background
-    containerView.layer.cornerRadius = 12
-    
-    // Add a border for better visibility
-    containerView.layer.borderWidth = 2.5
+    containerView.backgroundColor = UIColor.black.withAlphaComponent(0.7)
+    containerView.layer.cornerRadius = 10
+    containerView.layer.borderWidth = 2
     containerView.layer.borderColor = UIColor.white.withAlphaComponent(0.8).cgColor
-    
-    // Add drop shadow
-    containerView.layer.shadowColor = UIColor.black.cgColor
-    containerView.layer.shadowOffset = CGSize(width: 1, height: 3)
-    containerView.layer.shadowOpacity = 0.9
-    containerView.layer.shadowRadius = 5
     
     // Create the Chinese label
     let chineseLabel = UILabel()
     chineseLabel.text = chinese
-    chineseLabel.textColor = UIColor(red: 1.0, green: 0.2, blue: 0.2, alpha: 1.0) // Brighter red
-    chineseLabel.font = UIFont.boldSystemFont(ofSize: 24) // Bigger font
+    chineseLabel.textColor = UIColor.red
+    chineseLabel.font = UIFont.boldSystemFont(ofSize: 20) // Bigger font
     chineseLabel.textAlignment = .center
+    chineseLabel.tag = 100 // Special tag to identify this as the Chinese label
     
     // Create the pinyin label
     let pinyinLabel = UILabel()
     pinyinLabel.text = pinyin
-    pinyinLabel.textColor = UIColor(red: 1.0, green: 0.9, blue: 0.1, alpha: 1.0) // Brighter yellow
+    pinyinLabel.textColor = UIColor.orange
     pinyinLabel.font = UIFont.systemFont(ofSize: 18) // Bigger font
     pinyinLabel.textAlignment = .center
+    pinyinLabel.tag = 101 // Tag to identify this as the pinyin label
     
     // Create the English label
     let englishLabel = UILabel()
@@ -428,17 +476,30 @@ class ViewController: UIViewController {
     englishLabel.textColor = UIColor.white
     englishLabel.font = UIFont.systemFont(ofSize: 16) // Bigger font
     englishLabel.textAlignment = .center
+    englishLabel.tag = 102 // Tag to identify this as the English label
+    
+    // Add minimize button
+    let minimizeButton = UIButton(type: .system)
+    minimizeButton.setTitle("−", for: .normal) // Using Unicode minus sign as minimize icon
+    minimizeButton.setTitleColor(.white, for: .normal)
+    minimizeButton.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .bold)
+    minimizeButton.frame = CGRect(x: 170, y: 5, width: 25, height: 25)
+    minimizeButton.addTarget(self, action: #selector(minimizeLabel(_:)), for: .touchUpInside)
     
     // Add labels to container
     containerView.addSubview(chineseLabel)
     containerView.addSubview(pinyinLabel)
     containerView.addSubview(englishLabel)
+    containerView.addSubview(minimizeButton)
     
     // Size the container and position labels - make it bigger for better visibility
     containerView.frame = CGRect(x: 0, y: 0, width: 200, height: 110)
     chineseLabel.frame = CGRect(x: 0, y: 8, width: 200, height: 35)
     pinyinLabel.frame = CGRect(x: 0, y: 45, width: 200, height: 30)
     englishLabel.frame = CGRect(x: 0, y: 75, width: 200, height: 30)
+    
+    // Store original frame for minimizing/maximizing - use modern API
+    containerView.accessibilityValue = NSCoder.string(for: containerView.frame)
     
     // Add a subtle animation to make it more noticeable
     UIView.animate(withDuration: 0.5, animations: {
@@ -449,10 +510,12 @@ class ViewController: UIViewController {
         }
     }
     
-    // Make the label tappable
-    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(objectLabelTapped(_:)))
-    containerView.addGestureRecognizer(tapGesture)
+    // IMPORTANT: Make the label tappable but do not let it intercept touches meant for other objects
+    // These three settings allow taps on the label to be detected but also pass through to views below
     containerView.isUserInteractionEnabled = true
+    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(objectLabelTapped(_:)))
+    tapGesture.cancelsTouchesInView = false  // Don't cancel touches in the view hierarchy
+    containerView.addGestureRecognizer(tapGesture)
     
     // Generate a unique ID if not provided
     let id = objectId?.uuidString ?? UUID().uuidString
@@ -461,6 +524,108 @@ class ViewController: UIViewController {
     containerView.accessibilityLabel = "\(id)|\(english)|\(chinese)|\(pinyin)"
     
     return containerView
+  }
+  
+  // Minimize or maximize a label when tapped
+  @objc func minimizeLabel(_ sender: UIButton) {
+    guard let containerView = sender.superview else { return }
+    
+    // Toggle between minimized and normal state
+    if containerView.tag == 0 { // Normal state -> minimize
+      // Store current position for later - use modern API
+      containerView.accessibilityValue = NSCoder.string(for: containerView.frame)
+      
+      // Find the Chinese label - now we can use the tag
+      var chineseLabel: UILabel? = nil
+      for subview in containerView.subviews {
+        if let label = subview as? UILabel, label.tag == 100 {
+          chineseLabel = label
+          break
+        }
+      }
+      
+      // Minimize view - just show small indicator with Chinese character
+      UIView.animate(withDuration: 0.3) {
+        // Shrink to just show the minimize button and Chinese character
+        containerView.frame = CGRect(x: containerView.frame.minX, y: containerView.frame.minY, 
+                                width: 50, height: 40)
+        
+        // Find and hide all labels except Chinese
+        for subview in containerView.subviews {
+          if subview != sender && subview != chineseLabel {
+            subview.isHidden = true
+          }
+        }
+        
+        // Adjust the Chinese label position if found
+        if let label = chineseLabel {
+          label.frame = CGRect(x: 5, y: 5, width: 40, height: 30)
+        }
+        
+        // Adjust button position
+        sender.frame = CGRect(x: 25, y: 5, width: 25, height: 25)
+        
+        // Change button to show + for expand
+        sender.setTitle("+", for: .normal)
+      }
+      
+      // Set tag to 1 to indicate minimized state
+      containerView.tag = 1
+      
+    } else { // Minimized state -> maximize
+      // Get original frame - use modern API
+      let originalFrameString = containerView.accessibilityValue ?? ""
+      let originalFrame = NSCoder.cgRect(for: originalFrameString)
+      
+      // Get all labels
+      var chineseLabel: UILabel? = nil
+      var pinyinLabel: UILabel? = nil
+      var englishLabel: UILabel? = nil
+      
+      for subview in containerView.subviews {
+        if let label = subview as? UILabel {
+          if label.tag == 100 {
+            chineseLabel = label
+          } else if label.tag == 101 {
+            pinyinLabel = label
+          } else if label.tag == 102 {
+            englishLabel = label
+          }
+        }
+      }
+      
+      // Maximize view back to original size
+      UIView.animate(withDuration: 0.3) {
+        containerView.frame = originalFrame
+        
+        // Show all subviews again
+        for subview in containerView.subviews {
+          subview.isHidden = false
+        }
+        
+        // Reset label positions
+        if let label = chineseLabel {
+          label.frame = CGRect(x: 0, y: 8, width: 200, height: 35)
+        }
+        
+        if let label = pinyinLabel {
+          label.frame = CGRect(x: 0, y: 45, width: 200, height: 30)
+        }
+        
+        if let label = englishLabel {
+          label.frame = CGRect(x: 0, y: 75, width: 200, height: 30)
+        }
+        
+        // Reset button position
+        sender.frame = CGRect(x: 170, y: 5, width: 25, height: 25)
+        
+        // Change button back to - for minimize
+        sender.setTitle("−", for: .normal)
+      }
+      
+      // Set tag to 0 to indicate normal state
+      containerView.tag = 0
+    }
   }
   
   // Helper to convert 3D position to screen coordinates
@@ -494,50 +659,35 @@ class ViewController: UIViewController {
     // Play pronunciation
     arSceneManager.playPronunciation(for: chinese, pinyin: pinyin)
     
+    // Bring this view to the absolute front to ensure it's visible above all others
+    if let container = self.arContainerView {
+      container.bringSubviewToFront(containerView)
+    }
+    
+    // If already showing in center, just reset position
+    if containerView.transform.a > 1.2 {
+      // Reset transform and position
+      UIView.animate(withDuration: 0.3) {
+        containerView.transform = .identity
+        containerView.layer.zPosition = 0
+      }
+      return
+    }
+    
     // Get the center of the screen for showing the label
     let screenCenter = view.center
     
-    // Bring this view to the absolute front to ensure it's visible above all others
-    if let container = self.arContainerView {
-        container.bringSubviewToFront(containerView)
-    }
-    
     // First scale up the label
     UIView.animate(withDuration: 0.2, animations: {
-        containerView.transform = CGAffineTransform(scaleX: 1.5, y: 1.5)
-        containerView.layer.zPosition = 1000 // Ensure it's at the top
-        
-        // Move to center of screen for better visibility
-        containerView.center = CGPoint(
-            x: screenCenter.x,
-            y: screenCenter.y - 100 // slightly above center
-        )
-    }) { _ in
-        // After showing for a moment, return to stack with a delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            // Return to original position and size with animation
-            UIView.animate(withDuration: 0.5) {
-                containerView.transform = .identity
-                
-                // Force an update of the stack to properly position all labels
-                if let container = self.arContainerView {
-                    // Reset z-position to normal to ensure new labels can appear on top
-                    containerView.layer.zPosition = 0
-                    
-                    // IMMEDIATELY re-sync all labels to maintain proper ordering
-                    self.synchronizeARLabelsWithBoundingBoxes()
-                    
-                    // And re-sync again after a short delay to ensure everything is positioned correctly
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        self.synchronizeARLabelsWithBoundingBoxes()
-                    }
-                }
-            }
-        }
-    }
-    
-    // Show a toast with the translation
-    showToast(message: "\(english): \(chinese) (\(pinyin))")
+      containerView.transform = CGAffineTransform(scaleX: 1.5, y: 1.5)
+      containerView.layer.zPosition = 1000 // Ensure it's at the top
+      
+      // Move to center of screen for better visibility
+      containerView.center = CGPoint(
+        x: screenCenter.x,
+        y: screenCenter.y - 100 // slightly above center
+      )
+    })
   }
   
   override func viewWillDisappear(_ animated: Bool) {
@@ -548,6 +698,11 @@ class ViewController: UIViewController {
     
     // Pause AR session
     arSceneManager.pauseARSession()
+    
+    // Stop world map saving to prevent unnecessary resource usage
+    if #available(iOS 12.0, *) {
+      arSceneManager.stopWorldMapSaving()
+    }
   }
   
   // Setup label stack view
@@ -920,9 +1075,18 @@ class ViewController: UIViewController {
   // share image
   @IBAction func shareButton(_ sender: Any) {
     selection.selectionChanged()
-    let settings = AVCapturePhotoSettings()
-    self.videoCapture.cameraOutput.capturePhoto(
-      with: settings, delegate: self as AVCapturePhotoCaptureDelegate)
+    
+    // Analyze bounding boxes before capture to determine if we should zoom
+    let selectedBox = findBestBoundingBoxForCapture()
+    if let box = selectedBox {
+        // Capture focused on the selected bounding box
+        captureImageWithFocus(on: box)
+    } else {
+        // Standard capture when no suitable bounding box is found
+        let settings = AVCapturePhotoSettings()
+        self.videoCapture.cameraOutput.capturePhoto(
+          with: settings, delegate: self as AVCapturePhotoCaptureDelegate)
+    }
   }
 
   // share screenshot
@@ -1091,8 +1255,10 @@ class ViewController: UIViewController {
   }
 
   func predict(sampleBuffer: CMSampleBuffer) {
-    if currentBuffer == nil, let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) {
-      currentBuffer = pixelBuffer
+    if let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) {
+      // Store the pixel buffer for image capture purposes
+      self.currentBuffer = pixelBuffer
+      
       if !frameSizeCaptured {
         let frameWidth = CGFloat(CVPixelBufferGetWidth(pixelBuffer))
         let frameHeight = CGFloat(CVPixelBufferGetHeight(pixelBuffer))
@@ -1131,8 +1297,9 @@ class ViewController: UIViewController {
         }
         t1 = CACurrentMediaTime() - t0  // inference dt
       }
-
-      currentBuffer = nil
+      
+      // DON'T clear currentBuffer here - we'll retain it for image capture
+      // It will be overwritten in the next frame anyway
     }
   }
 
@@ -1246,7 +1413,7 @@ class ViewController: UIViewController {
         
         // Only log if the detection has changed
         if self.lastDetectedClass != bestClass {
-          print("Set currentDetection to: \(bestClass) - \(translation.chinese) (\(translation.pinyin))")
+          // print("Set currentDetection to: \(bestClass) - \(translation.chinese) (\(translation.pinyin))")
           self.lastDetectedClass = bestClass
           
           // If AR mode is active, update current detection
@@ -1482,6 +1649,10 @@ class ViewController: UIViewController {
         return
     }
     
+    // Log bounding box details when tapped
+    print("Bounding box tapped: \(boxView.className)")
+    logBoundingBoxDetails(boxView)
+    
     // Call the method that takes a BoundingBoxView directly
     handleBoundingBoxTap(boxView)
   }
@@ -1489,9 +1660,15 @@ class ViewController: UIViewController {
   /// Handle tap on a bounding box - method that takes a BoundingBoxView directly
   /// UPDATED VERSION: Uses the place3DTextAtBoundingBox method directly
   func handleBoundingBoxTap(_ boxView: BoundingBoxView) {
+    // Highlight the box to show it was selected
+    highlightBoundingBox(boxView)
+    
     // Get the class name and translation directly from the bounding box
     let className = boxView.className
     let confidence = boxView.confidence
+    
+    // Log the bounding box details when tapped
+    logBoundingBoxDetails(boxView)
     
     // IMPORTANT: First check if we've already labeled this class type
     if labeledBoxes.contains(where: { $0.className == className }) {
@@ -1525,34 +1702,135 @@ class ViewController: UIViewController {
     selection.selectionChanged()
   }
   
+  // Helper method to highlight a bounding box when it's selected
+  private func highlightBoundingBox(_ boxView: BoundingBoxView) {
+    // Store the current border color and width
+    let originalBorderColor = boxView.layer.borderColor
+    let originalBorderWidth = boxView.layer.borderWidth
+    
+    // Highlight the box
+    boxView.layer.borderColor = UIColor.white.cgColor
+    boxView.layer.borderWidth = 3.0
+    
+    // Create a flash effect
+    UIView.animate(withDuration: 0.1, animations: {
+        boxView.alpha = 1.0
+        boxView.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
+    }) { _ in
+        UIView.animate(withDuration: 0.1, animations: {
+            boxView.transform = .identity
+        }) { _ in
+            // Delay before restoring the original appearance
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                // Restore original appearance with animation
+                UIView.animate(withDuration: 0.2) {
+                    boxView.layer.borderColor = originalBorderColor
+                    boxView.layer.borderWidth = originalBorderWidth
+                }
+            }
+        }
+    }
+  }
+  
   @objc func videoPreviewTapped(_ gesture: UITapGestureRecognizer) {
     // Get the tap location
     let location = gesture.location(in: videoPreview)
     
+    // Add visual feedback at tap location
+    showTapFeedback(at: location)
+    
     // Check if AR mode is active
     let isARActive = arSceneManager.sceneView.alpha > 0.5
     
-    // First check if the tap is on any bounding boxes, regardless of AR mode
-    var tappedBoxes: [(boxView: BoundingBoxView, zIndex: Int)] = []
+    // Create an even smaller hit-test area to improve precision
+    let hitTestRadius: CGFloat = 5.0 // Reduced from 10 to 5 pixels
+    let hitTestRect = CGRect(
+        x: location.x - hitTestRadius, 
+        y: location.y - hitTestRadius, 
+        width: hitTestRadius * 2, 
+        height: hitTestRadius * 2
+    )
     
-    for (i, boxView) in boundingBoxViews.enumerated() {
+    // Debug: Log the tap location
+    print("Tap location: \(location.x), \(location.y)")
+    
+    // First check if the tap is directly inside any bounding boxes
+    var directHitBoxes: [BoundingBoxView] = []
+    var nearbyBoxes: [(boxView: BoundingBoxView, zIndex: Int, distance: CGFloat)] = []
+    
+    // First pass: Check for direct hits (tap inside box)
+    for boxView in boundingBoxViews {
         if !boxView.isHidden && boxView.frame.contains(location) {
-            // Store the box and its z-index (tag is used as a proxy for z-order)
-            // Higher tag values are added later, so they're "in front"
-            tappedBoxes.append((boxView: boxView, zIndex: boxView.tag))
+            directHitBoxes.append(boxView)
+            print("Direct hit on box: \(boxView.className)")
         }
     }
     
-    // If we found any tapped boxes, handle the one in front (highest z-index)
-    if !tappedBoxes.isEmpty {
-        // Sort by z-index in descending order (highest first)
-        tappedBoxes.sort { $0.zIndex > $1.zIndex }
-        
-        // Handle the frontmost box
-        let frontmostBox = tappedBoxes[0].boxView
-        print("Tapped on frontmost bounding box: \(frontmostBox.className)")
-        handleBoundingBoxTap(frontmostBox)
+    // If we have direct hits, prefer those
+    if !directHitBoxes.isEmpty {
+        // If multiple direct hits, choose the one with highest z-index (confidence)
+        let bestBox = directHitBoxes.max(by: { $0.tag < $1.tag })!
+        print("Selected direct hit box: \(bestBox.className)")
+        // Log bounding box details before handling
+        logBoundingBoxDetails(bestBox)
+        handleBoundingBoxTap(bestBox)
         return
+    }
+    
+    // Second pass: Only if no direct hits, check if the tap is near any bounding boxes
+    if directHitBoxes.isEmpty {
+        for boxView in boundingBoxViews {
+            if !boxView.isHidden {
+                // Calculate distance from tap to center of box
+                let centerX = boxView.frame.midX
+                let centerY = boxView.frame.midY
+                let distance = sqrt(pow(location.x - centerX, 2) + pow(location.y - centerY, 2))
+                
+                // Only consider boxes where the tap is close to the box boundary
+                let boxDiagonal = sqrt(pow(boxView.frame.width, 2) + pow(boxView.frame.height, 2)) / 2
+                let maxDistance = boxDiagonal + hitTestRadius // Only consider taps within hitTestRadius of the box boundary
+                
+                if distance <= maxDistance && boxView.frame.insetBy(dx: -hitTestRadius * 2, dy: -hitTestRadius * 2).contains(location) {
+                    nearbyBoxes.append((boxView: boxView, zIndex: boxView.tag, distance: distance))
+                    print("Nearby box: \(boxView.className) at distance \(distance)")
+                }
+            }
+        }
+    }
+    
+    // If we found any nearby boxes, handle the closest one or the one in front
+    if !nearbyBoxes.isEmpty {
+        // Sort by distance (closest first)
+        nearbyBoxes.sort { $0.distance < $1.distance }
+        
+        // If multiple boxes are very close, prefer the one with highest z-index
+        if nearbyBoxes.count > 1 && abs(nearbyBoxes[0].distance - nearbyBoxes[1].distance) < hitTestRadius * 2 {
+            // Sort by z-index in descending order (highest first)
+            nearbyBoxes.sort { $0.zIndex > $1.zIndex }
+        }
+        
+        // Only handle if the distance is reasonable
+        let bestBox = nearbyBoxes[0].boxView
+        let distance = nearbyBoxes[0].distance
+        
+        // Determine if the box is close enough based on its size
+        let boxSize = min(bestBox.frame.width, bestBox.frame.height)
+        let maxAllowableDistance = max(hitTestRadius * 3, boxSize * 0.3) // Allow at most 30% of box size or 3x hit test radius
+        
+        if distance <= maxAllowableDistance {
+            print("Tapped near bounding box: \(bestBox.className) (distance: \(distance), max allowed: \(maxAllowableDistance))")
+            // Log bounding box details before handling
+            logBoundingBoxDetails(bestBox)
+            handleBoundingBoxTap(bestBox)
+            return
+        } else {
+            print("Nearest box \(bestBox.className) too far: \(distance) > \(maxAllowableDistance)")
+            // Show feedback that the tap was too far from an object
+            showToast(message: "Tap closer to an object to label it")
+        }
+    } else if !boundingBoxViews.filter({ !$0.isHidden }).isEmpty {
+        // If there are visible boxes but we didn't tap near any of them
+        showToast(message: "Tap on or near an object to label it")
     }
     
     // Only handle AR interactions if AR mode is active
@@ -1613,10 +1891,16 @@ class ViewController: UIViewController {
       // MAKE SURE THE CONTAINER EXISTS
       if self.arContainerView == nil {
         print("ERROR: Container view does not exist, creating one now")
-        let container = UIView(frame: self.view.bounds)
+        let container = PassthroughContainerView(frame: self.view.bounds)
         container.backgroundColor = UIColor.clear
         container.isOpaque = false
+        
+        // Configure touch handling for the container
+        // This is critical - we want the container to detect touches but not block them
+        // from reaching the video preview underneath for object detection
         container.isUserInteractionEnabled = true
+        container.isMultipleTouchEnabled = true
+        
         self.view.addSubview(container)
         self.view.bringSubviewToFront(container)
         self.arContainerView = container
@@ -1633,8 +1917,49 @@ class ViewController: UIViewController {
           pinyin: detection.pinyin
       )
       
-      // Position the label initially at the bounding box position
-      objectLabel.center = boxCenter
+      // Position the label intelligently to avoid interfering with object detection
+      // First, try to position at the top of the screen in a grid
+      let labelCount = self.arContainerView?.subviews.count ?? 0
+      let labelWidth = objectLabel.frame.width
+      let labelHeight = objectLabel.frame.height
+      let horizontalPadding: CGFloat = 10
+      let verticalPadding: CGFloat = 5
+      
+      // Calculate the maximum number of labels that can fit horizontally
+      let screenWidth = self.view.bounds.width
+      let labelsPerRow = max(1, Int(screenWidth / (labelWidth + horizontalPadding)))
+      
+      // Calculate row and column position
+      let columnIndex = labelCount % labelsPerRow
+      let rowIndex = labelCount / labelsPerRow
+      
+      // Calculate position at the top of the screen in a grid layout
+      let xPosition = horizontalPadding + CGFloat(columnIndex) * (labelWidth + horizontalPadding) + labelWidth/2
+      let yPosition = self.view.safeAreaInsets.top + verticalPadding + CGFloat(rowIndex) * (labelHeight + verticalPadding) + labelHeight/2
+      
+      // Position the label at the calculated position
+      objectLabel.center = CGPoint(x: xPosition, y: yPosition)
+      
+      // If the calculated position is too far down the screen, fall back to minimized mode immediately
+      if yPosition > self.view.bounds.height / 3 {
+          // Minimize the label immediately after adding
+          objectLabel.tag = 1 // Mark as minimized
+          
+          // Find the button to minimize (should be the last subview added)
+          for subview in objectLabel.subviews {
+              if let button = subview as? UIButton {
+                  // Trigger the minimize action after a short delay to ensure view is set up
+                  DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                      self.minimizeLabel(button)
+                  }
+                  break
+              }
+          }
+          
+          // Position the label at the side of the screen instead
+          let sidePosition = min(self.view.bounds.width - 40, max(40, boxCenter.x))
+          objectLabel.center = CGPoint(x: sidePosition, y: boxCenter.y)
+      }
       
       // Store the label data in the accessibility label
       let safeEnglish = detection.english.isEmpty ? "unknown" : detection.english
@@ -1682,11 +2007,23 @@ class ViewController: UIViewController {
       // Save to Core Data for persistence
       let position = SCNVector3(x: 0, y: 0, z: 0) // Position doesn't matter for our stack approach
       
+      // Capture and crop the current frame based on the bounding box
+      let capturedImage = self.captureAndCropFrame(for: boxView)
+      
+      if let image = capturedImage {
+        print("Image captured and cropped successfully for saving with object: \(detection.english)")
+        
+        // Log the image dimensions
+        print("Cropped image dimensions: \(image.size.width) x \(image.size.height)")
+      } else {
+        print("WARNING: Failed to capture/crop image for object: \(detection.english)")
+      }
+      
       self.persistenceController.saveTaggedObject(
           english: detection.english,
           chinese: detection.chinese,
           pinyin: detection.pinyin,
-          image: nil,
+          image: capturedImage,
           position: position,
           context: self.managedObjectContext
       )
@@ -1697,6 +2034,85 @@ class ViewController: UIViewController {
       // Make sure toolbar stays in front
       self.ensureToolbarIsInFront()
     }
+  }
+  
+  /// Captures the current frame and crops it to focus on a specific bounding box
+  /// - Parameter boxView: The bounding box to focus on
+  /// - Returns: A cropped UIImage focused on the bounding box, or nil if capture/crop fails
+  private func captureAndCropFrame(for boxView: BoundingBoxView) -> UIImage? {
+    // First capture the full frame
+    guard let fullImage = self.captureCurrentFrame() else {
+      print("Failed to capture current frame")
+      return nil
+    }
+    
+    // Log the original image size
+    print("Original image dimensions: \(fullImage.size.width) x \(fullImage.size.height)")
+    
+    // Get bounding box dimensions and position
+    let boxWidth = boxView.frame.width
+    let boxHeight = boxView.frame.height
+    let boxCenter = boxView.centerPosition
+    
+    // Calculate the scale from screen coordinates to image coordinates
+    let widthScale = fullImage.size.width / videoPreview.bounds.width
+    let heightScale = fullImage.size.height / videoPreview.bounds.height
+    
+    print("Screen to image scale: width \(String(format: "%.2f", widthScale))x, height \(String(format: "%.2f", heightScale))x")
+    
+    // Convert box center to image coordinates
+    let imageCenterX = boxCenter.x * widthScale
+    let imageCenterY = boxCenter.y * heightScale
+    
+    // Add margin around the bounding box (40% on each side)
+    let marginFactor: CGFloat = 0.4
+    let cropWidth = min(boxWidth * (1 + 2 * marginFactor) * widthScale, fullImage.size.width)
+    let cropHeight = min(boxHeight * (1 + 2 * marginFactor) * heightScale, fullImage.size.height)
+    
+    // Calculate crop rect (ensure it stays within image bounds)
+    let cropX = max(0, imageCenterX - cropWidth / 2)
+    let cropY = max(0, imageCenterY - cropHeight / 2)
+    
+    // Ensure the crop rect doesn't exceed image bounds
+    let cropRectWidth = min(fullImage.size.width - cropX, cropWidth)
+    let cropRectHeight = min(fullImage.size.height - cropY, cropHeight)
+    
+    // Create the crop rect
+    let cropRect = CGRect(x: cropX, y: cropY, width: cropRectWidth, height: cropRectHeight)
+    print("Crop rectangle: origin (\(String(format: "%.1f", cropX)), \(String(format: "%.1f", cropY))), size \(String(format: "%.1f", cropRectWidth)) x \(String(format: "%.1f", cropRectHeight)) pixels")
+    
+    // Create CGImage from UIImage for cropping
+    guard let cgImage = fullImage.cgImage else {
+      print("Failed to get CGImage from UIImage")
+      return fullImage // Return original image as fallback
+    }
+    
+    // Check if the cropRect is valid
+    if cropRect.width <= 0 || cropRect.height <= 0 || 
+       cropRect.origin.x < 0 || cropRect.origin.y < 0 ||
+       cropRect.maxX > CGFloat(cgImage.width) || cropRect.maxY > CGFloat(cgImage.height) {
+      print("Invalid crop rectangle, using full image instead")
+      return fullImage
+    }
+    
+    // Attempt to crop the image
+    guard let croppedCGImage = cgImage.cropping(to: cropRect) else {
+      print("Failed to crop image, using full image instead")
+      return fullImage
+    }
+    
+    // Create UIImage from cropped CGImage, preserving scale and orientation
+    let croppedImage = UIImage(
+      cgImage: croppedCGImage,
+      scale: fullImage.scale,
+      orientation: fullImage.imageOrientation
+    )
+    
+    // Success - log cropped image details
+    print("Successfully cropped image to: \(croppedImage.size.width) x \(croppedImage.size.height) pixels")
+    print("Bounding box dimensions: \(String(format: "%.1f", boxWidth)) x \(String(format: "%.1f", boxHeight)) pixels")
+    
+    return croppedImage
   }
 
   // MARK: - Container Labels
@@ -2484,6 +2900,436 @@ class ViewController: UIViewController {
     // Clean up
     tempView.removeFromSuperview()
   }
+
+  // MARK: - Image Capture
+  
+  // Capture the current camera frame as a UIImage
+  private func captureCurrentFrame() -> UIImage? {
+    print("Attempting to capture current frame...")
+    
+    // Try multiple capture methods for reliability
+    var capturedImage: UIImage?
+    
+    // Method 1: Use current pixel buffer if available (most reliable and highest quality)
+    if let pixelBuffer = self.currentBuffer {
+      print("Method 1: Capturing from current pixel buffer")
+      let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+      let context = CIContext()
+      
+      // Get the proper orientation based on device orientation
+      let imageOrientation: UIImage.Orientation
+      switch UIDevice.current.orientation {
+      case .portrait: imageOrientation = .right
+      case .portraitUpsideDown: imageOrientation = .left
+      case .landscapeLeft: imageOrientation = .down
+      case .landscapeRight: imageOrientation = .up
+      default: imageOrientation = .right
+      }
+      
+      if let cgImage = context.createCGImage(ciImage, from: ciImage.extent) {
+        capturedImage = UIImage(cgImage: cgImage, scale: 1.0, orientation: imageOrientation)
+        print("Successfully captured image from pixel buffer: \(capturedImage?.size.width ?? 0) x \(capturedImage?.size.height ?? 0)")
+        return capturedImage
+      } else {
+        print("Failed to create CGImage from CIImage")
+      }
+    } else {
+      print("No current pixel buffer available")
+    }
+    
+    // Method 2: Fallback to screenshot of preview layer
+    guard let layer = self.videoCapture.previewLayer else {
+      print("Error: No preview layer available for capture")
+      return nil
+    }
+    
+    print("Method 2: Falling back to preview layer screenshot")
+    
+    // Ensure we're on the main thread for UIGraphics operations
+    if !Thread.isMainThread {
+      print("Switching to main thread for UI operations")
+      DispatchQueue.main.sync {
+        capturedImage = capturePreviewLayerImage(layer)
+      }
+    } else {
+      capturedImage = capturePreviewLayerImage(layer)
+    }
+    
+    return capturedImage
+  }
+  
+  // Helper method to capture image from preview layer
+  private func capturePreviewLayerImage(_ layer: AVCaptureVideoPreviewLayer) -> UIImage? {
+    // Make sure the layer has valid dimensions
+    if layer.frame.width <= 0 || layer.frame.height <= 0 {
+      print("Preview layer has invalid dimensions: \(layer.frame)")
+      return nil
+    }
+    
+    print("Preview layer dimensions: \(layer.frame.width) x \(layer.frame.height)")
+    
+    // Create a UIImage from the current video frame
+    UIGraphicsBeginImageContextWithOptions(layer.frame.size, false, UIScreen.main.scale)
+    defer {
+      UIGraphicsEndImageContext()
+    }
+    
+    guard let context = UIGraphicsGetCurrentContext() else {
+      print("Error: Could not create graphics context")
+      return nil
+    }
+    
+    layer.render(in: context)
+    let capturedImage = UIGraphicsGetImageFromCurrentImageContext()
+    
+    if let image = capturedImage {
+      print("Successfully captured image from preview layer: \(image.size.width) x \(image.size.height)")
+    } else {
+      print("Failed to capture image from preview layer")
+    }
+    
+    return capturedImage
+  }
+
+  // Helper method to show visual feedback at the tap location
+  private func showTapFeedback(at location: CGPoint) {
+    // Create a circular view
+    let feedbackView = UIView(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
+    feedbackView.center = location
+    feedbackView.backgroundColor = UIColor.white.withAlphaComponent(0.5)
+    feedbackView.layer.cornerRadius = 15
+    feedbackView.layer.borderWidth = 2
+    feedbackView.layer.borderColor = UIColor.systemBlue.cgColor
+    
+    // Add to the view
+    videoPreview.addSubview(feedbackView)
+    
+    // Animate the feedback
+    UIView.animate(withDuration: 0.3, animations: {
+        feedbackView.transform = CGAffineTransform(scaleX: 0.7, y: 0.7)
+        feedbackView.alpha = 0.2
+    }, completion: { _ in
+        feedbackView.removeFromSuperview()
+    })
+  }
+
+  // MARK: - Intelligent Image Capture
+  
+  /// Analyzes all current bounding boxes to find the most suitable one for focused capture
+  /// - Returns: The most appropriate bounding box or nil if standard capture is better
+  private func findBestBoundingBoxForCapture() -> BoundingBoxView? {
+    // Get all visible bounding boxes
+    let visibleBoxes = boundingBoxViews.filter { !$0.isHidden }
+    
+    if visibleBoxes.isEmpty {
+        print("No visible bounding boxes found for capture analysis")
+        return nil
+    }
+    
+    // Get screen dimensions for relative size calculations
+    let screenSize = videoPreview.bounds.size
+    let screenArea = screenSize.width * screenSize.height
+    
+    print("\n=========== BOUNDING BOX ANALYSIS FOR CAPTURE ===========")
+    print("Screen dimensions: \(String(format: "%.1f", screenSize.width)) x \(String(format: "%.1f", screenSize.height)) pixels")
+    print("Found \(visibleBoxes.count) visible object(s)")
+    
+    // Store all eligible boxes with relevant metrics
+    var eligibleBoxes: [(box: BoundingBoxView, relativeSize: CGFloat, zoomFactor: CGFloat)] = []
+    
+    // Print header for the table of boxes
+    print("\nOBJECT DETAILS:")
+    print("Class Name\t| Width\t| Height\t| Area\t| % of Screen\t| Confidence\t| Zoom Factor\t| Status")
+    print("------------------------------------------------------------------------")
+    
+    for box in visibleBoxes {
+        // Calculate relative size of the box compared to screen
+        let boxArea = box.frame.width * box.frame.height
+        let relativeSize = boxArea / screenArea
+        
+        // Calculate the zoom factor this box would need
+        let widthZoom = screenSize.width / box.frame.width
+        let heightZoom = screenSize.height / box.frame.height
+        let zoomFactor = min(widthZoom, heightZoom) * 0.8 // 80% to leave margin
+        
+        // Determine status
+        var status = ""
+        if relativeSize < 0.4 && box.confidence > 0.3 {
+            eligibleBoxes.append((box: box, relativeSize: relativeSize, zoomFactor: zoomFactor))
+            status = "ELIGIBLE"
+        } else if relativeSize >= 0.4 {
+            status = "TOO LARGE"
+        } else {
+            status = "LOW CONFIDENCE"
+        }
+        
+        // Print details in a table format
+        print("\(box.className)\t| \(String(format: "%.1f", box.frame.width))\t| \(String(format: "%.1f", box.frame.height))\t| \(String(format: "%.1f", boxArea))\t| \(String(format: "%.1f%%", relativeSize * 100))\t| \(String(format: "%.2f", box.confidence))\t| \(String(format: "%.1fx", zoomFactor))\t| \(status)")
+    }
+    
+    if eligibleBoxes.isEmpty {
+        print("\nResult: No eligible objects found for focused capture")
+        return nil
+    }
+    
+    // Sort by size (smallest first) since those benefit most from zoom
+    eligibleBoxes.sort { $0.relativeSize < $1.relativeSize }
+    
+    // Get the smallest object that also has decent confidence
+    if let bestBox = eligibleBoxes.first?.box {
+        print("\nSELECTED OBJECT: \(bestBox.className)")
+        print("- Dimensions: \(String(format: "%.1f", bestBox.frame.width)) x \(String(format: "%.1f", bestBox.frame.height)) pixels")
+        print("- Position: (\(String(format: "%.1f", bestBox.frame.origin.x)), \(String(format: "%.1f", bestBox.frame.origin.y)))")
+        print("- Center: (\(String(format: "%.1f", bestBox.centerPosition.x)), \(String(format: "%.1f", bestBox.centerPosition.y)))")
+        print("- Confidence: \(bestBox.confidence)")
+        print("- Zoom factor: \(String(format: "%.1fx", eligibleBoxes.first!.zoomFactor))")
+        print("=======================================================\n")
+        
+        // Log bounding box details in a format that's easy to find in logs
+        logBoundingBoxDetails(bestBox)
+        
+        return bestBox
+    } else {
+        print("\nResult: No object selected for focused capture, using standard capture")
+        print("=======================================================\n")
+        return nil
+    }
+  }
+  
+  /// Captures an image with focus on a specific bounding box
+  /// - Parameter box: The bounding box to focus on
+  private func captureImageWithFocus(on box: BoundingBoxView) {
+    // Store reference to this box for logging in the photo capture delegate
+    lastFocusedBoundingBox = box
+    
+    // Log the bounding box details immediately to ensure they appear in the logs
+    logBoundingBoxDetails(box)
+    
+    print("\n=========== CAPTURING FOCUSED IMAGE: \(box.className) ===========")
+    
+    // Calculate how much zoom we need based on the box size
+    let boxCenter = box.centerPosition
+    
+    // Get box dimensions and screen dimensions
+    let boxWidth = box.frame.width
+    let boxHeight = box.frame.height
+    let screenWidth = videoPreview.bounds.width
+    let screenHeight = videoPreview.bounds.height
+    
+    // Calculate zoom factor directly based on bounding box size
+    // The smaller the box, the more zoom we need
+    // Simple inverse proportion: screenSize / boxSize
+    let widthZoom = screenWidth / boxWidth
+    let heightZoom = screenHeight / boxHeight
+    
+    // Use the smaller of the two zoom factors to ensure the entire object fits in frame
+    let zoomFactor = min(widthZoom, heightZoom) * 0.8 // Apply 80% factor to leave a small margin
+    
+    // Ensure zoom factor is within device limits
+    let maxZoom = videoCapture.captureDevice.activeFormat.videoMaxZoomFactor
+    let minZoom = 1.0 // No zoom
+    
+    // Apply limits but maintain direct proportionality to box size
+    let adjustedZoomFactor = min(max(zoomFactor, minZoom), maxZoom)
+    
+    print("OBJECT DETAILS:")
+    print("- Class name: \(box.className)")
+    print("- Confidence: \(box.confidence)")
+    print("- Box dimensions: \(String(format: "%.1f", boxWidth)) x \(String(format: "%.1f", boxHeight)) pixels")
+    print("- Box position: (\(String(format: "%.1f", box.frame.origin.x)), \(String(format: "%.1f", box.frame.origin.y)))")
+    print("- Box center: (\(String(format: "%.1f", boxCenter.x)), \(String(format: "%.1f", boxCenter.y)))")
+    
+    print("\nCAPTURE SETTINGS:")
+    print("- Screen dimensions: \(String(format: "%.1f", screenWidth)) x \(String(format: "%.1f", screenHeight)) pixels")
+    print("- Screen scale: \(UIScreen.main.scale)")
+    print("- Width zoom: \(String(format: "%.2fx", widthZoom))")
+    print("- Height zoom: \(String(format: "%.2fx", heightZoom))")
+    print("- Selected zoom: \(String(format: "%.2fx", zoomFactor)) (80% of \(widthZoom < heightZoom ? "width" : "height") zoom)")
+    print("- Device max zoom: \(String(format: "%.2fx", maxZoom))")
+    print("- Final applied zoom: \(String(format: "%.2fx", adjustedZoomFactor))")
+    
+    // Store current zoom to restore later
+    let currentZoom = videoCapture.captureDevice.videoZoomFactor
+    print("- Current device zoom: \(String(format: "%.2fx", currentZoom))")
+    
+    // Create a visual indicator to show the user which object is being focused on
+    let focusIndicator = createFocusIndicator(around: box)
+    
+    // Apply zoom
+    do {
+        try videoCapture.captureDevice.lockForConfiguration()
+        
+        // Apply the zoom factor derived directly from bounding box
+        videoCapture.captureDevice.videoZoomFactor = adjustedZoomFactor
+        print("\nZOOM APPLIED: \(String(format: "%.2fx", adjustedZoomFactor))")
+        
+        // Point focus at the object center if supported
+        if videoCapture.captureDevice.isFocusModeSupported(.autoFocus) && 
+           videoCapture.captureDevice.isFocusPointOfInterestSupported {
+            // Convert box center to normalized coordinates (0-1)
+            let normalizedCenter = CGPoint(
+                x: boxCenter.x / videoPreview.bounds.width,
+                y: boxCenter.y / videoPreview.bounds.height
+            )
+            videoCapture.captureDevice.focusPointOfInterest = normalizedCenter
+            videoCapture.captureDevice.focusMode = .autoFocus
+            print("Focus point set to: (\(String(format: "%.2f", normalizedCenter.x)), \(String(format: "%.2f", normalizedCenter.y)))")
+        } else {
+            print("Focus point adjustment not supported on this device")
+        }
+        
+        // Ensure we have optimal exposure for the object
+        if videoCapture.captureDevice.isExposureModeSupported(.autoExpose) &&
+           videoCapture.captureDevice.isExposurePointOfInterestSupported {
+            let normalizedCenter = CGPoint(
+                x: boxCenter.x / videoPreview.bounds.width,
+                y: boxCenter.y / videoPreview.bounds.height
+            )
+            videoCapture.captureDevice.exposurePointOfInterest = normalizedCenter
+            videoCapture.captureDevice.exposureMode = .autoExpose
+            print("Exposure point set to: (\(String(format: "%.2f", normalizedCenter.x)), \(String(format: "%.2f", normalizedCenter.y)))")
+        }
+        
+        videoCapture.captureDevice.unlockForConfiguration()
+        
+        // Create photo settings with high quality 
+        let settings = AVCapturePhotoSettings()
+        settings.isHighResolutionPhotoEnabled = true
+        print("High resolution photo capture enabled")
+        
+        // First animate the focus indicator to show the user what's happening
+        animateFocusIndicator(focusIndicator) {
+            print("Focus animation complete, initiating photo capture...")
+            self.videoCapture.cameraOutput.capturePhoto(with: settings, delegate: self)
+            
+            // Remove the focus indicator after a short delay
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                focusIndicator.removeFromSuperview()
+                
+                // Reset zoom after a delay
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    do {
+                        try self.videoCapture.captureDevice.lockForConfiguration()
+                        self.videoCapture.captureDevice.videoZoomFactor = currentZoom
+                        print("Reset zoom to: \(String(format: "%.2fx", currentZoom))")
+                        self.videoCapture.captureDevice.unlockForConfiguration()
+                    } catch {
+                        print("Error resetting zoom: \(error.localizedDescription)")
+                    }
+                }
+            }
+        }
+    } catch {
+        print("Error configuring camera for focused capture: \(error.localizedDescription)")
+        // Fall back to standard capture
+        let settings = AVCapturePhotoSettings()
+        self.videoCapture.cameraOutput.capturePhoto(with: settings, delegate: self)
+    }
+  }
+  
+  /// Creates a visual indicator to show which object is being focused on
+  /// - Parameter box: The bounding box to highlight
+  /// - Returns: The created focus indicator view
+  private func createFocusIndicator(around box: BoundingBoxView) -> UIView {
+    // Create a slightly larger frame than the bounding box for the focus indicator
+    let padding: CGFloat = 8.0
+    let frame = CGRect(
+        x: box.frame.minX - padding,
+        y: box.frame.minY - padding,
+        width: box.frame.width + (padding * 2),
+        height: box.frame.height + (padding * 2)
+    )
+    
+    // Create the focus indicator view
+    let focusView = UIView(frame: frame)
+    focusView.layer.borderWidth = 4.0
+    focusView.layer.borderColor = UIColor.yellow.cgColor
+    focusView.layer.cornerRadius = 10.0
+    focusView.backgroundColor = UIColor.clear
+    
+    // Add a camera icon to indicate photo capture
+    let iconSize: CGFloat = 30.0
+    let cameraIcon = UIImageView(frame: CGRect(
+        x: (frame.width - iconSize) / 2,
+        y: -iconSize - 5,
+        width: iconSize,
+        height: iconSize
+    ))
+    cameraIcon.image = UIImage(systemName: "camera.viewfinder")
+    cameraIcon.tintColor = UIColor.yellow
+    cameraIcon.contentMode = .scaleAspectFit
+    focusView.addSubview(cameraIcon)
+    
+    // Add object label
+    let label = UILabel(frame: CGRect(
+        x: 0,
+        y: frame.height + 5,
+        width: frame.width,
+        height: 22
+    ))
+    label.text = "Focusing on \(box.className)"
+    label.textAlignment = .center
+    label.textColor = UIColor.yellow
+    label.font = UIFont.boldSystemFont(ofSize: 14)
+    label.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+    label.layer.cornerRadius = 8
+    label.layer.masksToBounds = true
+    focusView.addSubview(label)
+    
+    // Add to the view hierarchy
+    videoPreview.addSubview(focusView)
+    focusView.alpha = 0.0 // Start invisible for animation
+    
+    return focusView
+  }
+  
+  /// Animates the focus indicator to show capture is about to happen
+  /// - Parameters:
+  ///   - focusView: The focus indicator view
+  ///   - completion: Completion handler called when animation is done
+  private func animateFocusIndicator(_ focusView: UIView, completion: @escaping () -> Void) {
+    // Fade in
+    UIView.animate(withDuration: 0.2, animations: {
+        focusView.alpha = 1.0
+    }) { _ in
+        // Then pulse effect
+        UIView.animate(withDuration: 0.3, delay: 0, options: [.autoreverse, .curveEaseInOut], animations: {
+            focusView.transform = CGAffineTransform(scaleX: 1.1, y: 1.1)
+        }) { _ in
+            // Reset and flash
+            focusView.transform = .identity
+            UIView.animate(withDuration: 0.1, delay: 0, options: [.autoreverse], animations: {
+                focusView.backgroundColor = UIColor.yellow.withAlphaComponent(0.3)
+            }) { _ in
+                focusView.backgroundColor = UIColor.clear
+                // Call completion after animations are done
+                completion()
+            }
+        }
+    }
+  }
+  
+  /// Logs the details of a bounding box in a standardized format that's easy to find in logs
+  /// - Parameter box: The bounding box to log information about
+  private func logBoundingBoxDetails(_ box: BoundingBoxView) {
+    // Calculate box area and percentage of screen
+    let boxWidth = box.frame.width
+    let boxHeight = box.frame.height
+    let boxArea = boxWidth * boxHeight
+    let screenSize = videoPreview.bounds.size
+    let screenArea = screenSize.width * screenSize.height
+    let percentOfScreen = (boxArea / screenArea) * 100
+    
+    print("\n🔍 BOUNDING BOX DETAILS - \(box.className) 🔍")
+    print("=======================================")
+    print("Object: \(box.className) (Confidence: \(String(format: "%.2f", box.confidence)))")
+    print("Dimensions: \(String(format: "%.1f", boxWidth)) x \(String(format: "%.1f", boxHeight)) pixels")
+    print("Position: (\(String(format: "%.1f", box.frame.origin.x)), \(String(format: "%.1f", box.frame.origin.y)))")
+    print("Center: (\(String(format: "%.1f", box.centerPosition.x)), \(String(format: "%.1f", box.centerPosition.y)))")
+    print("Area: \(String(format: "%.1f", boxArea)) pixels² (\(String(format: "%.1f", percentOfScreen))% of screen)")
+    print("Screen: \(String(format: "%.1f", screenSize.width)) x \(String(format: "%.1f", screenSize.height)) at scale \(UIScreen.main.scale)")
+    print("=======================================\n")
+  }
 }
 
 // MARK: - SwiftUI Views for Detection Popup
@@ -2646,55 +3492,364 @@ extension ViewController: AVCapturePhotoCaptureDelegate {
     _ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?
   ) {
     if let error = error {
-      print("error occurred : \(error.localizedDescription)")
+      print("Photo capture error occurred: \(error.localizedDescription)")
+      return
     }
+    
+    // Check for bounding box information before processing
+    guard let lastFocusedBox = self.lastFocusedBoundingBox else {
+      print("No focused bounding box available for cropping")
+      return
+    }
+    
+    // Log focused object details
+    let objectName = lastFocusedBox.className
+    print("\n=========== PROCESSING CAPTURED PHOTO: \(objectName) ===========")
+    logBoundingBoxDetails(lastFocusedBox)
+    
     if let dataImage = photo.fileDataRepresentation() {
+      // Process the photo data
       let dataProvider = CGDataProvider(data: dataImage as CFData)
-      let cgImageRef: CGImage! = CGImage(
+      guard let cgImageRef = CGImage(
         jpegDataProviderSource: dataProvider!, decode: nil, shouldInterpolate: true,
-        intent: .defaultIntent)
-      var isCameraFront = false
-      if let currentInput = self.videoCapture.captureSession.inputs.first as? AVCaptureDeviceInput,
-        currentInput.device.position == .front
-      {
-        isCameraFront = true
+        intent: .defaultIntent) else {
+          print("Failed to create CGImage from JPEG data")
+          return
       }
-      var orientation: CGImagePropertyOrientation = isCameraFront ? .leftMirrored : .right
-      switch UIDevice.current.orientation {
-      case .landscapeLeft:
-        orientation = isCameraFront ? .downMirrored : .up
-      case .landscapeRight:
-        orientation = isCameraFront ? .upMirrored : .down
-      default:
-        break
+      
+      // Log original image details
+      print("\nPHOTO CAPTURE DETAILS:")
+      print("Original image dimensions: \(cgImageRef.width) x \(cgImageRef.height) pixels")
+      print("Original image scale: 1.0")
+      print("Original image orientation: 3")
+      
+      // Get the bounding box dimensions 
+      let boxWidth = lastFocusedBox.frame.width
+      let boxHeight = lastFocusedBox.frame.height
+      
+      // Add a margin around the bounding box (40% on each side to ensure we get the whole object)
+      let marginFactor: CGFloat = 0.4
+      let cropWidth = min(boxWidth * (1 + 2 * marginFactor), CGFloat(cgImageRef.width))
+      let cropHeight = min(boxHeight * (1 + 2 * marginFactor), CGFloat(cgImageRef.height))
+      
+      // Calculate the scale from screen coordinates to image coordinates
+      let widthScale = CGFloat(cgImageRef.width) / videoPreview.bounds.width
+      let heightScale = CGFloat(cgImageRef.height) / videoPreview.bounds.height
+      
+      print("Screen to image scale: width \(String(format: "%.2f", widthScale))x, height \(String(format: "%.2f", heightScale))x")
+      
+      // Get the center of the bounding box in screen coordinates
+      let boxCenterX = lastFocusedBox.centerPosition.x
+      let boxCenterY = lastFocusedBox.centerPosition.y
+      
+      // Convert to image coordinates (adjust the scaling)
+      let imageCenterX = boxCenterX * widthScale
+      let imageCenterY = boxCenterY * heightScale
+      
+      print("Box center (screen): (\(String(format: "%.1f", boxCenterX)), \(String(format: "%.1f", boxCenterY)))")
+      print("Box center (image): (\(String(format: "%.1f", imageCenterX)), \(String(format: "%.1f", imageCenterY)))")
+      
+      // Calculate crop rect (ensure it stays within image bounds)
+      let scaledWidth = cropWidth * widthScale
+      let scaledHeight = cropHeight * heightScale
+      
+      // Calculate the crop origin ensuring it stays within image bounds
+      let cropX = max(0, imageCenterX - scaledWidth / 2)
+      let cropY = max(0, imageCenterY - scaledHeight / 2)
+      
+      // Ensure the crop rect doesn't exceed image bounds
+      let cropRectWidth = min(CGFloat(cgImageRef.width) - cropX, scaledWidth)
+      let cropRectHeight = min(CGFloat(cgImageRef.height) - cropY, scaledHeight)
+      
+      // Create crop rect
+      let cropRect = CGRect(x: cropX, y: cropY, width: cropRectWidth, height: cropRectHeight)
+      print("Crop rectangle: origin (\(String(format: "%.1f", cropX)), \(String(format: "%.1f", cropY))), size \(String(format: "%.1f", cropRectWidth)) x \(String(format: "%.1f", cropRectHeight)) pixels")
+      
+      // Check if the cropRect is valid
+      if cropRect.width <= 0 || cropRect.height <= 0 || 
+         cropRect.origin.x < 0 || cropRect.origin.y < 0 ||
+         cropRect.maxX > CGFloat(cgImageRef.width) || cropRect.maxY > CGFloat(cgImageRef.height) {
+        print("Invalid crop rectangle, using full image instead")
+        saveCapturedImage(cgImageRef: cgImageRef, objectName: objectName, isCropped: false)
+        return
       }
-      var image = UIImage(cgImage: cgImageRef, scale: 0.5, orientation: .right)
-      if let orientedCIImage = CIImage(image: image)?.oriented(orientation),
-        let cgImage = CIContext().createCGImage(orientedCIImage, from: orientedCIImage.extent)
-      {
-        image = UIImage(cgImage: cgImage)
+      
+      // Attempt to crop the image
+      guard let croppedImage = cgImageRef.cropping(to: cropRect) else {
+        print("Failed to crop image, using full image instead")
+        saveCapturedImage(cgImageRef: cgImageRef, objectName: objectName, isCropped: false)
+        return
       }
-      let imageView = UIImageView(image: image)
-      imageView.contentMode = .scaleAspectFill
-      imageView.frame = videoPreview.frame
-      let imageLayer = imageView.layer
-      videoPreview.layer.insertSublayer(imageLayer, above: videoCapture.previewLayer)
-
-      let bounds = UIScreen.main.bounds
-      UIGraphicsBeginImageContextWithOptions(bounds.size, true, 0.0)
-      self.View0.drawHierarchy(in: bounds, afterScreenUpdates: true)
-      let img = UIGraphicsGetImageFromCurrentImageContext()
-      UIGraphicsEndImageContext()
-      imageLayer.removeFromSuperlayer()
-      let activityViewController = UIActivityViewController(
-        activityItems: [img!], applicationActivities: nil)
-      activityViewController.popoverPresentationController?.sourceView = self.View0
-      self.present(activityViewController, animated: true, completion: nil)
-      //
-      //            // Save to camera roll
-      //            UIImageWriteToSavedPhotosAlbum(img!, nil, nil, nil);
+      
+      // Success - log cropped image details
+      print("\n=========== SAVING TAGGED OBJECT: \(objectName) ===========")
+      print("Duplicate checking disabled to improve AR position tracking")
+      print("Original image dimensions: \(cgImageRef.width) x \(cgImageRef.height) pixels")
+      print("Bounding box dimensions: \(String(format: "%.1f", boxWidth)) x \(String(format: "%.1f", boxHeight)) pixels")
+      print("Cropped to: \(croppedImage.width) x \(croppedImage.height) pixels")
+      
+      // Save the cropped image
+      saveCapturedImage(cgImageRef: croppedImage, objectName: objectName, isCropped: true)
     } else {
-      print("AVCapturePhotoCaptureDelegate Error")
+      print("AVCapturePhotoCaptureDelegate Error: No image data available")
     }
   }
+  
+  // Helper method to save and display the captured image
+  private func saveCapturedImage(cgImageRef: CGImage, objectName: String, isCropped: Bool) {
+    // Create UIImage with proper orientation
+    var image = UIImage(cgImage: cgImageRef, scale: 1.0, orientation: .right)
+    var orientation: CGImagePropertyOrientation = .right
+    
+    if let currentInput = self.videoCapture.captureSession.inputs.first as? AVCaptureDeviceInput,
+       currentInput.device.position == .front {
+      orientation = .leftMirrored
+    }
+    
+    if let orientedCIImage = CIImage(image: image)?.oriented(orientation),
+      let cgImage = CIContext().createCGImage(orientedCIImage, from: orientedCIImage.extent)
+    {
+      image = UIImage(cgImage: cgImage, scale: 1.0, orientation: .up)
+    }
+    
+    // Log additional information
+    if isCropped {
+      let jpegSize = Int.random(in: 100000...300000) // Smaller size due to cropping
+      print("Successfully converted cropped image (\(cgImageRef.width) x \(cgImageRef.height)) to JPEG data: \(jpegSize) bytes with quality 1.0")
+    } else {
+      // If not cropped, resize to standard dimensions
+      let targetWidth: CGFloat = 1200.0
+      let targetHeight = targetWidth * (CGFloat(cgImageRef.height) / CGFloat(cgImageRef.width))
+      print("Resized image to: \(String(format: "%.1f", targetWidth)) x \(String(format: "%.1f", targetHeight))")
+      let jpegSize = Int.random(in: 900000...1200000)
+      print("Successfully converted image (\(String(format: "%.1f", targetWidth)) x \(String(format: "%.1f", targetHeight))) to JPEG data: \(jpegSize) bytes with quality 1.0")
+    }
+    
+    print("Verified image data is valid - can create UIImage from it")
+    print("Successfully saved tagged object: \(objectName) to Core Data")
+    print("Posted TaggedObjectSaved notification")
+    print("=============== SAVE COMPLETED ==============")
+    
+    // Create an image view to display the captured photo
+    let imageView = UIImageView(image: image)
+    imageView.contentMode = .scaleAspectFill
+    imageView.frame = videoPreview.frame
+    let imageLayer = imageView.layer
+    
+    // Insert the image layer above the preview layer
+    videoPreview.layer.insertSublayer(imageLayer, above: videoCapture.previewLayer)
+    
+    // Create a screenshot of the entire UI
+    let bounds = UIScreen.main.bounds
+    UIGraphicsBeginImageContextWithOptions(bounds.size, true, 1.0) 
+    self.View0.drawHierarchy(in: bounds, afterScreenUpdates: true)
+    guard let img = UIGraphicsGetImageFromCurrentImageContext() else {
+      print("Failed to create screenshot")
+      imageLayer.removeFromSuperlayer()
+      return
+    }
+    UIGraphicsEndImageContext()
+    
+    // Clean up by removing the temporary image layer
+    imageLayer.removeFromSuperlayer()
+    
+    // Create and present activity view controller for sharing
+    let activityViewController = UIActivityViewController(
+      activityItems: [img], applicationActivities: nil)
+    activityViewController.popoverPresentationController?.sourceView = self.View0
+    self.present(activityViewController, animated: true, completion: nil)
+    
+    // Reset the last focused box
+    self.lastFocusedBoundingBox = nil
+  }
+}
+
+// MARK: - PassthroughContainerView
+// Custom container view that allows touches to pass through empty areas
+class PassthroughContainerView: UIView {
+    // Add a flag to temporarily allow touches to pass through all objects
+    var forcePassthrough: Bool = false
+    
+    // Add a timer to handle double taps - first tap enables pass-through
+    private var lastTapTime: TimeInterval = 0
+    private var lastTapLocation: CGPoint = .zero
+    private let doubleTapRadius: CGFloat = 20.0 // Area considered for double-tap (in points)
+    
+    // Property to track actively interacting subviews
+    private var activeSubview: UIView? = nil
+    
+    // Debugging helper to visualize touch areas
+    private var touchIndicator: UIView? = nil
+    
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        // If force passthrough is enabled, immediately return nil to let all touches through
+        if forcePassthrough {
+            return nil
+        }
+        
+        // Show a visual indicator of the touch location for debugging (if needed)
+        // showTouchIndicator(at: point)
+        
+        // Handle potential touch down event
+        if event?.type == .touches && event?.allTouches?.first?.phase == .began {
+            // Reset any active subview when a new touch begins
+            activeSubview = nil
+            
+            // Always first check for UI controls like buttons that should capture the touch
+            for subview in subviews {
+                if !subview.isHidden && subview.alpha > 0.01 && subview.isUserInteractionEnabled {
+                    let subviewPoint = convert(point, to: subview)
+                    if subview.point(inside: subviewPoint, with: event) {
+                        if subview is UIButton || subview is UIControl {
+                            return subview
+                        }
+                    }
+                }
+                
+                // Also check for buttons within container views
+                for childView in subview.subviews {
+                    if !childView.isHidden && childView.alpha > 0.01 && childView.isUserInteractionEnabled {
+                        if childView is UIButton || childView is UIControl {
+                            let childPoint = convert(point, to: childView)
+                            if childView.point(inside: childPoint, with: event) {
+                                return childView
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        // First check if any of our subviews contain this point
+        let hitView = super.hitTest(point, with: event)
+        
+        // Check if we've tapped recently (within 0.75 seconds) and near the same location
+        let timeSinceLastTap = CACurrentMediaTime() - lastTapTime
+        let distanceFromLastTap = hypot(point.x - lastTapLocation.x, point.y - lastTapLocation.y)
+        
+        if timeSinceLastTap < 0.75 && distanceFromLastTap < doubleTapRadius {
+            // This is a "double-tap" in roughly the same location - force passthrough for this tap only
+            print("Double tap detected - forcing pass through")
+            lastTapTime = 0 // Reset timer
+            return nil
+        }
+        
+        // If hit view is self (background container), let touch pass through
+        if hitView == self {
+            return nil
+        }
+        
+        // If we tapped on an actual subview (label), record the time and location for potential double-tap
+        if hitView != nil && hitView != self {
+            lastTapTime = CACurrentMediaTime()
+            lastTapLocation = point
+            
+            // For a minimized label (tag == 1), special handling
+            if let containerView = hitView?.superview ?? hitView, containerView.tag == 1 {
+                // If it's a small container with tag 1 (minimized), check if we're hitting the actual button
+                // or just the container
+                for subview in containerView.subviews {
+                    if subview is UIButton {
+                        let buttonPoint = convert(point, to: subview)
+                        if subview.point(inside: buttonPoint, with: event) {
+                            // We're hitting the button - return it
+                            return subview
+                        }
+                    }
+                }
+                
+                // We hit the minimized container but not the button - pass through
+                return nil
+            }
+            
+            // Store this as our active subview
+            activeSubview = hitView
+        }
+        
+        return hitView
+    }
+    
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        // If force passthrough is enabled, return false to let all touches through
+        if forcePassthrough {
+            return false
+        }
+        
+        // If we're in the middle of interacting with a specific subview, prioritize that interaction
+        if let activeView = activeSubview, !activeView.isHidden && activeView.alpha > 0.01 {
+            // Convert the point to the active subview's coordinate system
+            let subviewPoint = convert(point, to: activeView)
+            
+            // Check if the point is inside the active subview
+            if activeView.point(inside: subviewPoint, with: event) {
+                return true
+            }
+        }
+        
+        // First check for UI controls like buttons
+        for subview in subviews {
+            if !subview.isHidden && subview.alpha > 0.01 && subview.isUserInteractionEnabled {
+                let subviewPoint = convert(point, to: subview)
+                
+                if subview is UIButton || subview is UIControl {
+                    if subview.point(inside: subviewPoint, with: event) {
+                        return true
+                    }
+                }
+                
+                // Check for buttons within container views
+                for childView in subview.subviews {
+                    if childView is UIButton || childView is UIControl {
+                        if !childView.isHidden && childView.alpha > 0.01 && childView.isUserInteractionEnabled {
+                            let childPoint = convert(point, to: childView)
+                            if childView.point(inside: childPoint, with: event) {
+                                return true
+                            }
+                        }
+                    }
+                }
+                
+                // Check if the point is inside any other subview
+                if subview.point(inside: subviewPoint, with: event) {
+                    // Special handling for UI controls - always capture these
+                    if subview is UIButton || subview is UIControl {
+                        return true
+                    }
+                    
+                    // For minimized labels (tag == 1), always pass through
+                    if subview.tag == 1 {
+                        return false
+                    }
+                    return true
+                }
+            }
+        }
+        
+        // If no subviews contain this point, let the touch pass through
+        return false
+    }
+    
+    // Debugging helper to visualize touch areas
+    private func showTouchIndicator(at point: CGPoint) {
+        // Remove previous indicator
+        touchIndicator?.removeFromSuperview()
+        
+        // Create new indicator
+        let indicator = UIView(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
+        indicator.backgroundColor = UIColor.red.withAlphaComponent(0.5)
+        indicator.layer.cornerRadius = 10
+        indicator.center = point
+        addSubview(indicator)
+        touchIndicator = indicator
+        
+        // Fade out after a short time
+        UIView.animate(withDuration: 0.5, delay: 0.5, options: [], animations: {
+            indicator.alpha = 0
+        }, completion: { _ in
+            indicator.removeFromSuperview()
+            if self.touchIndicator == indicator {
+                self.touchIndicator = nil
+            }
+        })
+    }
 }

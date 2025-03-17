@@ -29,6 +29,18 @@ class CollectionViewController: UIViewController, UICollectionViewDataSource, UI
         if context != nil {
             fetchTaggedObjects()
         }
+        
+        // Add observer for newly saved objects
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleObjectSaved),
+            name: Notification.Name("TaggedObjectSaved"),
+            object: nil
+        )
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -184,10 +196,25 @@ class CollectionViewController: UIViewController, UICollectionViewDataSource, UI
     
     private func fetchTaggedObjects() {
         taggedObjects = PersistenceController.shared.fetchTaggedObjects(context: context)
+        
+        // Debug info about fetched objects
+        print("Fetched \(taggedObjects.count) tagged objects for collection view")
+        for (index, object) in taggedObjects.enumerated() {
+            let hasImage = object.image != nil && !(object.image?.isEmpty ?? true)
+            let imageSize = object.image?.count ?? 0
+            print("  Object \(index): \(object.english ?? "unknown") - Has image: \(hasImage) (Size: \(imageSize) bytes)")
+        }
+        
         collectionView.reloadData()
         
         // Show/hide empty state view
         emptyStateView.isHidden = !taggedObjects.isEmpty
+    }
+    
+    @objc private func handleObjectSaved() {
+        DispatchQueue.main.async { [weak self] in
+            self?.fetchTaggedObjects()
+        }
     }
     
     // MARK: - UICollectionViewDataSource
@@ -331,11 +358,51 @@ class TaggedObjectCell: UICollectionViewCell {
     }
     
     func configure(with taggedObject: TaggedObject) {
-        if let imageData = taggedObject.image {
-            imageView.image = UIImage(data: imageData)
+        // Log debugging info
+        let objectName = taggedObject.english ?? "unknown"
+        let hasImageData = taggedObject.image != nil && !(taggedObject.image?.isEmpty ?? true)
+        let imageDataSize = taggedObject.image?.count ?? 0
+        print("Configuring cell for \(objectName) - Image data: \(hasImageData) (Size: \(imageDataSize) bytes)")
+        
+        if let imageData = taggedObject.image, !imageData.isEmpty {
+            print("  Attempting to create UIImage for \(objectName) from \(imageData.count) bytes")
+            
+            // Set a placeholder immediately
+            imageView.image = UIImage(systemName: "arrow.clockwise")
+            imageView.tintColor = .systemBlue
+            imageView.contentMode = .center
+            
+            // Use a background thread to create the image
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                let startTime = CFAbsoluteTimeGetCurrent()
+                let image = UIImage(data: imageData)
+                let duration = CFAbsoluteTimeGetCurrent() - startTime
+                
+                let success = image != nil
+                print("  Image creation for \(objectName): \(success ? "SUCCESS" : "FAILED") in \(duration) seconds")
+                
+                // Update UI on main thread
+                DispatchQueue.main.async {
+                    guard let self = self else { return }
+                    
+                    if let image = image {
+                        self.imageView.image = image
+                        self.imageView.contentMode = .scaleAspectFill
+                        self.imageView.tintColor = nil
+                        print("  Successfully displayed image for \(objectName)")
+                    } else {
+                        self.imageView.image = UIImage(systemName: "exclamationmark.triangle")
+                        self.imageView.tintColor = .systemRed
+                        self.imageView.contentMode = .center
+                        print("  Failed to create/display image for \(objectName)")
+                    }
+                }
+            }
         } else {
+            print("  No image data for \(objectName)")
             imageView.image = UIImage(systemName: "photo")
             imageView.tintColor = .systemGray3
+            imageView.contentMode = .center
         }
         
         nameLabel.text = taggedObject.english

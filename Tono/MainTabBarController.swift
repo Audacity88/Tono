@@ -49,11 +49,11 @@ class MainTabBarController: UITabBarController {
             tag: 0
         )
         
-        // 2. Collection Tab (SwiftUI)
-        let collectionView = CollectionView()
-            .environment(\.managedObjectContext, persistenceController.container.viewContext)
-        let collectionHostingController = UIHostingController(rootView: collectionView)
-        collectionHostingController.tabBarItem = UITabBarItem(
+        // 2. Collection Tab (UIKit-based implementation)
+        let collectionVC = CollectionViewController()
+        collectionVC.context = persistenceController.container.viewContext
+        let collectionNavController = UINavigationController(rootViewController: collectionVC)
+        collectionNavController.tabBarItem = UITabBarItem(
             title: "Collection",
             image: UIImage(systemName: "square.grid.2x2.fill"),
             tag: 1
@@ -82,7 +82,7 @@ class MainTabBarController: UITabBarController {
         // Set the view controllers
         viewControllers = [
             exploreNavController,
-            collectionHostingController,
+            collectionNavController,
             practiceHostingController,
             settingsHostingController
         ]
@@ -103,17 +103,33 @@ struct CollectionView: View {
         NavigationView {
             List {
                 ForEach(items) { item in
-                    VStack(alignment: .leading) {
-                        Text(item.chinese ?? "Unknown")
-                            .font(.headline)
-                        Text(item.pinyin ?? "")
-                            .font(.subheadline)
-                            .foregroundColor(.orange)
-                        Text(item.english ?? "")
-                            .font(.caption)
-                            .foregroundColor(.gray)
+                    HStack {
+                        if let imageData = item.image, let uiImage = UIImage(data: imageData) {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 60, height: 60)
+                                .cornerRadius(8)
+                        } else {
+                            Image(systemName: "photo")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 60, height: 60)
+                                .foregroundColor(.gray)
+                        }
+                        
+                        VStack(alignment: .leading) {
+                            Text(item.chinese ?? "Unknown")
+                                .font(.headline)
+                            Text(item.pinyin ?? "")
+                                .font(.subheadline)
+                                .foregroundColor(.orange)
+                            Text(item.english ?? "")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
+                        .padding(.vertical, 4)
                     }
-                    .padding(.vertical, 4)
                 }
                 .onDelete(perform: deleteItems)
             }

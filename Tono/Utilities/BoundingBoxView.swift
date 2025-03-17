@@ -87,8 +87,15 @@ class BoundingBoxView: UIView {
         return
     }
     
-    // Update the view's frame with validated values
-    self.frame = frame
+    // Make the frame slightly larger to be easier to tap - expand by 10% but minimum 10px each side
+    let expandAmount = max(10.0, min(frame.width * 0.1, frame.height * 0.1))
+    let expandedFrame = frame.insetBy(dx: -expandAmount, dy: -expandAmount)
+    
+    // Update the view's frame with validated and expanded values
+    self.frame = expandedFrame
+    
+    // Store the center position for tracking
+    self.centerPosition = CGPoint(x: frame.midX, y: frame.midY)
     
     // Make sure the view is visible
     self.isHidden = false
@@ -98,17 +105,28 @@ class BoundingBoxView: UIView {
     self.layer.zPosition = 100
     
     // Set the shape layer properties
-    shapeLayer.lineWidth = 4  // Standard line width
+    shapeLayer.lineWidth = 5  // Slightly thicker line for better visibility
     
-    let path = UIBezierPath(roundedRect: bounds, cornerRadius: 6.0)  // Rounded rectangle for the bounding box
+    // Create path based on the original object size (not expanded hitbox)
+    let originalRect = CGRect(
+        x: expandAmount, 
+        y: expandAmount, 
+        width: frame.width, 
+        height: frame.height
+    )
+    let path = UIBezierPath(roundedRect: originalRect, cornerRadius: 8.0)  // Rounded rectangle with more rounded corners
     shapeLayer.path = path.cgPath
-    shapeLayer.strokeColor = color.withAlphaComponent(alpha).cgColor  // Use the provided alpha
+    shapeLayer.strokeColor = color.withAlphaComponent(alpha + 0.2).cgColor  // Slightly more opaque for better visibility
     shapeLayer.isHidden = false  // Make the shape layer visible
+    
+    // Add a subtle pulsing animation to the box to make it more noticeable
+    addPulseAnimation()
 
     textLayer.string = label  // Set the label text
-    textLayer.backgroundColor = color.withAlphaComponent(alpha).cgColor  // Use the provided alpha
+    textLayer.backgroundColor = color.withAlphaComponent(alpha + 0.1).cgColor  // Slightly more opaque background
     textLayer.isHidden = false  // Make the text layer visible
     textLayer.foregroundColor = UIColor.white.cgColor  // Set text color with full opacity
+    textLayer.fontSize = 16  // Slightly larger font
     
     // Add a subtle shadow to make text more visible against AR content
     textLayer.shadowOpacity = 0.8
@@ -122,14 +140,33 @@ class BoundingBoxView: UIView {
       with: CGSize(width: 400, height: 100),
       options: .truncatesLastVisibleLine,
       attributes: attributes, context: nil)
-    let textSize = CGSize(width: textRect.width + 12, height: textRect.height)  // Add padding to the text size
+    let textSize = CGSize(width: textRect.width + 12, height: textRect.height + 4)  // Add more padding
     let textOrigin = CGPoint(x: 0, y: -textSize.height - 2)  // Position above the bounding box
     textLayer.frame = CGRect(origin: textOrigin, size: textSize)  // Set the text layer frame
+    textLayer.cornerRadius = 4  // Rounded corners for the text background
   }
 
   /// Hides the bounding box and text layers.
   func hide() {
     shapeLayer.isHidden = true
     textLayer.isHidden = true
+  }
+  
+  // Add a subtle pulsing animation to make the box more noticeable
+  private func addPulseAnimation() {
+    // Remove any existing animations
+    shapeLayer.removeAnimation(forKey: "pulseAnimation")
+    
+    // Create a subtle pulse animation
+    let pulseAnimation = CABasicAnimation(keyPath: "lineWidth")
+    pulseAnimation.fromValue = shapeLayer.lineWidth
+    pulseAnimation.toValue = shapeLayer.lineWidth - 1.0
+    pulseAnimation.duration = 1.0
+    pulseAnimation.autoreverses = true
+    pulseAnimation.repeatCount = Float.infinity
+    pulseAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+    
+    // Add the animation
+    shapeLayer.add(pulseAnimation, forKey: "pulseAnimation")
   }
 }
