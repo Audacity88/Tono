@@ -64,7 +64,7 @@ extension PersistenceController {
         print("\n=========== SAVING TAGGED OBJECT: \(english) ===========")
         
         // Check if this object already exists in the collection
-        if isDuplicate(english: english, context: context) {
+        if isDuplicate(english: english, chinese: chinese, context: context) {
             print("Object '\(english)' already exists in collection, not saving duplicate")
             return
         }
@@ -171,25 +171,23 @@ extension PersistenceController {
         return normalizedImage
     }
     
-    // Check if an object with the same English name already exists at the same position
-    func isDuplicate(english: String, context: NSManagedObjectContext) -> Bool {
-        // Disable duplicate checking temporarily to help fix position tracking issues
-        print("Duplicate checking disabled to improve AR position tracking")
-        return false
-        
-        /* Original duplicate checking logic - disabled for now
+    // Check if an object with the same Chinese text already exists
+    func isDuplicate(english: String, chinese: String, context: NSManagedObjectContext) -> Bool {
         let fetchRequest: NSFetchRequest<TaggedObject> = TaggedObject.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "english ==[c] %@", english)
+        fetchRequest.predicate = NSPredicate(format: "chinese ==[c] %@", chinese)
         fetchRequest.fetchLimit = 1
         
         do {
             let results = try context.fetch(fetchRequest)
-            return !results.isEmpty
+            if !results.isEmpty {
+                print("Object with Chinese text '\(chinese)' already exists in collection, not saving duplicate")
+                return true
+            }
+            return false
         } catch {
             print("Error checking for duplicate: \(error)")
             return false
         }
-        */
     }
     
     // Get all tagged objects

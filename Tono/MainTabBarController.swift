@@ -9,7 +9,7 @@ import UIKit
 import SwiftUI
 import CoreData
 
-class MainTabBarController: UITabBarController {
+class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
     
     // Reference to the Core Data persistence controller
     private let persistenceController = PersistenceController.shared
@@ -22,6 +22,22 @@ class MainTabBarController: UITabBarController {
         
         // Set up the view controllers for each tab
         setupViewControllers()
+        
+        // Set delegate to self to handle tab changes
+        self.delegate = self
+    }
+    
+    // Handle tab changes
+    func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
+        // Post a notification when tab changes
+        NotificationCenter.default.post(
+            name: NSNotification.Name("TabChangedNotification"),
+            object: self,
+            userInfo: ["selectedIndex": tabBarController.selectedIndex]
+        )
+        
+        // Log tab change for debugging
+        print("Tab changed to index: \(tabBarController.selectedIndex)")
     }
     
     private func setupAppearance() {

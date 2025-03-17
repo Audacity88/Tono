@@ -191,6 +191,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     setUpBoundingBoxViews()
     setUpOrientationChangeNotification()
     
+    // Set up app lifecycle notifications to handle foreground/background transitions
+    setupAppLifecycleNotifications()
+    
     // Initialize AR Scene Manager
     arSceneManager = ARSceneManager(viewController: self)
     
@@ -301,6 +304,17 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         if granted {
             print("Permission granted, starting video capture")
             self.startVideo()
+            
+            // Ensure camera is running after initialization
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                // Auto-start camera only on first launch
+                if self.videoCapture?.captureSession != nil && !self.videoCapture.captureSession.isRunning {
+                    print("Auto-starting camera after initialization")
+                    self.videoCapture.start()
+                    self.playButtonOutlet.isEnabled = false
+                    self.pauseButtonOutlet.isEnabled = true
+                }
+            }
         } else {
             print("Camera permission denied")
             // Show a placeholder or message indicating camera is not available
@@ -318,18 +332,68 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     // Fix issue with toolbar not being clickable by bringing it to front again
     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
         self.ensureToolbarIsInFront()
-        self.playButtonOutlet.isEnabled = true
-        self.pauseButtonOutlet.isEnabled = false
+        // We'll set these after checking camera state
     }
-    
-    // Initialize play/pause state correctly
-    self.pauseButtonOutlet.isEnabled = false
-    self.playButtonOutlet.isEnabled = true
     
     // Setup label stack view
     setupLabelStackView()
     
     // setModel()
+  }
+  
+  private func setupAppLifecycleNotifications() {
+    // Add observer for app entering foreground
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(appWillEnterForeground),
+      name: UIApplication.willEnterForegroundNotification,
+      object: nil
+    )
+    
+    // Add observer for app becoming active
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(appDidBecomeActive),
+      name: UIApplication.didBecomeActiveNotification,
+      object: nil
+    )
+    
+    // Add observer for app entering background
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(appDidEnterBackground),
+      name: UIApplication.didEnterBackgroundNotification,
+      object: nil
+    )
+  }
+  
+  @objc private func appWillEnterForeground() {
+    print("App will enter foreground - preparing to restart camera")
+    // Will restart in appDidBecomeActive
+  }
+  
+  @objc private func appDidBecomeActive() {
+    print("App did become active - checking camera status")
+    // Delayed execution to avoid configuration conflicts
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+      self.ensureToolbarIsInFront()
+      if self.videoCapture?.captureSession != nil && !self.videoCapture.captureSession.isRunning {
+        print("Restarting camera after app became active")
+        self.videoCapture.start()
+        self.playButtonOutlet.isEnabled = false
+        self.pauseButtonOutlet.isEnabled = true
+      }
+    }
+  }
+  
+  @objc private func appDidEnterBackground() {
+    print("App did enter background - pausing camera")
+    // Pause camera when app enters background
+    if self.videoCapture?.captureSession != nil && self.videoCapture.captureSession.isRunning {
+      self.videoCapture.stop()
+      self.playButtonOutlet.isEnabled = true
+      self.pauseButtonOutlet.isEnabled = false
+    }
   }
   
   override func viewWillAppear(_ animated: Bool) {
@@ -338,12 +402,99 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     // Start AR session
     arSceneManager.setupARSession()
     
+    // Register for tab change notifications
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(handleTabChange(_:)),
+      name: NSNotification.Name("TabChangedNotification"),
+      object: nil
+    )
+    
+    // Restart video capture if it was previously initialized
+    // Use a slight delay to ensure we don't interfere with any ongoing configuration
+    restartVideoCaptureIfNeeded(delay: 0.3)
+    
     // No longer clearing Core Data objects on app startup
     // This allows the collection to persist between tab switches
   }
   
+  override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    
+    // This is called after the view is fully visible
+    // Try to restart the camera again if needed with a slightly longer delay
+    restartVideoCaptureIfNeeded(delay: 0.5)
+  }
+  
+  override func viewWillDisappear(_ animated: Bool) {
+    super.viewWillDisappear(animated)
+    
+    // Remove tab change notification when view disappears
+    NotificationCenter.default.removeObserver(self, name: NSNotification.Name("TabChangedNotification"), object: nil)
+    
+    // Stop AR tracking monitoring
+    stopARTrackingStateMonitoring()
+    
+    // Pause AR session
+    arSceneManager.pauseARSession()
+    
+    // Stop world map saving to prevent unnecessary resource usage
+    if #available(iOS 12.0, *) {
+      arSceneManager.stopWorldMapSaving()
+    }
+  }
+  
+  // Helper method to restart video capture with a delay
+  private func restartVideoCaptureIfNeeded(delay: TimeInterval) {
+    DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+      if self.videoCapture?.captureSession != nil && !self.videoCapture.captureSession.isRunning {
+        print("Restarting video capture with \(delay)s delay")
+        do {
+          // Make sure we're not in a configuration state
+          self.videoCapture.start()
+          self.playButtonOutlet.isEnabled = false
+          self.pauseButtonOutlet.isEnabled = true
+        } catch {
+          print("Error restarting video capture: \(error)")
+        }
+      }
+    }
+  }
+  
+  // Handle tab change notifications
+  @objc private func handleTabChange(_ notification: Notification) {
+    if let userInfo = notification.userInfo,
+       let selectedIndex = userInfo["selectedIndex"] as? Int {
+      
+      // Check if our tab was selected (index 0 is the Explore tab)
+      if selectedIndex == 0 {
+        print("Explore tab selected - ensuring camera is running")
+        restartVideoCaptureIfNeeded(delay: 0.3)
+      }
+    }
+  }
+  
   // Helper method to ensure toolbar is always at the front of the view hierarchy
   private func ensureToolbarIsInFront() {
+    // First make sure AR container is in front of everything else
+    if let container = self.arContainerView {
+      self.view.bringSubviewToFront(container)
+      
+      // Ensure all labels in the container are interactive
+      for label in container.subviews {
+        label.isUserInteractionEnabled = true
+        label.layer.zPosition = 100
+        
+        // Ensure all buttons in labels are interactive
+        for subview in label.subviews {
+          if let button = subview as? UIButton {
+            button.isUserInteractionEnabled = true
+          }
+        }
+      }
+    }
+    
+    // Then put the toolbar at the very front
     if let toolbar = self.toolBar {
       self.view.bringSubviewToFront(toolbar)
       
@@ -690,20 +841,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     })
   }
   
-  override func viewWillDisappear(_ animated: Bool) {
-    super.viewWillDisappear(animated)
-    
-    // Stop AR tracking monitoring
-    stopARTrackingStateMonitoring()
-    
-    // Pause AR session
-    arSceneManager.pauseARSession()
-    
-    // Stop world map saving to prevent unnecessary resource usage
-    if #available(iOS 12.0, *) {
-      arSceneManager.stopWorldMapSaving()
-    }
-  }
+  // This override is deleted - there's already a viewWillDisappear method earlier in the file
   
   // Setup label stack view
   private func setupLabelStackView() {
@@ -1493,9 +1631,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
           let bestClass = prediction.labels[0].identifier
           let confidence = prediction.labels[0].confidence
           
-          // Check if we've already labeled this object class - prevent duplicates
+          // Check if we've already labeled this object class in the current session
           if labeledBoxes.contains(where: { labeled in labeled.className == bestClass }) {
-              // This class is already labeled - hide it
+              // This class is already labeled in the current session - hide it
               boundingBoxViews[i].hide()
               continue
           }
@@ -1573,6 +1711,24 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         lastARSyncTime = currentTime
         // If we have labels in the container, synchronize their positions with bounding boxes
         synchronizeARLabelsWithBoundingBoxes()
+        
+        // Also make sure the container stays in front and labels remain interactive
+        if let container = self.arContainerView {
+          self.view.bringSubviewToFront(container)
+          
+          // Ensure all labels in the container are interactive
+          for label in container.subviews {
+            label.isUserInteractionEnabled = true
+            label.layer.zPosition = 100
+            
+            // Ensure all buttons in labels are interactive
+            for subview in label.subviews {
+              if let button = subview as? UIButton {
+                button.isUserInteractionEnabled = true
+              }
+            }
+          }
+        }
       }
     }
 
@@ -1670,14 +1826,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     // Log the bounding box details when tapped
     logBoundingBoxDetails(boxView)
     
-    // IMPORTANT: First check if we've already labeled this class type
-    if labeledBoxes.contains(where: { $0.className == className }) {
-        // Already labeled this class - don't create a duplicate
-        print("Class \(className) is already labeled - ignoring tap")
-        showToast(message: "\(className) is already labeled")
-        return
-    }
-    
     // Check if we have a translation for this class
     guard let translation = boxView.translation ?? translationManager.getTranslation(for: className) else {
         print("No translation found for \(className)")
@@ -1689,11 +1837,17 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     // Create detection info from the bounding box data
     let detection = (english: className, chinese: translation.chinese, pinyin: translation.pinyin)
     
-    // COMPLETELY CHANGED APPROACH: Use our container-based approach
-    // This will handle all the animations, AR positioning, Core Data, etc.
+    // Proceed with creating UI for this object
     place3DTextAtBoundingBox(boxView, detection: detection)
     
-    // Track this class as labeled to prevent duplicates
+    // Hide ALL bounding boxes of this same class - for the entire session
+    for boundingBox in boundingBoxViews {
+        if !boundingBox.isHidden && boundingBox.className == className {
+            boundingBox.hide()
+        }
+    }
+    
+    // Add to labeled boxes to prevent showing this class again in this session
     let objectId = UUID()
     labeledBoxes.append((id: objectId, className: className, centerX: boxView.frame.midX, centerY: boxView.frame.midY))
     
@@ -1880,6 +2034,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
       transitionView.backgroundColor = UIColor.yellow.withAlphaComponent(0.3)
       transitionView.alpha = 0.9
     }) { _ in
+      // We don't need to show any notification for duplicates anymore
+      // The duplicate check happens in PersistenceController when saving to Core Data
+      
       // Get the center of the bounding box in screen coordinates
       let boxCenter = CGPoint(
           x: boxView.frame.midX,
@@ -2443,6 +2600,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                     }
                 }
                 
+                // Ensure the AR container view for cards is at the front
+                if let container = self.arContainerView {
+                    self.view.bringSubviewToFront(container)
+                }
+                
                 // Show the buttons since AR is active
                 self.clearARButton?.isHidden = false
                 
@@ -2456,6 +2618,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 } else {
                     self.refreshARButton?.isHidden = false
                 }
+                
+                // Make sure toolbar stays above everything
+                self.ensureToolbarIsInFront()
             }
         })
     } else {
@@ -2483,6 +2648,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             // Hide the buttons
             self.clearARButton?.isHidden = true
             self.refreshARButton?.isHidden = true
+            
+            // Ensure AR container still stays at front
+            self.ensureToolbarIsInFront()
         })
     }
   }
@@ -2590,6 +2758,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     // Store reference to reset button
     self.resetARButton = resetButton
+    
+    // Ensure the AR container for UI cards is on top of everything except the toolbar
+    if let container = arContainerView {
+      view.bringSubviewToFront(container)
+    }
     
     // Make sure the toolbar is in front of these buttons
     ensureToolbarIsInFront()
