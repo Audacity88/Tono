@@ -26,6 +26,7 @@ class ObjectDetailViewController: UIViewController {
         imageView.clipsToBounds = true
         imageView.layer.cornerRadius = 12
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        // We'll use pre-rotated images instead of transforming the view
         return imageView
     }()
     
@@ -176,7 +177,27 @@ class ObjectDetailViewController: UIViewController {
     private func configureViews() {
         // Configure image view
         if let imageData = taggedObject.image {
-            imageView.image = UIImage(data: imageData)
+            // Load and rotate the image
+            if let originalImage = UIImage(data: imageData) {
+                // Create context for rotation
+                UIGraphicsBeginImageContextWithOptions(CGSize(width: originalImage.size.height, height: originalImage.size.width), false, originalImage.scale)
+                if let context = UIGraphicsGetCurrentContext() {
+                    // Rotate 90 degrees counterclockwise
+                    context.translateBy(x: 0, y: originalImage.size.width)
+                    context.rotate(by: -CGFloat.pi / 2)
+                    originalImage.draw(at: CGPoint.zero)
+                    let rotatedImage = UIGraphicsGetImageFromCurrentImageContext()
+                    UIGraphicsEndImageContext()
+                    imageView.image = rotatedImage
+                } else {
+                    imageView.image = originalImage // Fallback if context creation fails
+                }
+            }
+            
+            // Add tap gesture to show full-screen image
+            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(imageViewTapped))
+            imageView.isUserInteractionEnabled = true
+            imageView.addGestureRecognizer(tapGesture)
         } else {
             imageView.image = UIImage(systemName: "photo")
             imageView.tintColor = .systemGray3
@@ -189,6 +210,68 @@ class ObjectDetailViewController: UIViewController {
         
         // Configure review info
         setupReviewInfo()
+    }
+    
+    @objc private func imageViewTapped() {
+        guard let image = imageView.image else { return }
+        
+        // Create container view for full-screen display
+        let containerView = UIView(frame: view.window?.bounds ?? view.bounds)
+        containerView.backgroundColor = UIColor.black.withAlphaComponent(0.9)
+        containerView.alpha = 0
+        
+        // Create image view to display the full-size image
+        let fullImageView = UIImageView(frame: containerView.bounds)
+        fullImageView.contentMode = .scaleAspectFit
+        fullImageView.image = image
+        // No need to apply rotation as the image is already rotated
+        
+        // Add close button
+        let closeButton = UIButton(type: .system)
+        closeButton.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
+        closeButton.tintColor = .white
+        closeButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Add views to container
+        containerView.addSubview(fullImageView)
+        containerView.addSubview(closeButton)
+        
+        // Add constraints for close button
+        NSLayoutConstraint.activate([
+            closeButton.topAnchor.constraint(equalTo: containerView.safeAreaLayoutGuide.topAnchor, constant: 16),
+            closeButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+            closeButton.widthAnchor.constraint(equalToConstant: 40),
+            closeButton.heightAnchor.constraint(equalToConstant: 40)
+        ])
+        
+        // Add tap gesture to close
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissFullScreenImage))
+        closeButton.addGestureRecognizer(tapGesture)
+        containerView.tag = 1001  // Tag for identification
+        
+        // Add to view hierarchy
+        if let window = view.window {
+            window.addSubview(containerView)
+        } else {
+            view.addSubview(containerView)
+        }
+        
+        // Animate appearance
+        UIView.animate(withDuration: 0.3) {
+            containerView.alpha = 1.0
+        }
+    }
+    
+    @objc private func dismissFullScreenImage(_ gesture: UITapGestureRecognizer) {
+        guard let containerView = gesture.view?.superview,
+              containerView.tag == 1001 else { return }
+        
+        // Animate dismissal
+        UIView.animate(withDuration: 0.3, animations: {
+            containerView.alpha = 0
+        }) { _ in
+            containerView.removeFromSuperview()
+        }
     }
     
     private func setupReviewInfo() {

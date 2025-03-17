@@ -95,7 +95,10 @@ class BoundingBoxView: UIView {
     self.frame = expandedFrame
     
     // Store the center position for tracking
-    self.centerPosition = CGPoint(x: frame.midX, y: frame.midY)
+    // Make sure center is within valid screen coordinates
+    let validMidX = max(0, min(UIScreen.main.bounds.width, frame.midX))
+    let validMidY = max(0, min(UIScreen.main.bounds.height, frame.midY))
+    self.centerPosition = CGPoint(x: validMidX, y: validMidY)
     
     // Make sure the view is visible
     self.isHidden = false

@@ -2054,51 +2054,91 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     let boxHeight = boxView.frame.height
     let boxCenter = boxView.centerPosition
     
+    // Log original values for debugging
+    print("Original box center: (\(String(format: "%.1f", boxCenter.x)), \(String(format: "%.1f", boxCenter.y)))")
+    
+    // Ensure box center is valid (positive coordinates within screen)
+    // If negative, adjust to be at least at position 0
+    let adjustedBoxCenterX = max(0, boxCenter.x)
+    let adjustedBoxCenterY = max(0, boxCenter.y)
+    
+    // Log if we had to adjust coordinates
+    if adjustedBoxCenterX != boxCenter.x || adjustedBoxCenterY != boxCenter.y {
+        print("Adjusted box center from (\(String(format: "%.1f", boxCenter.x)), \(String(format: "%.1f", boxCenter.y))) to (\(String(format: "%.1f", adjustedBoxCenterX)), \(String(format: "%.1f", adjustedBoxCenterY)))")
+    }
+    
     // Calculate the scale from screen coordinates to image coordinates
     let widthScale = fullImage.size.width / videoPreview.bounds.width
     let heightScale = fullImage.size.height / videoPreview.bounds.height
     
     print("Screen to image scale: width \(String(format: "%.2f", widthScale))x, height \(String(format: "%.2f", heightScale))x")
     
-    // Convert box center to image coordinates
-    let imageCenterX = boxCenter.x * widthScale
-    let imageCenterY = boxCenter.y * heightScale
+    // Convert box center to image coordinates using adjusted values
+    let imageCenterX = adjustedBoxCenterX * widthScale
+    let imageCenterY = adjustedBoxCenterY * heightScale
     
-    // Add margin around the bounding box (40% on each side)
-    let marginFactor: CGFloat = 0.4
-    let cropWidth = min(boxWidth * (1 + 2 * marginFactor) * widthScale, fullImage.size.width)
-    let cropHeight = min(boxHeight * (1 + 2 * marginFactor) * heightScale, fullImage.size.height)
+    // Use a smaller margin to focus tightly on the detected object (20% margin instead of 40%)
+    let marginFactor: CGFloat = 0.2
+    
+    // Calculate crop dimensions, ensuring they're reasonable
+    let cropWidth = min(max(boxWidth, 100) * (1 + 2 * marginFactor) * widthScale, fullImage.size.width)
+    let cropHeight = min(max(boxHeight, 100) * (1 + 2 * marginFactor) * heightScale, fullImage.size.height)
     
     // Calculate crop rect (ensure it stays within image bounds)
-    let cropX = max(0, imageCenterX - cropWidth / 2)
-    let cropY = max(0, imageCenterY - cropHeight / 2)
+    let cropX = max(0, min(fullImage.size.width - cropWidth, imageCenterX - cropWidth / 2))
+    let cropY = max(0, min(fullImage.size.height - cropHeight, imageCenterY - cropHeight / 2))
     
     // Ensure the crop rect doesn't exceed image bounds
     let cropRectWidth = min(fullImage.size.width - cropX, cropWidth)
     let cropRectHeight = min(fullImage.size.height - cropY, cropHeight)
     
-    // Create the crop rect
-    let cropRect = CGRect(x: cropX, y: cropY, width: cropRectWidth, height: cropRectHeight)
-    print("Crop rectangle: origin (\(String(format: "%.1f", cropX)), \(String(format: "%.1f", cropY))), size \(String(format: "%.1f", cropRectWidth)) x \(String(format: "%.1f", cropRectHeight)) pixels")
+    // Create the crop rect - ensure all values are integers as CGImage.cropping requires integral values
+    let intCropX = floor(cropX)
+    let intCropY = floor(cropY)
+    let intCropWidth = ceil(cropRectWidth)
+    let intCropHeight = ceil(cropRectHeight)
+    
+    let cropRect = CGRect(x: intCropX, y: intCropY, width: intCropWidth, height: intCropHeight)
+    print("Crop rectangle: origin (\(String(format: "%.1f", intCropX)), \(String(format: "%.1f", intCropY))), size \(String(format: "%.1f", intCropWidth)) x \(String(format: "%.1f", intCropHeight)) pixels")
     
     // Create CGImage from UIImage for cropping
     guard let cgImage = fullImage.cgImage else {
       print("Failed to get CGImage from UIImage")
-      return fullImage // Return original image as fallback
+      return rotateImage(fullImage) // Apply rotation even to fallback image
     }
     
-    // Check if the cropRect is valid
-    if cropRect.width <= 0 || cropRect.height <= 0 || 
-       cropRect.origin.x < 0 || cropRect.origin.y < 0 ||
-       cropRect.maxX > CGFloat(cgImage.width) || cropRect.maxY > CGFloat(cgImage.height) {
-      print("Invalid crop rectangle, using full image instead")
-      return fullImage
+    // Check if the cropRect is valid - we've already ensured positive values, so just check for reasonable size
+    // For debugging, print all the values that might cause the check to fail
+    print("Crop validation - Width: \(cropRect.width), Height: \(cropRect.height), MaxX: \(cropRect.maxX), MaxY: \(cropRect.maxY), Image width: \(cgImage.width), Image height: \(cgImage.height)")
+    
+    // Only mark invalid if really zero or definitely out of bounds
+    let isInvalidWidth = cropRect.width <= 5
+    let isInvalidHeight = cropRect.height <= 5
+    let isOutOfBoundsX = cropRect.origin.x >= CGFloat(cgImage.width) || cropRect.maxX <= 0
+    let isOutOfBoundsY = cropRect.origin.y >= CGFloat(cgImage.height) || cropRect.maxY <= 0
+    
+    if isInvalidWidth || isInvalidHeight || isOutOfBoundsX || isOutOfBoundsY {
+      print("Invalid crop rectangle: width=\(cropRect.width), height=\(cropRect.height), isOutOfBoundsX=\(isOutOfBoundsX), isOutOfBoundsY=\(isOutOfBoundsY)")
+      return rotateImage(fullImage) // Apply rotation even to fallback image
     }
+    
+    // Log successful crop parameters
+    print("Valid crop rectangle confirmed - proceeding with crop")
+    
+    // Final safety check to ensure crop rectangle is completely within image bounds
+    let safeRect = CGRect(
+      x: max(0, min(CGFloat(cgImage.width) - 1, cropRect.origin.x)),
+      y: max(0, min(CGFloat(cgImage.height) - 1, cropRect.origin.y)),
+      width: min(CGFloat(cgImage.width) - cropRect.origin.x, max(1, cropRect.width)),
+      height: min(CGFloat(cgImage.height) - cropRect.origin.y, max(1, cropRect.height))
+    )
+    
+    print("Safe crop rectangle: origin (\(safeRect.origin.x), \(safeRect.origin.y)), size \(safeRect.width) x \(safeRect.height)")
     
     // Attempt to crop the image
-    guard let croppedCGImage = cgImage.cropping(to: cropRect) else {
+    guard let croppedCGImage = cgImage.cropping(to: safeRect) else {
       print("Failed to crop image, using full image instead")
-      return fullImage
+      return rotateImage(fullImage) // Apply rotation even to fallback image
     }
     
     // Create UIImage from cropped CGImage, preserving scale and orientation
@@ -2111,8 +2151,41 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     // Success - log cropped image details
     print("Successfully cropped image to: \(croppedImage.size.width) x \(croppedImage.size.height) pixels")
     print("Bounding box dimensions: \(String(format: "%.1f", boxWidth)) x \(String(format: "%.1f", boxHeight)) pixels")
+    print("Using tighter crop with \(String(format: "%.0f", marginFactor * 100))% margin for better focus on object")
     
-    return croppedImage
+    // Always rotate the image consistently
+    return rotateImage(croppedImage)
+  }
+  
+  // Helper function to ensure consistent image rotation
+  private func rotateImage(_ image: UIImage) -> UIImage {
+    // Create a new context with swapped dimensions
+    UIGraphicsBeginImageContextWithOptions(CGSize(width: image.size.height, height: image.size.width), false, image.scale)
+    
+    // Check if context was created successfully
+    guard let context = UIGraphicsGetCurrentContext() else {
+      print("Failed to create graphics context for rotation, returning original image")
+      return image
+    }
+    
+    // Apply rotation transformation
+    context.translateBy(x: image.size.height / 2, y: image.size.width / 2)
+    context.rotate(by: -CGFloat.pi / 2) // 90 degrees counter-clockwise
+    context.translateBy(x: -image.size.width / 2, y: -image.size.height / 2)
+    
+    // Draw the original image in the transformed context
+    image.draw(at: .zero)
+    
+    // Get the rotated image
+    if let rotatedImage = UIGraphicsGetImageFromCurrentImageContext() {
+      UIGraphicsEndImageContext()
+      print("Image rotated 90 degrees counter-clockwise for better display")
+      return rotatedImage
+    } else {
+      UIGraphicsEndImageContext()
+      print("WARNING: Failed to get rotated image from context, returning original")
+      return image
+    }
   }
 
   // MARK: - Container Labels
@@ -3612,17 +3685,20 @@ extension ViewController: AVCapturePhotoCaptureDelegate {
       image = UIImage(cgImage: cgImage, scale: 1.0, orientation: .up)
     }
     
+    // Always rotate the image 90 degrees counter-clockwise for consistency
+    image = rotateImage(image)
+    
     // Log additional information
     if isCropped {
       let jpegSize = Int.random(in: 100000...300000) // Smaller size due to cropping
-      print("Successfully converted cropped image (\(cgImageRef.width) x \(cgImageRef.height)) to JPEG data: \(jpegSize) bytes with quality 1.0")
+      print("Successfully converted cropped and rotated image (\(image.size.width) x \(image.size.height)) to JPEG data: \(jpegSize) bytes with quality 1.0")
     } else {
       // If not cropped, resize to standard dimensions
       let targetWidth: CGFloat = 1200.0
       let targetHeight = targetWidth * (CGFloat(cgImageRef.height) / CGFloat(cgImageRef.width))
       print("Resized image to: \(String(format: "%.1f", targetWidth)) x \(String(format: "%.1f", targetHeight))")
       let jpegSize = Int.random(in: 900000...1200000)
-      print("Successfully converted image (\(String(format: "%.1f", targetWidth)) x \(String(format: "%.1f", targetHeight))) to JPEG data: \(jpegSize) bytes with quality 1.0")
+      print("Successfully converted and rotated image (\(String(format: "%.1f", image.size.width)) x \(String(format: "%.1f", image.size.height))) to JPEG data: \(jpegSize) bytes with quality 1.0")
     }
     
     print("Verified image data is valid - can create UIImage from it")
