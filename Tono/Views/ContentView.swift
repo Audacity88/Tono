@@ -4,6 +4,10 @@ import CoreData
 // Define the collection view based on backup implementation
 struct CollectionViewWrapper: View {
     @Environment(\.managedObjectContext) private var viewContext
+    @State private var isEditMode: EditMode = .inactive
+    @State private var selectedObjectIDs = Set<NSManagedObjectID>()
+    @State private var showingDeleteConfirmation = false
+    @State private var multiSelectEnabled = false
     
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \TaggedObject.timestamp, ascending: false)],
@@ -32,20 +36,113 @@ struct CollectionViewWrapper: View {
                 }
                 .navigationTitle("My Collection")
             } else {
-                List {
-                    ForEach(taggedObjects) { object in
-                        NavigationLink(destination: ObjectDetailViewWrapper(object: object)) {
-                            ObjectRow(object: object)
+                VStack {
+                    List {
+                        ForEach(taggedObjects) { object in
+                            if multiSelectEnabled {
+                                ObjectRowWithSelection(
+                                    object: object,
+                                    isSelected: selectedObjectIDs.contains(object.objectID),
+                                    onToggle: {
+                                        toggleSelection(object)
+                                    }
+                                )
+                            } else {
+                                NavigationLink(destination: ObjectDetailViewWrapper(object: object)) {
+                                    ObjectRow(object: object)
+                                }
+                            }
                         }
+                        .onDelete(perform: deleteObjects)
                     }
-                    .onDelete(perform: deleteObjects)
+                    
+                    if multiSelectEnabled && !selectedObjectIDs.isEmpty {
+                        Button(action: {
+                            showingDeleteConfirmation = true
+                        }) {
+                            HStack {
+                                Image(systemName: "trash")
+                                Text("Delete Selected (\(selectedObjectIDs.count))")
+                            }
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.red)
+                            .cornerRadius(8)
+                        }
+                        .padding(.bottom)
+                    }
                 }
                 .navigationTitle("My Collection")
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        EditButton()
+                        Button(action: {
+                            multiSelectEnabled.toggle()
+                            if !multiSelectEnabled {
+                                selectedObjectIDs.removeAll()
+                            }
+                        }) {
+                            Text(multiSelectEnabled ? "Done" : "Edit")
+                        }
+                    }
+                    
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        if multiSelectEnabled {
+                            Button(action: {
+                                toggleSelectAll()
+                            }) {
+                                Text(selectedObjectIDs.count == taggedObjects.count ? "Deselect All" : "Select All")
+                            }
+                        }
                     }
                 }
+                .alert(isPresented: $showingDeleteConfirmation) {
+                    Alert(
+                        title: Text("Delete Selected Objects"),
+                        message: Text("Are you sure you want to delete \(selectedObjectIDs.count) objects? This action cannot be undone."),
+                        primaryButton: .destructive(Text("Delete")) {
+                            deleteSelectedObjects()
+                        },
+                        secondaryButton: .cancel()
+                    )
+                }
+            }
+        }
+    }
+    
+    private func toggleSelection(_ object: TaggedObject) {
+        if selectedObjectIDs.contains(object.objectID) {
+            selectedObjectIDs.remove(object.objectID)
+        } else {
+            selectedObjectIDs.insert(object.objectID)
+        }
+    }
+    
+    private func toggleSelectAll() {
+        if selectedObjectIDs.count == taggedObjects.count {
+            // Deselect all
+            selectedObjectIDs.removeAll()
+        } else {
+            // Select all
+            selectedObjectIDs = Set(taggedObjects.map { $0.objectID })
+        }
+    }
+    
+    private func deleteSelectedObjects() {
+        withAnimation {
+            // Convert object IDs back to objects
+            let objectsToDelete = taggedObjects.filter { selectedObjectIDs.contains($0.objectID) }
+            
+            for object in objectsToDelete {
+                viewContext.delete(object)
+            }
+            
+            do {
+                try viewContext.save()
+                selectedObjectIDs.removeAll()
+                multiSelectEnabled = false
+            } catch {
+                let nsError = error as NSError
+                print("Error deleting objects: \(nsError), \(nsError.userInfo)")
             }
         }
     }
@@ -61,6 +158,84 @@ struct CollectionViewWrapper: View {
                 print("Unresolved error \(nsError), \(nsError.userInfo)")
             }
         }
+    }
+}
+
+struct ObjectRowWithSelection: View {
+    let object: TaggedObject
+    let isSelected: Bool
+    let onToggle: () -> Void
+    
+    var body: some View {
+        Button(action: onToggle) {
+            HStack {
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .foregroundColor(isSelected ? .blue : .gray)
+                    .font(.system(size: 20))
+                    .padding(.trailing, 4)
+                
+                if let imageData = object.image, let uiImage = UIImage(data: imageData) {
+                    Image(uiImage: fixOrientation(uiImage))
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 60, height: 60)
+                        .cornerRadius(8)
+                } else {
+                    Image(systemName: "photo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 60, height: 60)
+                        .foregroundColor(.gray)
+                        .background(Color.gray.opacity(0.2))
+                        .cornerRadius(8)
+                }
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(object.chinese ?? "未知")
+                        .font(.headline)
+                        .foregroundColor(.red)
+                    
+                    Text(object.pinyin ?? "")
+                        .font(.subheadline)
+                        .foregroundColor(.orange)
+                    
+                    Text(object.english ?? "Unknown")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+                
+                Spacer()
+                
+                // Show review count as stars
+                HStack {
+                    ForEach(0..<min(Int(object.reviewCount), 5), id: \.self) { _ in
+                        Image(systemName: "star.fill")
+                            .foregroundColor(.yellow)
+                            .font(.system(size: 12))
+                    }
+                    ForEach(0..<(5 - min(Int(object.reviewCount), 5)), id: \.self) { _ in
+                        Image(systemName: "star")
+                            .foregroundColor(.gray)
+                            .font(.system(size: 12))
+                    }
+                }
+            }
+            .padding(.vertical, 4)
+            .background(isSelected ? Color.blue.opacity(0.1) : Color.clear)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    // Helper function to fix image orientation
+    private func fixOrientation(_ image: UIImage) -> UIImage {
+        if image.imageOrientation == .up { return image }
+        
+        UIGraphicsBeginImageContextWithOptions(image.size, false, image.scale)
+        image.draw(at: CGPoint.zero)
+        let normalizedImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return normalizedImage ?? image
     }
 }
 
