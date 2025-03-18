@@ -1871,6 +1871,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     print("Handling tap on bounding box for: \(className)")
     
+    // Play pronunciation once here before creating the UI
+    // This avoids duplicate sounds but ensures we hear the word when tapping
+    self.arSceneManager.playPronunciation(for: detection.chinese, pinyin: detection.pinyin)
+    
     // Proceed with creating UI for this object
     place3DTextAtBoundingBox(boxView, detection: detection)
     
@@ -2223,8 +2227,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
               self.synchronizeARLabelsWithBoundingBoxes()
           }
           
-          // Play pronunciation
-          self.arSceneManager.playPronunciation(for: detection.chinese, pinyin: detection.pinyin)
+          // We now let the caller (handleBoundingBoxTap) play the pronunciation to avoid duplicate sounds
+          // The pronunciation will be played by ARSceneManager when the user taps on the label
       })
       
       // Remove the transition view with fade out
@@ -2283,120 +2287,81 @@ class ViewController: UIViewController, ARSCNViewDelegate {
   /// - Parameter boxView: The bounding box to focus on
   /// - Returns: A cropped UIImage focused on the bounding box, or nil if capture/crop fails
   private func captureAndCropFrame(for boxView: BoundingBoxView) -> UIImage? {
-    // First capture the full frame
-    guard let fullImage = self.captureCurrentFrame() else {
-      print("Failed to capture current frame")
+    // We'll use the current buffer directly instead of trying to screenshot the view
+    guard let pixelBuffer = self.currentBuffer else {
+      print("No current pixel buffer available")
       return nil
     }
     
-    // Log the original image size
-    print("Original image dimensions: \(fullImage.size.width) x \(fullImage.size.height)")
+    // Get original image from the pixel buffer
+    let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+    let context = CIContext()
     
-    // Get bounding box dimensions and position
-    let boxWidth = boxView.frame.width
-    let boxHeight = boxView.frame.height
-    let boxCenter = boxView.centerPosition
-    
-    // Log original values for debugging
-    print("Original box center: (\(String(format: "%.1f", boxCenter.x)), \(String(format: "%.1f", boxCenter.y)))")
-    
-    // Ensure box center is valid (positive coordinates within screen)
-    // If negative, adjust to be at least at position 0
-    let adjustedBoxCenterX = max(0, boxCenter.x)
-    let adjustedBoxCenterY = max(0, boxCenter.y)
-    
-    // Log if we had to adjust coordinates
-    if adjustedBoxCenterX != boxCenter.x || adjustedBoxCenterY != boxCenter.y {
-        print("Adjusted box center from (\(String(format: "%.1f", boxCenter.x)), \(String(format: "%.1f", boxCenter.y))) to (\(String(format: "%.1f", adjustedBoxCenterX)), \(String(format: "%.1f", adjustedBoxCenterY)))")
+    // Get proper orientation
+    let orientation: UIImage.Orientation
+    switch UIDevice.current.orientation {
+    case .portrait: orientation = .right
+    case .portraitUpsideDown: orientation = .left
+    case .landscapeLeft: orientation = .down
+    case .landscapeRight: orientation = .up
+    default: orientation = .right // Default to portrait
     }
+    
+    // Convert to UIImage
+    guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else {
+      print("Failed to create CGImage from pixel buffer")
+      return nil
+    }
+    
+    // Create full image
+    let fullImage = UIImage(cgImage: cgImage, scale: 1.0, orientation: orientation)
+    print("Created full image: \(fullImage.size.width) x \(fullImage.size.height)")
+    
+    // Get the bounding box frame
+    let boxFrame = boxView.frame
+    print("Bounding box frame: \(boxFrame)")
     
     // Calculate the scale from screen coordinates to image coordinates
     let widthScale = fullImage.size.width / videoPreview.bounds.width
     let heightScale = fullImage.size.height / videoPreview.bounds.height
+    print("Scale factors: width=\(widthScale), height=\(heightScale)")
     
-    print("Screen to image scale: width \(String(format: "%.2f", widthScale))x, height \(String(format: "%.2f", heightScale))x")
-    
-    // Convert box center to image coordinates using adjusted values
-    let imageCenterX = adjustedBoxCenterX * widthScale
-    let imageCenterY = adjustedBoxCenterY * heightScale
-    
-    // Use a smaller margin to focus tightly on the detected object (20% margin instead of 40%)
+    // Convert box to image coordinates with margins
     let marginFactor: CGFloat = 0.2
+    let marginX = boxFrame.width * marginFactor
+    let marginY = boxFrame.height * marginFactor
     
-    // Calculate crop dimensions, ensuring they're reasonable
-    let cropWidth = min(max(boxWidth, 100) * (1 + 2 * marginFactor) * widthScale, fullImage.size.width)
-    let cropHeight = min(max(boxHeight, 100) * (1 + 2 * marginFactor) * heightScale, fullImage.size.height)
+    // Calculate crop rectangle in image coordinates
+    let cropX = (boxFrame.minX - marginX) * widthScale
+    let cropY = (boxFrame.minY - marginY) * heightScale
+    let cropWidth = (boxFrame.width + (2 * marginX)) * widthScale
+    let cropHeight = (boxFrame.height + (2 * marginY)) * heightScale
     
-    // Calculate crop rect (ensure it stays within image bounds)
-    let cropX = max(0, min(fullImage.size.width - cropWidth, imageCenterX - cropWidth / 2))
-    let cropY = max(0, min(fullImage.size.height - cropHeight, imageCenterY - cropHeight / 2))
+    // Ensure crop rectangle is within bounds
+    let safeX = max(0, cropX)
+    let safeY = max(0, cropY)
+    let safeWidth = min(fullImage.size.width - safeX, cropWidth)
+    let safeHeight = min(fullImage.size.height - safeY, cropHeight)
     
-    // Ensure the crop rect doesn't exceed image bounds
-    let cropRectWidth = min(fullImage.size.width - cropX, cropWidth)
-    let cropRectHeight = min(fullImage.size.height - cropY, cropHeight)
+    let cropRect = CGRect(x: safeX, y: safeY, width: safeWidth, height: safeHeight)
+    print("Crop rectangle: \(cropRect)")
     
-    // Create the crop rect - ensure all values are integers as CGImage.cropping requires integral values
-    let intCropX = floor(cropX)
-    let intCropY = floor(cropY)
-    let intCropWidth = ceil(cropRectWidth)
-    let intCropHeight = ceil(cropRectHeight)
-    
-    let cropRect = CGRect(x: intCropX, y: intCropY, width: intCropWidth, height: intCropHeight)
-    print("Crop rectangle: origin (\(String(format: "%.1f", intCropX)), \(String(format: "%.1f", intCropY))), size \(String(format: "%.1f", intCropWidth)) x \(String(format: "%.1f", intCropHeight)) pixels")
-    
-    // Create CGImage from UIImage for cropping
-    guard let cgImage = fullImage.cgImage else {
-      print("Failed to get CGImage from UIImage")
-      return rotateImage(fullImage) // Apply rotation even to fallback image
-    }
-    
-    // Check if the cropRect is valid - we've already ensured positive values, so just check for reasonable size
-    // For debugging, print all the values that might cause the check to fail
-    print("Crop validation - Width: \(cropRect.width), Height: \(cropRect.height), MaxX: \(cropRect.maxX), MaxY: \(cropRect.maxY), Image width: \(cgImage.width), Image height: \(cgImage.height)")
-    
-    // Only mark invalid if really zero or definitely out of bounds
-    let isInvalidWidth = cropRect.width <= 5
-    let isInvalidHeight = cropRect.height <= 5
-    let isOutOfBoundsX = cropRect.origin.x >= CGFloat(cgImage.width) || cropRect.maxX <= 0
-    let isOutOfBoundsY = cropRect.origin.y >= CGFloat(cgImage.height) || cropRect.maxY <= 0
-    
-    if isInvalidWidth || isInvalidHeight || isOutOfBoundsX || isOutOfBoundsY {
-      print("Invalid crop rectangle: width=\(cropRect.width), height=\(cropRect.height), isOutOfBoundsX=\(isOutOfBoundsX), isOutOfBoundsY=\(isOutOfBoundsY)")
-      return rotateImage(fullImage) // Apply rotation even to fallback image
-    }
-    
-    // Log successful crop parameters
-    print("Valid crop rectangle confirmed - proceeding with crop")
-    
-    // Final safety check to ensure crop rectangle is completely within image bounds
-    let safeRect = CGRect(
-      x: max(0, min(CGFloat(cgImage.width) - 1, cropRect.origin.x)),
-      y: max(0, min(CGFloat(cgImage.height) - 1, cropRect.origin.y)),
-      width: min(CGFloat(cgImage.width) - cropRect.origin.x, max(1, cropRect.width)),
-      height: min(CGFloat(cgImage.height) - cropRect.origin.y, max(1, cropRect.height))
-    )
-    
-    print("Safe crop rectangle: origin (\(safeRect.origin.x), \(safeRect.origin.y)), size \(safeRect.width) x \(safeRect.height)")
-    
-    // Attempt to crop the image
-    guard let croppedCGImage = cgImage.cropping(to: safeRect) else {
+    // Perform the crop
+    guard let croppedCGImage = cgImage.cropping(to: cropRect) else {
       print("Failed to crop image, using full image instead")
-      return rotateImage(fullImage) // Apply rotation even to fallback image
+      return rotateImage(fullImage)
     }
     
-    // Create UIImage from cropped CGImage, preserving scale and orientation
+    // Create UIImage from cropped CGImage
     let croppedImage = UIImage(
       cgImage: croppedCGImage,
       scale: fullImage.scale,
       orientation: fullImage.imageOrientation
     )
     
-    // Success - log cropped image details
-    print("Successfully cropped image to: \(croppedImage.size.width) x \(croppedImage.size.height) pixels")
-    print("Bounding box dimensions: \(String(format: "%.1f", boxWidth)) x \(String(format: "%.1f", boxHeight)) pixels")
-    print("Using tighter crop with \(String(format: "%.0f", marginFactor * 100))% margin for better focus on object")
+    print("Successfully cropped image to: \(croppedImage.size.width) x \(croppedImage.size.height)")
     
-    // Always rotate the image consistently
+    // Rotate for consistency
     return rotateImage(croppedImage)
   }
   

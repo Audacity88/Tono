@@ -21,7 +21,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
-	<string>424</string>
+	<string>435</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
@@ -30,10 +30,14 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Tono uses your camera to detect objects around you and help you learn Chinese 🚀</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Tono uses the microphone to allow you to practice pronunciation and receive feedback on your Chinese speaking skills.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>To save results to Photo Library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>To see images in Photo Library and apply AI object detection to them.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Tono uses speech recognition to analyze your pronunciation and provide learning feedback.</string>
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

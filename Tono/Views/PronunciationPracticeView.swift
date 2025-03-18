@@ -158,7 +158,28 @@ struct PronunciationPracticeView: View {
                             
                             Button(action: {
                                 if let chinese = practiceObjects[currentIndex].chinese {
-                                    speechManager.speak(chinese) { _ in }
+                                    print("Pronouncing text: \"\(chinese)\"")
+                                    // Temporarily force audio session to playback mode before speaking
+                                    do {
+                                        let audioSession = AVAudioSession.sharedInstance()
+                                        try audioSession.setCategory(.playback, mode: .spokenAudio, options: [.duckOthers])
+                                        print("Switched to playback mode for pronunciation")
+                                    } catch {
+                                        print("Error switching audio mode: \(error)")
+                                    }
+                                    
+                                    // Try speaking with verbose logging
+                                    speechManager.speak(chinese) { isStarting in
+                                        if isStarting {
+                                            print("Speech started successfully")
+                                        } else {
+                                            print("Speech completed or failed")
+                                            // Reset audio session to recording mode after speaking
+                                            self.setupAudioSession()
+                                        }
+                                    }
+                                } else {
+                                    print("Error: No Chinese text to pronounce")
                                 }
                             }) {
                                 Image(systemName: "speaker.wave.2.fill")
@@ -302,8 +323,25 @@ struct PronunciationPracticeView: View {
         let audioSession = AVAudioSession.sharedInstance()
         
         do {
-            try audioSession.setCategory(.playAndRecord, mode: .default)
-            try audioSession.setActive(true)
+            // Use the playAndRecord category with proper options for both recording and playback
+            try audioSession.setCategory(.playAndRecord, 
+                                        mode: .default, 
+                                        options: [.defaultToSpeaker, .allowBluetooth, .allowAirPlay])
+            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+            
+            // Print current audio configuration for debugging
+            print("PronunciationPracticeView - Audio session configured with:")
+            print("- Category: \(audioSession.category.rawValue)")
+            print("- Mode: \(audioSession.mode.rawValue)")
+            print("- Sample Rate: \(audioSession.sampleRate)")
+            print("- I/O Buffer Duration: \(audioSession.ioBufferDuration)")
+            
+            // Print current audio route for debugging
+            let currentRoute = audioSession.currentRoute
+            print("Current audio route:")
+            for output in currentRoute.outputs {
+                print(" - Output: \(output.portName) (type: \(output.portType.rawValue))")
+            }
             
             // Request microphone permission
             audioSession.requestRecordPermission { allowed in
@@ -311,41 +349,71 @@ struct PronunciationPracticeView: View {
                     self.feedbackMessage = "Microphone access is required for pronunciation practice"
                     self.feedbackColor = .red
                     self.showFeedback = true
+                } else {
+                    print("Microphone permission granted")
                 }
             }
         } catch {
             print("Failed to set up audio session: \(error)")
+            feedbackMessage = "Audio setup error: \(error.localizedDescription)"
+            feedbackColor = .red
+            showFeedback = true
         }
     }
     
     // Start recording audio
     private func startRecording() {
+        // Ensure we have a proper audio session for recording
+        setupAudioSession()
+        
         // Create a temporary URL for the recording
         let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        recordingURL = documentsPath.appendingPathComponent("pronunciation_recording.m4a")
+        recordingURL = documentsPath.appendingPathComponent("pronunciation_recording_\(Date().timeIntervalSince1970).m4a")
         
-        // Recording settings
+        print("Recording to file: \(recordingURL?.lastPathComponent ?? "unknown")")
+        
+        // Recording settings - use higher quality for better speech recognition
         let settings: [String: Any] = [
             AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
             AVSampleRateKey: 44100.0,
             AVNumberOfChannelsKey: 1,
-            AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+            AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue,
+            AVEncoderBitRateKey: 128000
         ]
         
         do {
-            audioRecorder = try AVAudioRecorder(url: recordingURL!, settings: settings)
-            audioRecorder?.record()
-            isRecording = true
+            // Make sure any existing recorder is stopped and released
+            audioRecorder?.stop()
+            audioRecorder = nil
             
-            // Automatically stop recording after 5 seconds
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                if self.isRecording {
-                    self.stopRecording()
+            // Create a new recorder
+            guard let recordingURL = recordingURL else {
+                throw NSError(domain: "PronunciationPractice", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid recording URL"])
+            }
+            
+            audioRecorder = try AVAudioRecorder(url: recordingURL, settings: settings)
+            audioRecorder?.prepareToRecord()
+            
+            // Start recording and update UI
+            let recordingStarted = audioRecorder?.record() ?? false
+            
+            if recordingStarted {
+                print("Recording started successfully")
+                isRecording = true
+                
+                // Automatically stop recording after 5 seconds
+                DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                    if self.isRecording {
+                        print("Auto-stopping recording after 5 seconds")
+                        self.stopRecording()
+                    }
                 }
+            } else {
+                throw NSError(domain: "PronunciationPractice", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to start recording"])
             }
         } catch {
             print("Failed to start recording: \(error)")
-            feedbackMessage = "Failed to start recording"
+            feedbackMessage = "Failed to start recording: \(error.localizedDescription)"
             feedbackColor = .red
             showFeedback = true
         }
@@ -353,11 +421,42 @@ struct PronunciationPracticeView: View {
     
     // Stop recording and process the audio
     private func stopRecording() {
-        audioRecorder?.stop()
+        guard isRecording, let recorder = audioRecorder else {
+            print("No active recording to stop")
+            return
+        }
+        
+        print("Stopping recording")
+        recorder.stop()
         isRecording = false
         
-        // Process the recording
-        processPronunciation()
+        // Check if the file exists and has content
+        if let url = recordingURL, FileManager.default.fileExists(atPath: url.path) {
+            do {
+                let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
+                if let fileSize = attributes[.size] as? NSNumber, fileSize.intValue > 1000 {
+                    print("Recording saved successfully: \(url.lastPathComponent) (\(fileSize.intValue) bytes)")
+                    // Process the recording
+                    processPronunciation()
+                } else {
+                    let fileSize = attributes[.size] as? NSNumber
+                    print("Recording file too small or empty: \(fileSize?.intValue ?? 0)")
+                    feedbackMessage = "Recording was too short or failed"
+                    feedbackColor = .red
+                    showFeedback = true
+                }
+            } catch {
+                print("Error checking recording file: \(error)")
+                feedbackMessage = "Error processing recording"
+                feedbackColor = .red
+                showFeedback = true
+            }
+        } else {
+            print("Recording file not found")
+            feedbackMessage = "Recording failed - no audio file created"
+            feedbackColor = .red
+            showFeedback = true
+        }
     }
     
     // Process the pronunciation recording
