@@ -232,8 +232,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     objectsContainer.isUserInteractionEnabled = true
     objectsContainer.isMultipleTouchEnabled = true
     
-    // With PassthroughContainerView, we don't need this explicit tap recognizer
-    // as the view will automatically pass through touches to underlying views
+    // Add a tap gesture recognizer to handle taps on the container
+    let containerTapGesture = UITapGestureRecognizer(target: self, action: #selector(containerViewTapped(_:)))
+    containerTapGesture.cancelsTouchesInView = false
+    objectsContainer.addGestureRecognizer(containerTapGesture)
     
     // Add the container above the video preview
     view.addSubview(objectsContainer)
@@ -558,6 +560,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
       
       // Enable force passthrough to ensure taps reach video preview
       container.forcePassthrough = true
+      
+      // IMPORTANT: Disable user interaction on the container when labels are hidden
+      // This ensures taps go straight to the video preview for object tagging
+      container.isUserInteractionEnabled = false
     } else {
       // Show all labels
       UIView.animate(withDuration: 0.3) {
@@ -576,6 +582,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
       
       // Disable force passthrough
       container.forcePassthrough = false
+      
+      // IMPORTANT: Re-enable user interaction on the container when labels are visible
+      // This ensures taps on labels are properly captured
+      container.isUserInteractionEnabled = true
     }
   }
   
@@ -661,11 +671,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
     }
     
-    // IMPORTANT: Make the label tappable but do not let it intercept touches meant for other objects
-    // These three settings allow taps on the label to be detected but also pass through to views below
+    // IMPORTANT: Make the label tappable but PREVENT taps from passing through to objects below
+    // This ensures taps on labels are intercepted correctly and don't trigger object tagging
     containerView.isUserInteractionEnabled = true
     let tapGesture = UITapGestureRecognizer(target: self, action: #selector(objectLabelTapped(_:)))
-    tapGesture.cancelsTouchesInView = false  // Don't cancel touches in the view hierarchy
+    tapGesture.cancelsTouchesInView = true  // IMPORTANT: Cancel touches to prevent them from reaching views below
     containerView.addGestureRecognizer(tapGesture)
     
     // Generate a unique ID if not provided
@@ -795,6 +805,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
   
   // Handle taps on object labels
   @objc func objectLabelTapped(_ gesture: UITapGestureRecognizer) {
+    // IMPORTANT: Explicitly consume this touch event to prevent pass-through
+    gesture.cancelsTouchesInView = true
+    
     guard let containerView = gesture.view,
           let labelData = containerView.accessibilityLabel?.components(separatedBy: "|"),
           labelData.count >= 4 else {
@@ -806,6 +819,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     let english = labelData[1]
     let chinese = labelData[2]
     let pinyin = labelData[3]
+    
+    // Show toast message to confirm tap was recognized
+    showToast(message: "Playing: \(chinese) (\(english))")
     
     // Play pronunciation
     arSceneManager.playPronunciation(for: chinese, pinyin: pinyin)
@@ -822,6 +838,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         containerView.transform = .identity
         containerView.layer.zPosition = 0
       }
+      // IMPORTANT: Return to exit the method early and prevent further propagation
       return
     }
     
@@ -3915,14 +3932,12 @@ extension ViewController: AVCapturePhotoCaptureDelegate {
 
 // MARK: - PassthroughContainerView
 // Custom container view that allows touches to pass through empty areas
+// but properly captures touches on UI elements
 class PassthroughContainerView: UIView {
     // Add a flag to temporarily allow touches to pass through all objects
     var forcePassthrough: Bool = false
     
-    // Add a timer to handle double taps - first tap enables pass-through
-    private var lastTapTime: TimeInterval = 0
-    private var lastTapLocation: CGPoint = .zero
-    private let doubleTapRadius: CGFloat = 20.0 // Area considered for double-tap (in points)
+    // FIXED: Removed double-tap pass-through mechanism that was causing touch handling issues
     
     // Property to track actively interacting subviews
     private var activeSubview: UIView? = nil
@@ -3949,9 +3964,8 @@ class PassthroughContainerView: UIView {
                 if !subview.isHidden && subview.alpha > 0.01 && subview.isUserInteractionEnabled {
                     let subviewPoint = convert(point, to: subview)
                     if subview.point(inside: subviewPoint, with: event) {
-                        if subview is UIButton || subview is UIControl {
-                            return subview
-                        }
+                        // IMPORTANT: Always return the actual subview to properly capture the touch
+                        return subview
                     }
                 }
                 
@@ -3972,47 +3986,16 @@ class PassthroughContainerView: UIView {
         // First check if any of our subviews contain this point
         let hitView = super.hitTest(point, with: event)
         
-        // Check if we've tapped recently (within 0.75 seconds) and near the same location
-        let timeSinceLastTap = CACurrentMediaTime() - lastTapTime
-        let distanceFromLastTap = hypot(point.x - lastTapLocation.x, point.y - lastTapLocation.y)
-        
-        if timeSinceLastTap < 0.75 && distanceFromLastTap < doubleTapRadius {
-            // This is a "double-tap" in roughly the same location - force passthrough for this tap only
-            print("Double tap detected - forcing pass through")
-            lastTapTime = 0 // Reset timer
-            return nil
-        }
-        
         // If hit view is self (background container), let touch pass through
         if hitView == self {
             return nil
         }
         
-        // If we tapped on an actual subview (label), record the time and location for potential double-tap
+        // FIXED: Always capture touches on UI elements (don't allow them to pass through)
         if hitView != nil && hitView != self {
-            lastTapTime = CACurrentMediaTime()
-            lastTapLocation = point
-            
-            // For a minimized label (tag == 1), special handling
-            if let containerView = hitView?.superview ?? hitView, containerView.tag == 1 {
-                // If it's a small container with tag 1 (minimized), check if we're hitting the actual button
-                // or just the container
-                for subview in containerView.subviews {
-                    if subview is UIButton {
-                        let buttonPoint = convert(point, to: subview)
-                        if subview.point(inside: buttonPoint, with: event) {
-                            // We're hitting the button - return it
-                            return subview
-                        }
-                    }
-                }
-                
-                // We hit the minimized container but not the button - pass through
-                return nil
-            }
-            
             // Store this as our active subview
             activeSubview = hitView
+            return hitView
         }
         
         return hitView
@@ -4035,41 +4018,24 @@ class PassthroughContainerView: UIView {
             }
         }
         
-        // First check for UI controls like buttons
+        // Check for UI elements that should capture touches
         for subview in subviews {
             if !subview.isHidden && subview.alpha > 0.01 && subview.isUserInteractionEnabled {
                 let subviewPoint = convert(point, to: subview)
                 
-                if subview is UIButton || subview is UIControl {
-                    if subview.point(inside: subviewPoint, with: event) {
-                        return true
-                    }
+                // FIXED: Capture all touches on subviews, not just buttons
+                if subview.point(inside: subviewPoint, with: event) {
+                    return true
                 }
                 
-                // Check for buttons within container views
+                // Check for interactive elements within container views
                 for childView in subview.subviews {
-                    if childView is UIButton || childView is UIControl {
-                        if !childView.isHidden && childView.alpha > 0.01 && childView.isUserInteractionEnabled {
-                            let childPoint = convert(point, to: childView)
-                            if childView.point(inside: childPoint, with: event) {
-                                return true
-                            }
+                    if !childView.isHidden && childView.alpha > 0.01 && childView.isUserInteractionEnabled {
+                        let childPoint = convert(point, to: childView)
+                        if childView.point(inside: childPoint, with: event) {
+                            return true
                         }
                     }
-                }
-                
-                // Check if the point is inside any other subview
-                if subview.point(inside: subviewPoint, with: event) {
-                    // Special handling for UI controls - always capture these
-                    if subview is UIButton || subview is UIControl {
-                        return true
-                    }
-                    
-                    // For minimized labels (tag == 1), always pass through
-                    if subview.tag == 1 {
-                        return false
-                    }
-                    return true
                 }
             }
         }
