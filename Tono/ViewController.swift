@@ -2270,8 +2270,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
           // Show toast confirmation
           self.showToast(message: "Added \(detection.english) - \(detection.chinese)")
       } else {
-          // For existing objects, just play the pronunciation and show toast
-          self.arSceneManager.playPronunciation(for: detection.chinese, pinyin: detection.pinyin)
+          // For existing objects, just show toast (pronunciation already played earlier)
           self.showToast(message: "Found \(detection.english) - \(detection.chinese)")
       }
       
