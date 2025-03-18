@@ -63,7 +63,7 @@ extension PersistenceController {
     func saveTaggedObject(english: String, chinese: String, pinyin: String, image: UIImage?, position: SCNVector3, context: NSManagedObjectContext) {
         print("\n=========== SAVING TAGGED OBJECT: \(english) ===========")
         
-        // Check if this object already exists in the collection
+        // Check if this object already exists in the collection - exit early if it's a duplicate
         if isDuplicate(english: english, chinese: chinese, context: context) {
             print("Object '\(english)' already exists in collection, not saving duplicate")
             return

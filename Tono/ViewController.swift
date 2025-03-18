@@ -1816,15 +1816,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
   // MARK: - Translation and Learning Features
   
+  // Track the timestamp of the last processed tap to prevent duplicate processing
+  private var lastTapProcessedTime: TimeInterval = 0
+  private let minimumTapInterval: TimeInterval = 1.0 // Minimum interval between taps (in seconds)
+  
   /// Handle tap on a bounding box
   @objc func boundingBoxTapped(_ gesture: UITapGestureRecognizer) {
     guard let boxView = gesture.view as? BoundingBoxView else {
         return
     }
     
-    // Log bounding box details when tapped
+    // Log bounding box details when tapped (only once)
     print("Bounding box tapped: \(boxView.className)")
-    logBoundingBoxDetails(boxView)
     
     // Call the method that takes a BoundingBoxView directly
     handleBoundingBoxTap(boxView)
@@ -1833,6 +1836,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
   /// Handle tap on a bounding box - method that takes a BoundingBoxView directly
   /// UPDATED VERSION: Uses the place3DTextAtBoundingBox method directly
   func handleBoundingBoxTap(_ boxView: BoundingBoxView) {
+    // Get current time to implement tap debouncing
+    let currentTime = Date().timeIntervalSince1970
+    
+    // Check if this tap happened too soon after the last one
+    if currentTime - lastTapProcessedTime < minimumTapInterval {
+        print("Ignoring tap - too soon after previous tap (debounce: \(minimumTapInterval)s)")
+        return
+    }
+    
+    // Update the last processed tap time
+    lastTapProcessedTime = currentTime
+    
     // Highlight the box to show it was selected
     highlightBoundingBox(boxView)
     
@@ -1840,19 +1855,21 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     let className = boxView.className
     let confidence = boxView.confidence
     
-    // Log the bounding box details when tapped
-    logBoundingBoxDetails(boxView)
-    
-    // Check if we have a translation for this class
+    // First create the detection info
     guard let translation = boxView.translation ?? translationManager.getTranslation(for: className) else {
         print("No translation found for \(className)")
         return
     }
     
-    print("Handling tap on bounding box for: \(className)")
-    
-    // Create detection info from the bounding box data
     let detection = (english: className, chinese: translation.chinese, pinyin: translation.pinyin)
+    
+    // Check for duplicate and log it, but still create the UI card
+    let isDuplicate = self.persistenceController.isDuplicate(english: detection.english, chinese: detection.chinese, context: self.managedObjectContext)
+    if isDuplicate {
+        print("Object '\(detection.english)' already exists - but still showing UI")
+    }
+    
+    print("Handling tap on bounding box for: \(className)")
     
     // Proceed with creating UI for this object
     place3DTextAtBoundingBox(boxView, detection: detection)
@@ -2080,6 +2097,45 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         self.arContainerView = container
       }
       
+      // Check if we already have a label with this object in the container
+      var existingLabel: UIView? = nil
+      if let container = self.arContainerView {
+        for subview in container.subviews {
+          if let accessLabel = subview.accessibilityLabel,
+             accessLabel.contains("|\(detection.english)|") {
+            existingLabel = subview
+            print("Found existing UI label for '\(detection.english)', will not create duplicate")
+            break
+          }
+        }
+        
+        // If a label for this object already exists, highlight it but don't create a new one
+        if let existing = existingLabel {
+          // Highlight the existing label with a pulse animation
+          UIView.animate(withDuration: 0.2, animations: {
+            existing.transform = CGAffineTransform(scaleX: 1.2, y: 1.2)
+            existing.layer.borderColor = UIColor.green.cgColor
+            existing.layer.borderWidth = 3
+          }, completion: { _ in
+            UIView.animate(withDuration: 0.2) {
+              existing.transform = .identity
+              existing.layer.borderWidth = 2
+            }
+          })
+          
+          // Bring it to front
+          container.bringSubviewToFront(existing)
+          existing.layer.zPosition = 100
+          
+          // Play pronunciation for the object
+          self.arSceneManager.playPronunciation(for: detection.chinese, pinyin: detection.pinyin)
+          
+          // Remove the transition view and exit
+          transitionView.removeFromSuperview()
+          return
+        }
+      }
+      
       // Make sure the container is visible and in front
       self.arContainerView?.isHidden = false
       self.view.bringSubviewToFront(self.arContainerView!)
@@ -2178,6 +2234,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         transitionView.removeFromSuperview()
       }
       
+      // Check if this object is a duplicate before capturing and processing the image
+      let isDuplicate = self.persistenceController.isDuplicate(english: detection.english, chinese: detection.chinese, context: self.managedObjectContext)
+      if isDuplicate {
+          print("Object with text '\(detection.english)'/'\(detection.chinese)' already exists in collection")
+          // Continue with UI creation but skip the Core Data saving step
+      }
+      
       // Save to Core Data for persistence
       let position = SCNVector3(x: 0, y: 0, z: 0) // Position doesn't matter for our stack approach
       
@@ -2193,17 +2256,24 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         print("WARNING: Failed to capture/crop image for object: \(detection.english)")
       }
       
-      self.persistenceController.saveTaggedObject(
-          english: detection.english,
-          chinese: detection.chinese,
-          pinyin: detection.pinyin,
-          image: capturedImage,
-          position: position,
-          context: self.managedObjectContext
-      )
-      
-      // Show toast confirmation
-      self.showToast(message: "Added \(detection.english) - \(detection.chinese)")
+      // Only save to Core Data if not a duplicate
+      if !isDuplicate {
+          self.persistenceController.saveTaggedObject(
+              english: detection.english,
+              chinese: detection.chinese,
+              pinyin: detection.pinyin,
+              image: capturedImage,
+              position: position,
+              context: self.managedObjectContext
+          )
+          
+          // Show toast confirmation
+          self.showToast(message: "Added \(detection.english) - \(detection.chinese)")
+      } else {
+          // For existing objects, just play the pronunciation and show toast
+          self.arSceneManager.playPronunciation(for: detection.chinese, pinyin: detection.pinyin)
+          self.showToast(message: "Found \(detection.english) - \(detection.chinese)")
+      }
       
       // Make sure toolbar stays in front
       self.ensureToolbarIsInFront()
