@@ -143,8 +143,8 @@ class BoundingBoxView: UIView {
       with: CGSize(width: 400, height: 100),
       options: .truncatesLastVisibleLine,
       attributes: attributes, context: nil)
-    let textSize = CGSize(width: textRect.width + 12, height: textRect.height + 4)  // Add more padding
-    let textOrigin = CGPoint(x: 0, y: -textSize.height - 2)  // Position above the bounding box
+    let textSize = CGSize(width: textRect.width + 20, height: textRect.height + 8)  // Increased padding
+    let textOrigin = CGPoint(x: -4, y: -textSize.height - 2)  // Position above the bounding box with slight left offset
     textLayer.frame = CGRect(origin: textOrigin, size: textSize)  // Set the text layer frame
     textLayer.cornerRadius = 4  // Rounded corners for the text background
   }
