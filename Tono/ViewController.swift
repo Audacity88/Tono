@@ -1227,21 +1227,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
   }
 
-  // share image
+  // This method has been deprecated - object capture now happens through bounding box taps only
   @IBAction func shareButton(_ sender: Any) {
-    selection.selectionChanged()
-    
-    // Analyze bounding boxes before capture to determine if we should zoom
-    let selectedBox = findBestBoundingBoxForCapture()
-    if let box = selectedBox {
-        // Capture focused on the selected bounding box
-        captureImageWithFocus(on: box)
-    } else {
-        // Standard capture when no suitable bounding box is found
-        let settings = AVCapturePhotoSettings()
-        self.videoCapture.cameraOutput.capturePhoto(
-          with: settings, delegate: self as AVCapturePhotoCaptureDelegate)
-    }
+    // Functionality removed - do nothing
   }
 
   // share screenshot
@@ -2327,7 +2315,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     print("Scale factors: width=\(widthScale), height=\(heightScale)")
     
     // Convert box to image coordinates with margins
-    let marginFactor: CGFloat = 0.2
+    // Use larger margin (40%) like we used to in photoOutput for more context around objects
+    let marginFactor: CGFloat = 0.4
     let marginX = boxFrame.width * marginFactor
     let marginY = boxFrame.height * marginFactor
     
@@ -3785,111 +3774,12 @@ extension ViewController: VideoCaptureDelegate {
 
 // Programmatically save image
 extension ViewController: AVCapturePhotoCaptureDelegate {
+  // This method is deprecated - we now use direct frame capture through captureAndCropFrame
   func photoOutput(
     _ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?
   ) {
-    if let error = error {
-      print("Photo capture error occurred: \(error.localizedDescription)")
-      return
-    }
-    
-    // Check for bounding box information before processing
-    guard let lastFocusedBox = self.lastFocusedBoundingBox else {
-      print("No focused bounding box available for cropping")
-      return
-    }
-    
-    // Log focused object details
-    let objectName = lastFocusedBox.className
-    print("\n=========== PROCESSING CAPTURED PHOTO: \(objectName) ===========")
-    logBoundingBoxDetails(lastFocusedBox)
-    
-    if let dataImage = photo.fileDataRepresentation() {
-      // Process the photo data
-      let dataProvider = CGDataProvider(data: dataImage as CFData)
-      guard let cgImageRef = CGImage(
-        jpegDataProviderSource: dataProvider!, decode: nil, shouldInterpolate: true,
-        intent: .defaultIntent) else {
-          print("Failed to create CGImage from JPEG data")
-          return
-      }
-      
-      // Log original image details
-      print("\nPHOTO CAPTURE DETAILS:")
-      print("Original image dimensions: \(cgImageRef.width) x \(cgImageRef.height) pixels")
-      print("Original image scale: 1.0")
-      print("Original image orientation: 3")
-      
-      // Get the bounding box dimensions 
-      let boxWidth = lastFocusedBox.frame.width
-      let boxHeight = lastFocusedBox.frame.height
-      
-      // Add a margin around the bounding box (40% on each side to ensure we get the whole object)
-      let marginFactor: CGFloat = 0.4
-      let cropWidth = min(boxWidth * (1 + 2 * marginFactor), CGFloat(cgImageRef.width))
-      let cropHeight = min(boxHeight * (1 + 2 * marginFactor), CGFloat(cgImageRef.height))
-      
-      // Calculate the scale from screen coordinates to image coordinates
-      let widthScale = CGFloat(cgImageRef.width) / videoPreview.bounds.width
-      let heightScale = CGFloat(cgImageRef.height) / videoPreview.bounds.height
-      
-      print("Screen to image scale: width \(String(format: "%.2f", widthScale))x, height \(String(format: "%.2f", heightScale))x")
-      
-      // Get the center of the bounding box in screen coordinates
-      let boxCenterX = lastFocusedBox.centerPosition.x
-      let boxCenterY = lastFocusedBox.centerPosition.y
-      
-      // Convert to image coordinates (adjust the scaling)
-      let imageCenterX = boxCenterX * widthScale
-      let imageCenterY = boxCenterY * heightScale
-      
-      print("Box center (screen): (\(String(format: "%.1f", boxCenterX)), \(String(format: "%.1f", boxCenterY)))")
-      print("Box center (image): (\(String(format: "%.1f", imageCenterX)), \(String(format: "%.1f", imageCenterY)))")
-      
-      // Calculate crop rect (ensure it stays within image bounds)
-      let scaledWidth = cropWidth * widthScale
-      let scaledHeight = cropHeight * heightScale
-      
-      // Calculate the crop origin ensuring it stays within image bounds
-      let cropX = max(0, imageCenterX - scaledWidth / 2)
-      let cropY = max(0, imageCenterY - scaledHeight / 2)
-      
-      // Ensure the crop rect doesn't exceed image bounds
-      let cropRectWidth = min(CGFloat(cgImageRef.width) - cropX, scaledWidth)
-      let cropRectHeight = min(CGFloat(cgImageRef.height) - cropY, scaledHeight)
-      
-      // Create crop rect
-      let cropRect = CGRect(x: cropX, y: cropY, width: cropRectWidth, height: cropRectHeight)
-      print("Crop rectangle: origin (\(String(format: "%.1f", cropX)), \(String(format: "%.1f", cropY))), size \(String(format: "%.1f", cropRectWidth)) x \(String(format: "%.1f", cropRectHeight)) pixels")
-      
-      // Check if the cropRect is valid
-      if cropRect.width <= 0 || cropRect.height <= 0 || 
-         cropRect.origin.x < 0 || cropRect.origin.y < 0 ||
-         cropRect.maxX > CGFloat(cgImageRef.width) || cropRect.maxY > CGFloat(cgImageRef.height) {
-        print("Invalid crop rectangle, using full image instead")
-        saveCapturedImage(cgImageRef: cgImageRef, objectName: objectName, isCropped: false)
-        return
-      }
-      
-      // Attempt to crop the image
-      guard let croppedImage = cgImageRef.cropping(to: cropRect) else {
-        print("Failed to crop image, using full image instead")
-        saveCapturedImage(cgImageRef: cgImageRef, objectName: objectName, isCropped: false)
-        return
-      }
-      
-      // Success - log cropped image details
-      print("\n=========== SAVING TAGGED OBJECT: \(objectName) ===========")
-      print("Duplicate checking disabled to improve AR position tracking")
-      print("Original image dimensions: \(cgImageRef.width) x \(cgImageRef.height) pixels")
-      print("Bounding box dimensions: \(String(format: "%.1f", boxWidth)) x \(String(format: "%.1f", boxHeight)) pixels")
-      print("Cropped to: \(croppedImage.width) x \(croppedImage.height) pixels")
-      
-      // Save the cropped image
-      saveCapturedImage(cgImageRef: croppedImage, objectName: objectName, isCropped: true)
-    } else {
-      print("AVCapturePhotoCaptureDelegate Error: No image data available")
-    }
+    // Method functionality removed - all image capture happens through bounding box taps
+    print("photoOutput method called but is deprecated")
   }
   
   // Helper method to save and display the captured image
