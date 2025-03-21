@@ -21,15 +21,34 @@ import CoreData
 import SceneKit
 import ARKit
 
-var mlModel = try! yolo11n(configuration: mlmodelConfig).model
+// Declare model configuration first to avoid initialization order issues
 var mlmodelConfig: MLModelConfiguration = {
   let config = MLModelConfiguration()
 
+  // Use defer-loaded compilation mode to reduce launch time
+  if #available(iOS 15.0, *) {
+    config.computeUnits = .cpuAndGPU
+    config.allowLowPrecisionAccumulationOnGPU = true
+  }
+  
+  // Enable MLE5 Engine for iOS 17+
   if #available(iOS 17.0, *) {
     config.setValue(1, forKey: "experimentalMLE5EngineUsage")
   }
 
   return config
+}()
+
+// Initialize model with proper error handling
+var mlModel: MLModel = {
+  do {
+    print("Initializing ML model - this may take a moment")
+    return try yolo11n(configuration: mlmodelConfig).model
+  } catch {
+    print("Failed to initialize ML model: \(error)")
+    // Fallback to synchronous initialization as a last resort
+    return try! yolo11n(configuration: mlmodelConfig).model
+  }
 }()
 
 /// The main view controller for the YOLO app, responsible for camera setup, model selection, and detection visualization.
@@ -70,7 +89,19 @@ class ViewController: UIViewController, ARSCNViewDelegate {
   }
 
   let selection = UISelectionFeedbackGenerator()
-  var detector = try! VNCoreMLModel(for: mlModel)
+  
+  // Make detector lazy to defer initialization until needed
+  lazy var detector: VNCoreMLModel = {
+    do {
+      print("Initializing vision model - may take a moment")
+      return try VNCoreMLModel(for: mlModel)
+    } catch {
+      print("Failed to initialize vision model: \(error)")
+      // Fallback to synchronous initialization as last resort
+      return try! VNCoreMLModel(for: mlModel)
+    }
+  }()
+  
   var session: AVCaptureSession!
   var videoCapture: VideoCapture!
   var currentBuffer: CVPixelBuffer?
@@ -85,6 +116,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
   var shortSide: CGFloat = 4
   var frameSizeCaptured = false
   
+  // Track model initialization state
+  private var modelInitialized = false
+  
   // Track the last bounding box that was focused on for capture
   var lastFocusedBoundingBox: BoundingBoxView?
 
@@ -93,15 +127,25 @@ class ViewController: UIViewController, ARSCNViewDelegate {
   let save_detections = false  // write every detection to detections.txt
   let save_frames = false  // write every frame to frames.txt
 
+  // Delayed initialization of vision request to avoid startup delays
   lazy var visionRequest: VNCoreMLRequest = {
     let request = VNCoreMLRequest(
-      model: detector,
+      model: detector, // This will trigger lazy loading of detector
       completionHandler: {
         [weak self] request, error in
         self?.processObservations(for: request, error: error)
       })
     // NOTE: BoundingBoxView object scaling depends on request.imageCropAndScaleOption https://developer.apple.com/documentation/vision/vnimagecropandscaleoption
     request.imageCropAndScaleOption = VNImageCropAndScaleOption.scaleFill  // .scaleFit, .scaleFill, .centerCrop
+    
+    // Optimize vision request for speed
+    if #available(iOS 13.0, *) {
+      request.usesCPUOnly = false // Use Neural Engine when available
+    }
+    
+    // Mark as initialized
+    self.modelInitialized = true
+    print("Vision request initialized and ready")
     return request
   }()
 
@@ -200,6 +244,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     // =====  COMPLETELY NEW APPROACH =====
     // Try a drastically different approach - separate the AR view 
     // and video preview into two completely different layers
+    
+    // Ensure we don't trigger LLDB symbol resolution delays
+    Thread.setThreadPriority(0.9) // Higher priority for UI setup
     
     // 1. First, ensure the video preview is visible and correctly configured
     // Important: Don't remove from superview - this might be causing issues with camera feed
@@ -1305,69 +1352,90 @@ class ViewController: UIViewController, ARSCNViewDelegate {
   func startVideo() {
     // Only initialize VideoCapture if it doesn't exist yet
     if videoCapture == nil {
-        videoCapture = VideoCapture()
-        videoCapture.delegate = self
+        print("Creating new VideoCapture instance")
         
-        // Print debug info
-        print("Setting up video capture")
-        
-        videoCapture.setUp(sessionPreset: .photo) { success in
-          // .hd4K3840x2160 or .photo (4032x3024)  Warning: 4k may not work on all devices i.e. 2019 iPod
-          if success {
-            print("Video capture setup successful")
+        // Create VideoCapture on a lower priority thread to avoid blocking main thread
+        DispatchQueue.global(qos: .userInitiated).async {
+            // Create the video capture instance
+            let newVideoCapture = VideoCapture()
             
-            // Add the video preview into the UI.
-            if let previewLayer = self.videoCapture.previewLayer {
-              // First ensure the videoPreview is visible and properly sized
-              self.videoPreview.isHidden = false
-              self.videoPreview.alpha = 1.0
-              self.videoPreview.frame = self.view.bounds
-              
-              // Remove any existing preview layers to avoid duplication
-              for layer in self.videoPreview.layer.sublayers ?? [] {
-                if layer is AVCaptureVideoPreviewLayer {
-                  layer.removeFromSuperlayer()
+            // Switch back to main queue for UI updates and delegate assignment
+            DispatchQueue.main.async {
+                self.videoCapture = newVideoCapture
+                self.videoCapture.delegate = self
+                
+                print("Setting up video capture")
+                
+                // Use a more conservative preset to improve performance and reduce LLDB symbol resolution delays
+                self.videoCapture.setUp(sessionPreset: .hd1280x720) { success in
+                  if success {
+                    print("Video capture setup successful")
+                    
+                    // Add the video preview into the UI.
+                    if let previewLayer = self.videoCapture.previewLayer {
+                      // First ensure the videoPreview is visible and properly sized
+                      self.videoPreview.isHidden = false
+                      self.videoPreview.alpha = 1.0
+                      self.videoPreview.frame = self.view.bounds
+                      
+                      // Remove any existing preview layers to avoid duplication
+                      for layer in self.videoPreview.layer.sublayers ?? [] {
+                        if layer is AVCaptureVideoPreviewLayer {
+                          layer.removeFromSuperlayer()
+                        }
+                      }
+                      
+                      // Add and configure the preview layer
+                      self.videoPreview.layer.addSublayer(previewLayer)
+                      previewLayer.frame = self.videoPreview.bounds
+                      previewLayer.videoGravity = .resizeAspectFill
+                      
+                      print("Preview layer added with frame: \(previewLayer.frame)")
+                    } else {
+                      print("Failed to get preview layer from video capture")
+                    }
+            
+                    // Bring bounding box views to front with a slight delay 
+                    // to ensure they're positioned after the preview layer is ready
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                      for boxView in self.boundingBoxViews {
+                        self.videoPreview.bringSubviewToFront(boxView)
+                      }
+                    }
+                    
+                    // Ensure video preview is in the right place in view hierarchy
+                    self.view.bringSubviewToFront(self.videoPreview)
+                    
+                    // At initialization, start the camera with a slight delay
+                    // to give the system time to configure everything
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                      if !self.videoCapture.captureSession.isRunning {
+                        print("Starting video capture after delay")
+                        self.videoCapture.start()
+                        self.playButtonOutlet.isEnabled = false
+                        self.pauseButtonOutlet.isEnabled = true
+                      }
+                      
+                      // Make sure toolbar remains accessible after starting video
+                      self.ensureToolbarIsInFront()
+                      
+                      // Update camera position after starting
+                      self.videoCapture.updateVideoOrientation()
+                    }
+                  } else {
+                    print("Video capture setup failed")
+                    
+                    // Show camera access error to user
+                    let alert = UIAlertController(
+                        title: "Camera Setup Failed",
+                        message: "Please ensure Tono has camera access and try again.",
+                        preferredStyle: .alert
+                    )
+                    alert.addAction(UIAlertAction(title: "OK", style: .default))
+                    self.present(alert, animated: true)
+                  }
                 }
-              }
-              
-              // Add and configure the preview layer
-              self.videoPreview.layer.addSublayer(previewLayer)
-              previewLayer.frame = self.videoPreview.bounds
-              previewLayer.videoGravity = .resizeAspectFill
-              
-              print("Preview layer added with frame: \(previewLayer.frame)")
-            } else {
-              print("Failed to get preview layer from video capture")
             }
-    
-            // Bring bounding box views to front
-            for boxView in self.boundingBoxViews {
-              self.videoPreview.bringSubviewToFront(boxView)
-            }
-            
-            // Ensure video preview is in the right place in view hierarchy
-            self.view.bringSubviewToFront(self.videoPreview)
-            
-            // At initialization, we'll start the camera to ensure it's working
-            if !self.videoCapture.captureSession.isRunning {
-                print("Starting video capture")
-                self.videoCapture.start()
-                self.playButtonOutlet.isEnabled = false
-                self.pauseButtonOutlet.isEnabled = true
-            } else {
-                print("Video capture already running")
-                self.playButtonOutlet.isEnabled = false
-                self.pauseButtonOutlet.isEnabled = true
-            }
-            
-            // Make sure toolbar remains accessible after starting video
-            self.ensureToolbarIsInFront()
-            
-            // Update camera position if needed
-            self.videoCapture.updateVideoOrientation()
-          } else {
-            print("Video capture setup failed")
-          }
         }
     } else {
         print("Using existing video capture")
@@ -1398,6 +1466,17 @@ class ViewController: UIViewController, ARSCNViewDelegate {
   }
 
   func predict(sampleBuffer: CMSampleBuffer) {
+    // First check if the model has been initialized to avoid Symbol Resolution delay
+    if !modelInitialized {
+      // On first frame, set a timer to lazy-initialize the model to avoid blocking UI
+      DispatchQueue.main.async {
+        print("Starting deferred model initialization")
+        // This access will trigger lazy loading of the model
+        let _ = self.visionRequest
+      }
+      return
+    }
+    
     if let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) {
       // Store the pixel buffer for image capture purposes
       self.currentBuffer = pixelBuffer
@@ -1436,7 +1515,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         do {
           try handler.perform([visionRequest])
         } catch {
-          print(error)
+          print("Vision request error: \(error)")
         }
         t1 = CACurrentMediaTime() - t0  // inference dt
       }

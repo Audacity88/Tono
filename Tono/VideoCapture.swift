@@ -78,6 +78,7 @@ public class VideoCapture: NSObject {
       return
     }
     
+    // Create a background queue for camera setup
     queue.async {
       print("Setting up camera on background thread")
       let success = self.setUpCamera(sessionPreset: sessionPreset)
@@ -167,8 +168,25 @@ public class VideoCapture: NSObject {
   public func start() {
     if !captureSession.isRunning {
       print("Starting video capture session")
-      DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+      
+      // Use the dedicated camera session queue to avoid blocking main thread
+      // This helps prevent the LLDB symbol resolution issue during launch
+      queue.async { [weak self] in
         guard let self = self else { return }
+        
+        // Give the system a moment to finish any pending operations
+        Thread.sleep(forTimeInterval: 0.1)
+        
+        // Check configuration and connections before starting
+        if self.captureSession.inputs.isEmpty {
+          print("Warning: Capture session has no inputs, attempting to reconfigure")
+          if !self.setUpCamera(sessionPreset: self.captureSession.sessionPreset) {
+            print("Error: Failed to reconfigure capture session")
+            return
+          }
+        }
+        
+        // Start the capture session
         self.captureSession.startRunning()
         
         // Verify that the session started
@@ -193,8 +211,21 @@ public class VideoCapture: NSObject {
   public func stop() {
     if captureSession.isRunning {
       print("Stopping video capture session")
-      captureSession.stopRunning()
-      print("Video capture session stopped")
+      
+      // Use the dedicated queue to avoid blocking main thread
+      queue.async { [weak self] in
+        guard let self = self else { return }
+        
+        // Give any ongoing operations time to complete
+        Thread.sleep(forTimeInterval: 0.05)
+        
+        // Stop the session
+        self.captureSession.stopRunning()
+        
+        DispatchQueue.main.async {
+          print("Video capture session stopped")
+        }
+      }
     } else {
       print("Video capture session already stopped")
     }
