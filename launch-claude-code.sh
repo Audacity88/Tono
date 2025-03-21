@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Source the .env file
-set -a
-source .env
-set +a
+# set -a
+# source .env
+# set +a
 
 # Set environment variables for Claude Code with Bedrock
 export CLAUDE_CODE_PROVIDER=bedrock
