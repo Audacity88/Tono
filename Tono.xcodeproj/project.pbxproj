@@ -13,6 +13,15 @@
 		37DCCA762D8374B0004B280C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DCCA752D8374B0004B280C /* ContentView.swift */; };
 		37DCCA7D2D837577004B280C /* ARExploreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DCCA772D837576004B280C /* ARExploreView.swift */; };
 		37DCCA822D83777A004B280C /* YOLOViewControllerRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DCCA812D83777A004B280C /* YOLOViewControllerRepresentable.swift */; };
+		37DCCC072D88DFC5004B280C /* FlashcardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DCCC012D88DFC5004B280C /* FlashcardView.swift */; };
+		37DCCC082D88DFC5004B280C /* ObjectDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DCCC022D88DFC5004B280C /* ObjectDetailView.swift */; };
+		37DCCC092D88DFC5004B280C /* CollectionViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DCCC002D88DFC5004B280C /* CollectionViewWrapper.swift */; };
+		37DCCC0B2D88DFC5004B280C /* PronunciationPracticeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DCCC042D88DFC5004B280C /* PronunciationPracticeView.swift */; };
+		37DCCC0C2D88DFC5004B280C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DCCC062D88DFC5004B280C /* SettingsView.swift */; };
+		37DCCC0D2D88DFC5004B280C /* QuizView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DCCC052D88DFC5004B280C /* QuizView.swift */; };
+		37DCCC112D88DFD8004B280C /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DCCC0F2D88DFD8004B280C /* PersistenceController.swift */; };
+		37DCCC122D88DFD8004B280C /* QuizQuestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DCCC102D88DFD8004B280C /* QuizQuestion.swift */; };
+		37DCCC142D88DFE1004B280C /* UIImage+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DCCC132D88DFE1004B280C /* UIImage+Extensions.swift */; };
 		37DD19122D80F41E00F19533 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DD19112D80F41E00F19533 /* MainTabBarController.swift */; };
 		37DD19172D80F45A00F19533 /* SpeechManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DD19152D80F45A00F19533 /* SpeechManager.swift */; };
 		37DD19182D80F45A00F19533 /* PronunciationAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DD19142D80F45A00F19533 /* PronunciationAPI.swift */; };
@@ -26,7 +35,6 @@
 		636EFCAA21E62DD300DE43BC /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 636EFC9C21E62DD300DE43BC /* ViewController.swift */; };
 		636EFCAF21E62DD300DE43BC /* VideoCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 636EFCA221E62DD300DE43BC /* VideoCapture.swift */; };
 		636EFCB321E62DD300DE43BC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 636EFCA721E62DD300DE43BC /* AppDelegate.swift */; };
-		636EFCB921E62DD300DE43BC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 636EFCB821E62DD300DE43BC /* Assets.xcassets */; };
 		63CF371F2514455300E2DEA1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6323C44D22186177008AE681 /* LaunchScreen.storyboard */; };
 		63CF37202514455300E2DEA1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6323C44F22186177008AE681 /* Main.storyboard */; };
 		63CF37212514455300E2DEA1 /* ultralytics_yolo_logotype.png in Resources */ = {isa = PBXBuildFile; fileRef = 6323C45122186177008AE681 /* ultralytics_yolo_logotype.png */; };
@@ -45,6 +53,15 @@
 		37DCCA752D8374B0004B280C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContentView.swift; path = Views/ContentView.swift; sourceTree = "<group>"; };
 		37DCCA772D837576004B280C /* ARExploreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ARExploreView.swift; path = Views/ARExploreView.swift; sourceTree = "<group>"; };
 		37DCCA812D83777A004B280C /* YOLOViewControllerRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = YOLOViewControllerRepresentable.swift; path = Views/YOLOViewControllerRepresentable.swift; sourceTree = "<group>"; };
+		37DCCC002D88DFC5004B280C /* CollectionViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CollectionViewWrapper.swift; path = Views/CollectionViewWrapper.swift; sourceTree = "<group>"; };
+		37DCCC012D88DFC5004B280C /* FlashcardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FlashcardView.swift; path = Views/FlashcardView.swift; sourceTree = "<group>"; };
+		37DCCC022D88DFC5004B280C /* ObjectDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ObjectDetailView.swift; path = Views/ObjectDetailView.swift; sourceTree = "<group>"; };
+		37DCCC042D88DFC5004B280C /* PronunciationPracticeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PronunciationPracticeView.swift; path = Views/PronunciationPracticeView.swift; sourceTree = "<group>"; };
+		37DCCC052D88DFC5004B280C /* QuizView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QuizView.swift; path = Views/QuizView.swift; sourceTree = "<group>"; };
+		37DCCC062D88DFC5004B280C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SettingsView.swift; path = Views/SettingsView.swift; sourceTree = "<group>"; };
+		37DCCC0F2D88DFD8004B280C /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PersistenceController.swift; path = Models/PersistenceController.swift; sourceTree = "<group>"; };
+		37DCCC102D88DFD8004B280C /* QuizQuestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QuizQuestion.swift; path = Models/QuizQuestion.swift; sourceTree = "<group>"; };
+		37DCCC132D88DFE1004B280C /* UIImage+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "UIImage+Extensions.swift"; path = "Utilities/UIImage+Extensions.swift"; sourceTree = "<group>"; };
 		37DD19112D80F41E00F19533 /* MainTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
 		37DD19132D80F45A00F19533 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Persistence.swift; path = Utilities/Persistence.swift; sourceTree = "<group>"; };
 		37DD19142D80F45A00F19533 /* PronunciationAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PronunciationAPI.swift; path = Utilities/PronunciationAPI.swift; sourceTree = "<group>"; };
@@ -101,6 +118,15 @@
 				636166E72514438D0054FA7E /* Utilities */,
 				636EFCA721E62DD300DE43BC /* AppDelegate.swift */,
 				37DCCA752D8374B0004B280C /* ContentView.swift */,
+				37DCCC002D88DFC5004B280C /* CollectionViewWrapper.swift */,
+				37DCCC012D88DFC5004B280C /* FlashcardView.swift */,
+				37DCCC022D88DFC5004B280C /* ObjectDetailView.swift */,
+				37DCCC042D88DFC5004B280C /* PronunciationPracticeView.swift */,
+				37DCCC052D88DFC5004B280C /* QuizView.swift */,
+				37DCCC062D88DFC5004B280C /* SettingsView.swift */,
+				37DCCC0F2D88DFD8004B280C /* PersistenceController.swift */,
+				37DCCC102D88DFD8004B280C /* QuizQuestion.swift */,
+				37DCCC132D88DFE1004B280C /* UIImage+Extensions.swift */,
 				37DCCA772D837576004B280C /* ARExploreView.swift */,
 				37DCCA812D83777A004B280C /* YOLOViewControllerRepresentable.swift */,
 				37DD19112D80F41E00F19533 /* MainTabBarController.swift */,
@@ -216,7 +242,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				636EFCB921E62E3900DE43BC /* Assets.xcassets in Resources */,
 				63CF37202514455300E2DEA1 /* Main.storyboard in Resources */,
 				63CF37212514455300E2DEA1 /* ultralytics_yolo_logotype.png in Resources */,
 				37DD19212D80FDC100F19533 /* translations.json in Resources */,
@@ -258,6 +283,14 @@
 				37DCCA762D8374B0004B280C /* ContentView.swift in Sources */,
 				636166EA251443B20054FA7E /* ThresholdProvider.swift in Sources */,
 				37DCCA662D820646004B280C /* ARSceneManager.swift in Sources */,
+				37DCCC072D88DFC5004B280C /* FlashcardView.swift in Sources */,
+				37DCCC082D88DFC5004B280C /* ObjectDetailView.swift in Sources */,
+				37DCCC092D88DFC5004B280C /* CollectionViewWrapper.swift in Sources */,
+				37DCCC0B2D88DFC5004B280C /* PronunciationPracticeView.swift in Sources */,
+				37DCCC0C2D88DFC5004B280C /* SettingsView.swift in Sources */,
+				37DCCC0D2D88DFC5004B280C /* QuizView.swift in Sources */,
+				37DCCC112D88DFD8004B280C /* PersistenceController.swift in Sources */,
+				37DCCC122D88DFD8004B280C /* QuizQuestion.swift in Sources */,
 				37DCCA742D837396004B280C /* ObjectDetailViewController.swift in Sources */,
 				37DD19122D80F41E00F19533 /* MainTabBarController.swift in Sources */,
 				636EFCB321E62DD300DE43BC /* AppDelegate.swift in Sources */,
@@ -274,6 +307,7 @@
 				37DD191A2D80F45A00F19533 /* Persistence.swift in Sources */,
 				73E3C8012CE3AF1A00E2D85C /* yolo11s.mlpackage in Sources */,
 				73E3C8022CE3AF1A00E2D85C /* yolo11n.mlpackage in Sources */,
+				37DCCC142D88DFE1004B280C /* UIImage+Extensions.swift in Sources */,
 				636EFCAA21E62DD300DE43BC /* ViewController.swift in Sources */,
 				8EDAA33950796844333D60A7 /* BoundingBoxView.swift in Sources */,
 			);
@@ -409,7 +443,7 @@
 				CURRENT_PROJECT_VERSION = 0;
 				DEVELOPMENT_TEAM = JAAQKRTXQ6;
 				INFOPLIST_FILE = Tono/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Tono";
+				INFOPLIST_KEY_CFBundleDisplayName = Tono;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -437,7 +471,7 @@
 				CURRENT_PROJECT_VERSION = 0;
 				DEVELOPMENT_TEAM = JAAQKRTXQ6;
 				INFOPLIST_FILE = Tono/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Tono";
+				INFOPLIST_KEY_CFBundleDisplayName = Tono;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (

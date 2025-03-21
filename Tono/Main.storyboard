@@ -158,11 +158,6 @@
                                         </connections>
                                     </barButtonItem>
                                     <barButtonItem enabled="NO" width="20" systemItem="fixedSpace" id="872-1h-RSc"/>
-                                    <barButtonItem springLoaded="YES" systemItem="action" id="4Wt-da-Ok2">
-                                        <connections>
-                                            <action selector="shareButton:" destination="BYZ-38-t0r" id="t5S-8x-M27"/>
-                                        </connections>
-                                    </barButtonItem>
                                     <barButtonItem enabled="NO" width="20" systemItem="fixedSpace" id="vzs-nM-KXr"/>
                                     <barButtonItem image="camera.rotate" catalog="system" springLoaded="YES" id="tPm-bz-9sp">
                                         <connections>

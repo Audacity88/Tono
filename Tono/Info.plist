@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key></key>
-	<string></string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -21,19 +19,23 @@
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
-	<string>284</string>
+	<string>462</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
-	<false/>
+	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Tono uses your camera to detect objects around you and help you learn Chinese 🚀</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Tono uses the microphone to allow you to practice pronunciation and receive feedback on your Chinese speaking skills.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>To save results to Photo Library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>To see images in Photo Library and apply AI object detection to them.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Tono uses speech recognition to analyze your pronunciation and provide learning feedback.</string>
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

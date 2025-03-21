@@ -61,8 +61,10 @@ extension PersistenceController {
     
     // Save a new tagged object
     func saveTaggedObject(english: String, chinese: String, pinyin: String, image: UIImage?, position: SCNVector3, context: NSManagedObjectContext) {
-        // Check if this object already exists in the collection
-        if isDuplicate(english: english, context: context) {
+        print("\n=========== SAVING TAGGED OBJECT: \(english) ===========")
+        
+        // Check if this object already exists in the collection - exit early if it's a duplicate
+        if isDuplicate(english: english, chinese: chinese, context: context) {
             print("Object '\(english)' already exists in collection, not saving duplicate")
             return
         }
@@ -80,29 +82,108 @@ extension PersistenceController {
         newObject.positionY = position.y
         newObject.positionZ = position.z
         
+        // Debug image info
+        if let image = image {
+            print("Original image dimensions: \(image.size.width) x \(image.size.height)")
+            print("Original image scale: \(image.scale)")
+            print("Original image orientation: \(image.imageOrientation.rawValue)")
+        } else {
+            print("WARNING: No image provided for object: \(english)")
+        }
+        
         // Convert image to data for storage
-        if let image = image, let imageData = image.jpegData(compressionQuality: 0.8) {
-            newObject.image = imageData
+        if let image = image {
+            // First normalize the image orientation
+            let normalizedImage = normalizeImageOrientation(image)
+            print("Image orientation normalized: \(normalizedImage.imageOrientation.rawValue)")
+            
+            // Then resize the image to a reasonable size
+            let maxDimension: CGFloat = 1200
+            var scaledImage = normalizedImage
+            
+            if normalizedImage.size.width > maxDimension || normalizedImage.size.height > maxDimension {
+                let scale = min(maxDimension / normalizedImage.size.width, maxDimension / normalizedImage.size.height)
+                let newSize = CGSize(width: normalizedImage.size.width * scale, height: normalizedImage.size.height * scale)
+                
+                UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
+                normalizedImage.draw(in: CGRect(origin: .zero, size: newSize))
+                if let resizedImage = UIGraphicsGetImageFromCurrentImageContext() {
+                    scaledImage = resizedImage
+                    print("Resized image to: \(newSize.width) x \(newSize.height)")
+                } else {
+                    print("WARNING: Failed to resize image")
+                }
+                UIGraphicsEndImageContext()
+            }
+            
+            // Try progressively lower quality until we succeed or give up
+            var imageData: Data?
+            var quality: CGFloat = 1.0
+            
+            while imageData == nil && quality >= 0.5 {
+                imageData = scaledImage.jpegData(compressionQuality: quality)
+                if imageData == nil {
+                    print("Failed to create JPEG with quality \(quality), trying lower")
+                    quality -= 0.1
+                }
+            }
+            
+            if let imageData = imageData {
+                newObject.image = imageData
+                print("Successfully converted image (\(scaledImage.size.width)x\(scaledImage.size.height)) to JPEG data: \(imageData.count) bytes with quality \(quality)")
+                
+                // Verify the image data is valid
+                if UIImage(data: imageData) != nil {
+                    print("Verified image data is valid - can create UIImage from it")
+                } else {
+                    print("WARNING: Image data verification failed - cannot create UIImage from saved data!")
+                }
+            } else {
+                print("ERROR: Failed to convert image to JPEG data for object: \(english) after multiple attempts")
+            }
         }
         
         do {
             try context.save()
-            print("Successfully saved tagged object: \(english)")
+            print("Successfully saved tagged object: \(english) to Core Data")
+            
+            // Post a notification that a new object was saved
+            NotificationCenter.default.post(name: Notification.Name("TaggedObjectSaved"), object: nil)
+            print("Posted TaggedObjectSaved notification")
         } catch {
             let nsError = error as NSError
-            print("Error saving tagged object: \(nsError), \(nsError.userInfo)")
+            print("ERROR saving tagged object: \(nsError), \(nsError.userInfo)")
         }
+        print("=============== SAVE COMPLETED ==============\n")
     }
     
-    // Check if an object with the same English name already exists
-    func isDuplicate(english: String, context: NSManagedObjectContext) -> Bool {
+    // Helper to normalize image orientation
+    private func normalizeImageOrientation(_ image: UIImage) -> UIImage {
+        if image.imageOrientation == .up {
+            return image
+        }
+        
+        UIGraphicsBeginImageContextWithOptions(image.size, false, image.scale)
+        image.draw(in: CGRect(origin: .zero, size: image.size))
+        let normalizedImage = UIGraphicsGetImageFromCurrentImageContext() ?? image
+        UIGraphicsEndImageContext()
+        
+        return normalizedImage
+    }
+    
+    // Check if an object with the same Chinese text already exists
+    func isDuplicate(english: String, chinese: String, context: NSManagedObjectContext) -> Bool {
         let fetchRequest: NSFetchRequest<TaggedObject> = TaggedObject.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "english ==[c] %@", english)
+        fetchRequest.predicate = NSPredicate(format: "chinese ==[c] %@", chinese)
         fetchRequest.fetchLimit = 1
         
         do {
             let results = try context.fetch(fetchRequest)
-            return !results.isEmpty
+            if !results.isEmpty {
+                print("Object with Chinese text '\(chinese)' already exists in collection, not saving duplicate")
+                return true
+            }
+            return false
         } catch {
             print("Error checking for duplicate: \(error)")
             return false
@@ -136,6 +217,32 @@ extension PersistenceController {
         } catch {
             print("Error fetching objects due for review: \(error)")
             return []
+        }
+    }
+    
+    // Delete all tagged objects from Core Data
+    func deleteAllTaggedObjects(context: NSManagedObjectContext) {
+        // Fetch all objects
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = TaggedObject.fetchRequest()
+        
+        // Create a batch delete request
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+        deleteRequest.resultType = .resultTypeObjectIDs
+        
+        do {
+            // Execute the delete
+            let result = try context.execute(deleteRequest) as? NSBatchDeleteResult
+            if let objectIDs = result?.result as? [NSManagedObjectID] {
+                // Sync the deletion with the managed object context
+                let changes = [NSDeletedObjectsKey: objectIDs]
+                NSManagedObjectContext.mergeChanges(fromRemoteContextSave: changes, into: [context])
+            }
+            
+            // Save context changes
+            try context.save()
+            print("Successfully deleted all tagged objects")
+        } catch {
+            print("Error deleting tagged objects: \(error)")
         }
     }
     

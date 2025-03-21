@@ -29,6 +29,18 @@ class CollectionViewController: UIViewController, UICollectionViewDataSource, UI
         if context != nil {
             fetchTaggedObjects()
         }
+        
+        // Add observer for newly saved objects
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleObjectSaved),
+            name: Notification.Name("TaggedObjectSaved"),
+            object: nil
+        )
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -184,10 +196,25 @@ class CollectionViewController: UIViewController, UICollectionViewDataSource, UI
     
     private func fetchTaggedObjects() {
         taggedObjects = PersistenceController.shared.fetchTaggedObjects(context: context)
+        
+        // Debug info about fetched objects
+        print("Fetched \(taggedObjects.count) tagged objects for collection view")
+        for (index, object) in taggedObjects.enumerated() {
+            let hasImage = object.image != nil && !(object.image?.isEmpty ?? true)
+            let imageSize = object.image?.count ?? 0
+            print("  Object \(index): \(object.english ?? "unknown") - Has image: \(hasImage) (Size: \(imageSize) bytes)")
+        }
+        
         collectionView.reloadData()
         
         // Show/hide empty state view
         emptyStateView.isHidden = !taggedObjects.isEmpty
+    }
+    
+    @objc private func handleObjectSaved() {
+        DispatchQueue.main.async { [weak self] in
+            self?.fetchTaggedObjects()
+        }
     }
     
     // MARK: - UICollectionViewDataSource
@@ -206,9 +233,90 @@ class CollectionViewController: UIViewController, UICollectionViewDataSource, UI
     // MARK: - UICollectionViewDelegate
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let taggedObject = taggedObjects[indexPath.item]
-        let detailVC = ObjectDetailViewController(taggedObject: taggedObject, context: context)
-        navigationController?.pushViewController(detailVC, animated: true)
+        // Get the cell
+        guard let cell = collectionView.cellForItem(at: indexPath) as? TaggedObjectCell else { return }
+        
+        // Check if the user tapped on the image view area
+        let point = collectionView.convert(collectionView.panGestureRecognizer.location(in: collectionView), to: cell)
+        let imageFrame = cell.imageViewFrame
+        
+        if imageFrame.contains(point) {
+            // Tapped on the image - show fullscreen
+            if let image = cell.currentImage {
+                showFullScreenImage(image)
+            }
+        } else {
+            // Not on image - go to detail view
+            let taggedObject = taggedObjects[indexPath.item]
+            let detailVC = ObjectDetailViewController(taggedObject: taggedObject, context: context)
+            navigationController?.pushViewController(detailVC, animated: true)
+        }
+    }
+    
+    // Helper method to display a full-screen image
+    private func showFullScreenImage(_ image: UIImage) {
+        // Create container view for the fullscreen display
+        let containerView = UIView(frame: UIScreen.main.bounds)
+        containerView.backgroundColor = UIColor.black.withAlphaComponent(0.9)
+        containerView.alpha = 0
+        containerView.tag = 1001  // Tag for identification
+        
+        // Create image view to display the large image
+        let fullImageView = UIImageView(frame: containerView.bounds)
+        fullImageView.contentMode = .scaleAspectFit
+        fullImageView.image = image
+        
+        // Add close button
+        let closeButton = UIButton(type: .system)
+        closeButton.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
+        closeButton.tintColor = .white
+        closeButton.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        closeButton.layer.cornerRadius = 20
+        closeButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Add views to container
+        containerView.addSubview(fullImageView)
+        containerView.addSubview(closeButton)
+        
+        // Add layout constraints for close button
+        NSLayoutConstraint.activate([
+            closeButton.topAnchor.constraint(equalTo: containerView.safeAreaLayoutGuide.topAnchor, constant: 16),
+            closeButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+            closeButton.widthAnchor.constraint(equalToConstant: 40),
+            closeButton.heightAnchor.constraint(equalToConstant: 40)
+        ])
+        
+        // Add tap gestures
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissFullScreenImage))
+        containerView.addGestureRecognizer(tapGesture)
+        
+        let closeButtonTap = UITapGestureRecognizer(target: self, action: #selector(dismissFullScreenImage))
+        closeButton.addGestureRecognizer(closeButtonTap)
+        closeButton.isUserInteractionEnabled = true
+        
+        // Find the key window and add our container view
+        if let keyWindow = UIApplication.shared.windows.first(where: { $0.isKeyWindow }) {
+            keyWindow.addSubview(containerView)
+        } else {
+            view.window?.addSubview(containerView)
+        }
+        
+        // Animate the appearance
+        UIView.animate(withDuration: 0.3) {
+            containerView.alpha = 1.0
+        }
+    }
+    
+    @objc private func dismissFullScreenImage(_ gesture: UITapGestureRecognizer) {
+        guard let containerView = gesture.view,
+              containerView.tag == 1001 else { return }
+        
+        // Animate the dismissal
+        UIView.animate(withDuration: 0.3, animations: {
+            containerView.alpha = 0
+        }) { _ in
+            containerView.removeFromSuperview()
+        }
     }
     
     // MARK: - Editing Support
@@ -245,6 +353,16 @@ class TaggedObjectCell: UICollectionViewCell {
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
+    
+    // Make image accessible outside the cell
+    var currentImage: UIImage? {
+        return imageView.image
+    }
+    
+    // Make image frame accessible for hit testing
+    var imageViewFrame: CGRect {
+        return imageView.frame
+    }
     
     private let labelStack: UIStackView = {
         let stack = UIStackView()
@@ -328,14 +446,141 @@ class TaggedObjectCell: UICollectionViewCell {
             reviewBadge.widthAnchor.constraint(equalToConstant: 30),
             reviewBadge.heightAnchor.constraint(equalToConstant: 20)
         ])
+        
+        // Add tap gesture to image view for full-screen preview
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(imageViewTapped))
+        imageView.isUserInteractionEnabled = true
+        imageView.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc private func imageViewTapped() {
+        // Create a full-screen view to display the image
+        if let image = imageView.image {
+            showFullScreenImage(image)
+        }
+    }
+    
+    private func showFullScreenImage(_ image: UIImage) {
+        // Get reference to the root view controller
+        guard let rootVC = UIApplication.shared.windows.first?.rootViewController else { return }
+        
+        // Create container view for the fullscreen display
+        let containerView = UIView(frame: rootVC.view.bounds)
+        containerView.backgroundColor = UIColor.black.withAlphaComponent(0.9)
+        containerView.alpha = 0
+        
+        // Create image view to display the large image
+        let fullImageView = UIImageView(frame: containerView.bounds)
+        fullImageView.contentMode = .scaleAspectFit
+        fullImageView.image = image
+        // Rotate the image 90 degrees to the left (consistent with collection view)
+        fullImageView.transform = CGAffineTransform(rotationAngle: -CGFloat.pi / 2)
+        
+        // Add close button
+        let closeButton = UIButton(type: .system)
+        closeButton.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
+        closeButton.tintColor = .white
+        closeButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Add views to container
+        containerView.addSubview(fullImageView)
+        containerView.addSubview(closeButton)
+        
+        // Add layout constraints for close button
+        NSLayoutConstraint.activate([
+            closeButton.topAnchor.constraint(equalTo: containerView.safeAreaLayoutGuide.topAnchor, constant: 16),
+            closeButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+            closeButton.widthAnchor.constraint(equalToConstant: 40),
+            closeButton.heightAnchor.constraint(equalToConstant: 40)
+        ])
+        
+        // Add tap gesture to close
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissFullScreenImage))
+        closeButton.addGestureRecognizer(tapGesture)
+        containerView.tag = 1001  // Tag for identification
+        
+        // Add the container to the root view
+        rootVC.view.addSubview(containerView)
+        
+        // Animate the appearance
+        UIView.animate(withDuration: 0.3) {
+            containerView.alpha = 1.0
+        }
+    }
+    
+    @objc private func dismissFullScreenImage(_ gesture: UITapGestureRecognizer) {
+        guard let containerView = gesture.view?.superview,
+              containerView.tag == 1001 else { return }
+        
+        // Animate the dismissal
+        UIView.animate(withDuration: 0.3, animations: {
+            containerView.alpha = 0
+        }) { _ in
+            containerView.removeFromSuperview()
+        }
     }
     
     func configure(with taggedObject: TaggedObject) {
-        if let imageData = taggedObject.image {
-            imageView.image = UIImage(data: imageData)
+        // Log debugging info
+        let objectName = taggedObject.english ?? "unknown"
+        let hasImageData = taggedObject.image != nil && !(taggedObject.image?.isEmpty ?? true)
+        let imageDataSize = taggedObject.image?.count ?? 0
+        print("Configuring cell for \(objectName) - Image data: \(hasImageData) (Size: \(imageDataSize) bytes)")
+        
+        if let imageData = taggedObject.image, !imageData.isEmpty {
+            print("  Attempting to create UIImage for \(objectName) from \(imageData.count) bytes")
+            
+            // Set a placeholder immediately
+            imageView.image = UIImage(systemName: "arrow.clockwise")
+            imageView.tintColor = .systemBlue
+            imageView.contentMode = .center
+            
+            // Use a background thread to create the image
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                let startTime = CFAbsoluteTimeGetCurrent()
+                let image = UIImage(data: imageData)
+                let duration = CFAbsoluteTimeGetCurrent() - startTime
+                
+                let success = image != nil
+                print("  Image creation for \(objectName): \(success ? "SUCCESS" : "FAILED") in \(duration) seconds")
+                
+                // Create rotated image if needed
+                var finalImage = image
+                if let originalImage = image {
+                    // Create context for rotation
+                    UIGraphicsBeginImageContextWithOptions(CGSize(width: originalImage.size.height, height: originalImage.size.width), false, originalImage.scale)
+                    if let context = UIGraphicsGetCurrentContext() {
+                        // Rotate 90 degrees counterclockwise
+                        context.translateBy(x: 0, y: originalImage.size.width)
+                        context.rotate(by: -CGFloat.pi / 2)
+                        originalImage.draw(at: CGPoint.zero)
+                        finalImage = UIGraphicsGetImageFromCurrentImageContext()
+                        UIGraphicsEndImageContext()
+                    }
+                }
+                
+                // Update UI on main thread
+                DispatchQueue.main.async {
+                    guard let self = self else { return }
+                    
+                    if let image = finalImage {
+                        self.imageView.image = image
+                        self.imageView.contentMode = .scaleAspectFill
+                        self.imageView.tintColor = nil
+                        print("  Successfully displayed rotated image for \(objectName)")
+                    } else {
+                        self.imageView.image = UIImage(systemName: "exclamationmark.triangle")
+                        self.imageView.tintColor = .systemRed
+                        self.imageView.contentMode = .center
+                        print("  Failed to create/display image for \(objectName)")
+                    }
+                }
+            }
         } else {
+            print("  No image data for \(objectName)")
             imageView.image = UIImage(systemName: "photo")
             imageView.tintColor = .systemGray3
+            imageView.contentMode = .center
         }
         
         nameLabel.text = taggedObject.english

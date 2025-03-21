@@ -56,6 +56,55 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     return true
   }
+
+  // Called when the app is about to move from active to inactive state
+  func applicationWillResignActive(_ application: UIApplication) {
+    print("App is entering inactive state - stopping world map saving")
+    // Save one last time and then clear the world map to prevent unexpected behavior
+    saveAndClearWorldMap()
+  }
+  
+  // Called when the app is entering background
+  func applicationDidEnterBackground(_ application: UIApplication) {
+    print("App is entering background - stopping world map saving")
+    // Clear world map data when app enters background
+    saveAndClearWorldMap()
+  }
+  
+  // Called when app is terminating
+  func applicationWillTerminate(_ application: UIApplication) {
+    print("App is terminating - stopping world map saving")
+    // Clear world map data when app terminates
+    saveAndClearWorldMap()
+  }
+  
+  // Helper method to save one final time and then clear the world map
+  private func saveAndClearWorldMap() {
+    // First save the current session one last time
+    if #available(iOS 12.0, *) {
+      // Save current AR world map data to a temporary key
+      if let worldMapData = UserDefaults.standard.data(forKey: "arWorldMap") {
+        UserDefaults.standard.set(worldMapData, forKey: "arWorldMap_lastSession")
+        print("Saved current world map to last session backup")
+      }
+      
+      // Then clear the active world map
+      UserDefaults.standard.removeObject(forKey: "arWorldMap")
+      print("Cleared active world map")
+    }
+  }
+
+  // Called when the app enters the foreground
+  func applicationWillEnterForeground(_ application: UIApplication) {
+    print("App is entering foreground")
+    // The AR session will be restarted in viewWillAppear
+  }
+  
+  // Called when the app becomes active
+  func applicationDidBecomeActive(_ application: UIApplication) {
+    print("App is becoming active")
+    // Any additional setup when the app becomes active
+  }
 }
 
 /// Extension to CALayer to add functionality for generating screenshots of any layer.

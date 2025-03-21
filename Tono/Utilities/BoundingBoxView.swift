@@ -28,6 +28,12 @@ class BoundingBoxView: UIView {
   
   /// The detected object's translation (if available)
   var translation: (chinese: String, pinyin: String)? = nil
+  
+  /// The center position of the bounding box for tracking
+  var centerPosition: CGPoint = .zero
+  
+  /// Unique ID for this bounding box instance
+  var boxId: UUID = UUID()
 
   /// Initializes a new BoundingBoxView with configured shape and text layers.
   override init(frame: CGRect) {
@@ -66,8 +72,33 @@ class BoundingBoxView: UIView {
   func show(frame: CGRect, label: String, color: UIColor, alpha: CGFloat) {
     CATransaction.setDisableActions(true)  // Disable implicit animations
 
-    // Update the view's frame
-    self.frame = frame
+    // Validate the frame - don't proceed if it contains NaN values
+    if frame.origin.x.isNaN || frame.origin.y.isNaN || 
+       frame.size.width.isNaN || frame.size.height.isNaN {
+        print("Warning: Invalid frame with NaN values detected. Skipping box update.")
+        hide() // Hide the box instead of causing a crash
+        return
+    }
+    
+    // Ensure width and height are positive and not zero
+    if frame.size.width <= 0 || frame.size.height <= 0 {
+        print("Warning: Invalid frame size (zero or negative). Skipping box update.")
+        hide()
+        return
+    }
+    
+    // Make the frame slightly larger to be easier to tap - expand by 10% but minimum 10px each side
+    let expandAmount = max(10.0, min(frame.width * 0.1, frame.height * 0.1))
+    let expandedFrame = frame.insetBy(dx: -expandAmount, dy: -expandAmount)
+    
+    // Update the view's frame with validated and expanded values
+    self.frame = expandedFrame
+    
+    // Store the center position for tracking
+    // Make sure center is within valid screen coordinates
+    let validMidX = max(0, min(UIScreen.main.bounds.width, frame.midX))
+    let validMidY = max(0, min(UIScreen.main.bounds.height, frame.midY))
+    self.centerPosition = CGPoint(x: validMidX, y: validMidY)
     
     // Make sure the view is visible
     self.isHidden = false
@@ -77,17 +108,28 @@ class BoundingBoxView: UIView {
     self.layer.zPosition = 100
     
     // Set the shape layer properties
-    shapeLayer.lineWidth = 4  // Standard line width
+    shapeLayer.lineWidth = 5  // Slightly thicker line for better visibility
     
-    let path = UIBezierPath(roundedRect: bounds, cornerRadius: 6.0)  // Rounded rectangle for the bounding box
+    // Create path based on the original object size (not expanded hitbox)
+    let originalRect = CGRect(
+        x: expandAmount, 
+        y: expandAmount, 
+        width: frame.width, 
+        height: frame.height
+    )
+    let path = UIBezierPath(roundedRect: originalRect, cornerRadius: 8.0)  // Rounded rectangle with more rounded corners
     shapeLayer.path = path.cgPath
-    shapeLayer.strokeColor = color.withAlphaComponent(alpha).cgColor  // Use the provided alpha
+    shapeLayer.strokeColor = color.withAlphaComponent(alpha + 0.2).cgColor  // Slightly more opaque for better visibility
     shapeLayer.isHidden = false  // Make the shape layer visible
+    
+    // Add a subtle pulsing animation to the box to make it more noticeable
+    addPulseAnimation()
 
     textLayer.string = label  // Set the label text
-    textLayer.backgroundColor = color.withAlphaComponent(alpha).cgColor  // Use the provided alpha
+    textLayer.backgroundColor = color.withAlphaComponent(alpha + 0.1).cgColor  // Slightly more opaque background
     textLayer.isHidden = false  // Make the text layer visible
     textLayer.foregroundColor = UIColor.white.cgColor  // Set text color with full opacity
+    textLayer.fontSize = 16  // Slightly larger font
     
     // Add a subtle shadow to make text more visible against AR content
     textLayer.shadowOpacity = 0.8
@@ -101,14 +143,33 @@ class BoundingBoxView: UIView {
       with: CGSize(width: 400, height: 100),
       options: .truncatesLastVisibleLine,
       attributes: attributes, context: nil)
-    let textSize = CGSize(width: textRect.width + 12, height: textRect.height)  // Add padding to the text size
-    let textOrigin = CGPoint(x: 0, y: -textSize.height - 2)  // Position above the bounding box
+    let textSize = CGSize(width: textRect.width + 20, height: textRect.height + 8)  // Increased padding
+    let textOrigin = CGPoint(x: -4, y: -textSize.height - 2)  // Position above the bounding box with slight left offset
     textLayer.frame = CGRect(origin: textOrigin, size: textSize)  // Set the text layer frame
+    textLayer.cornerRadius = 4  // Rounded corners for the text background
   }
 
   /// Hides the bounding box and text layers.
   func hide() {
     shapeLayer.isHidden = true
     textLayer.isHidden = true
+  }
+  
+  // Add a subtle pulsing animation to make the box more noticeable
+  private func addPulseAnimation() {
+    // Remove any existing animations
+    shapeLayer.removeAnimation(forKey: "pulseAnimation")
+    
+    // Create a subtle pulse animation
+    let pulseAnimation = CABasicAnimation(keyPath: "lineWidth")
+    pulseAnimation.fromValue = shapeLayer.lineWidth
+    pulseAnimation.toValue = shapeLayer.lineWidth - 1.0
+    pulseAnimation.duration = 1.0
+    pulseAnimation.autoreverses = true
+    pulseAnimation.repeatCount = Float.infinity
+    pulseAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+    
+    // Add the animation
+    shapeLayer.add(pulseAnimation, forKey: "pulseAnimation")
   }
 }

@@ -259,3 +259,7 @@ fabric.properties
 *.mlpackage.tar.bz2
 *.mlpackage.tar.xz
 *.mlpackage.tar.lzma
+
+#Demo files
+SpeechSuper-SDK-iOS-Swift-Demo/
+SpeechSuper-SDK-iOS/
