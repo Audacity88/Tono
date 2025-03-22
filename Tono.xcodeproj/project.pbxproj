@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		37D497722D8F3BCF002B83F5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 636EFCB821E62E3900DE43BC /* Assets.xcassets */; };
 		37DCCA662D820646004B280C /* ARSceneManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DCCA652D820646004B280C /* ARSceneManager.swift */; };
 		37DCCA6C2D837278004B280C /* CollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DCCA6B2D837278004B280C /* CollectionViewController.swift */; };
 		37DCCA742D837396004B280C /* ObjectDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DCCA732D837396004B280C /* ObjectDetailViewController.swift */; };
@@ -246,6 +247,7 @@
 				63CF37212514455300E2DEA1 /* ultralytics_yolo_logotype.png in Resources */,
 				37DD19212D80FDC100F19533 /* translations.json in Resources */,
 				63CF371F2514455300E2DEA1 /* LaunchScreen.storyboard in Resources */,
+				37D497722D8F3BCF002B83F5 /* Assets.xcassets in Resources */,
 				633BC6FB22EDE73D00821BCA /* Settings.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
